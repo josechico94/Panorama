@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-const BASE_URL = import.meta.env.VITE_API_URL
-  ? `${import.meta.env.VITE_API_URL}/api/v1`
+const BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  ? 'https://panoramabo.onrender.com/api/v1'
   : '/api/v1'
 
 const getToken = (role: 'admin' | 'user' | 'venue' | 'any'): string | null => {
