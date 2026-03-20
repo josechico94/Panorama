@@ -61,7 +61,7 @@ export default function CouponDetailPage() {
     )}&bgcolor=07070f&color=f0ede8&margin=4`
     const a = document.createElement('a')
     a.href = qrUrl
-    a.download = `coupon-${myCoupon.uniqueCode.slice(0,8)}.png`
+    a.download = `coupon-${myCoupon.uniqueCode.slice(0,12)}.png`
     a.click()
   }
 
@@ -83,7 +83,7 @@ export default function CouponDetailPage() {
 
   const isExpired   = new Date() > new Date(coupon.validUntil)
   const isExhausted = coupon.maxUses !== null && coupon.usesCount >= coupon.maxUses
-  const qrValue     = myCoupon ? `${window.location.origin}/validate/${myCoupon.uniqueCode}` : ''
+  const qrValue     = myCoupon ? myCoupon.uniqueCode : ''
   const daysLeft    = Math.ceil((new Date(coupon.validUntil).getTime() - Date.now()) / (1000*60*60*24))
 
   return (
@@ -188,7 +188,7 @@ export default function CouponDetailPage() {
                     </div>
                   </div>
                   <p className="font-mono-dm text-[var(--text-3)] text-[10px] mb-1">
-                    Codice: <span className="text-[var(--accent)]">{myCoupon.uniqueCode.slice(0,12).toUpperCase()}</span>
+                    Codice: <span className="text-[var(--accent)]">{myCoupon.uniqueCode.toUpperCase()}</span>
                   </p>
                   <p className="text-[var(--text-3)] text-[10px] mb-4">
                     Mostra al locale per ottenere lo sconto
