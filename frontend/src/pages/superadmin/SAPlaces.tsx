@@ -323,7 +323,6 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
     tags: (place.tags || []).join(', '),
     'location.address': place.location?.address || '',
     'location.neighborhood': place.location?.neighborhood || '',
-    'location.address': place.location?.address || '',
     'location.coordinates.lat': String(place.location?.coordinates?.lat || 44.4949),
     'location.coordinates.lng': String(place.location?.coordinates?.lng || 11.3426),
     'contact.phone': place.contact?.phone || '',
