@@ -22,7 +22,11 @@ function QRCode({ value, size = 220 }: { value: string; size?: number }) {
     })
   }, [value, size])
 
-  return <canvas ref={canvasRef} width={size} height={size} style={{ borderRadius: 10, display: 'block' }} />
+  return (
+    <div style={{ background: '#ffffff', padding: 12, borderRadius: 12, display: 'inline-block' }}>
+      <canvas ref={canvasRef} width={size} height={size} style={{ display: 'block' }} />
+    </div>
+  )
 }
 
 function formatDate(d: string) {
@@ -197,9 +201,7 @@ export default function CouponDetailPage() {
                     Il tuo QR personale
                   </p>
                   <div className="flex justify-center mb-3">
-                    <div style={{ background:'rgba(7,7,15,0.9)', border:'1px solid rgba(232,98,42,0.2)', borderRadius:16, padding:12 }}>
-                      <QRCode value={qrValue} size={220} />
-                    </div>
+                    <QRCode value={qrValue} size={200} />
                   </div>
                   <p className="font-mono-dm text-[var(--text-3)] text-[10px] mb-1">
                     Codice: <span className="text-[var(--accent)]">{myCoupon.uniqueCode.toUpperCase()}</span>
