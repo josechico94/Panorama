@@ -60,7 +60,7 @@ router.get('/my/list', requireUser, async (req: AuthRequest, res: Response) => {
 // GET /api/v1/coupons/validate/:uniqueCode
 router.get('/validate/:uniqueCode', async (req: Request, res: Response) => {
   try {
-    const uc = await UserCoupon.findOne({ uniqueCode: req.params.uniqueCode })
+    const uc = await UserCoupon.findOne({ uniqueCode: req.params.uniqueCode.toLowerCase() })
       .populate('couponId')
       .populate('userId', 'name email')
       .populate('placeId', 'name');
@@ -86,7 +86,7 @@ router.get('/validate/:uniqueCode', async (req: Request, res: Response) => {
 // POST /api/v1/coupons/use/:uniqueCode
 router.post('/use/:uniqueCode', async (req: Request, res: Response) => {
   try {
-    const uc = await UserCoupon.findOne({ uniqueCode: req.params.uniqueCode });
+    const uc = await UserCoupon.findOne({ uniqueCode: req.params.uniqueCode.toLowerCase() });
     if (!uc) { res.status(404).json({ error: 'Non trovato' }); return; }
     if (uc.status !== 'active') { res.status(400).json({ error: 'Non utilizzabile' }); return; }
     await UserCoupon.findByIdAndUpdate(uc._id, { status: 'used', usedAt: new Date() });
