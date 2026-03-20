@@ -3,6 +3,7 @@ import { Coupon } from '../models/Coupon';
 import { UserCoupon } from '../models/UserCoupon';
 import { requireUser } from '../middleware/auth';
 import type { AuthRequest } from '../middleware/auth';
+/**/
 
 const router = Router();
 
