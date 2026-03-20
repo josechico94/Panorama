@@ -468,7 +468,7 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
             { k: 'shortDescription', label: 'Descrizione breve', ph: 'Max 160 caratteri' },
             { k: 'tags', label: 'Tag (virgola)', ph: 'aperitivo, vista, centro' },
             { k: 'location.neighborhood', label: 'Quartiere', ph: 'Centro Storico' },
-            { k: 'contact.phone', label: 'Telefono', ph: '+39 051...' },
+            { k: 'contact.phone', label: 'Telefono *', ph: '+39 051...' },
             { k: 'contact.website', label: 'Sito web', ph: 'https://...' },
             { k: 'contact.instagram', label: 'Instagram', ph: 'handle senza @' },
           ].map(({ k, label, ph }) => (
@@ -502,8 +502,13 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
 
           <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
             <button onClick={onClose} style={{ flex: 1, padding: '11px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(240,237,232,0.5)', cursor: 'pointer', fontSize: 13 }}>Annulla</button>
-            <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !form.name}
-              style={{ flex: 1, padding: '11px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#e8622a,#f0884a)', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 700, opacity: mutation.isPending || !form.name ? 0.5 : 1 }}>
+            {(!form.name || !form['location.address'] || !form['contact.phone']) && (
+              <p style={{ fontSize: 11, color: '#fbbf24', background: 'rgba(251,191,36,0.08)', borderRadius: 8, padding: '7px 12px', textAlign: 'center' }}>
+                ⚠ Nome, indirizzo e telefono sono obbligatori
+              </p>
+            )}
+            <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !form.name || !form['location.address'] || !form['contact.phone']}
+              style={{ flex: 1, padding: '11px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#e8622a,#f0884a)', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 700, opacity: mutation.isPending || !form.name || !form['location.address'] || !form['contact.phone'] ? 0.5 : 1 }}>
               {mutation.isPending ? 'Salvataggio...' : isEdit ? 'Salva' : 'Crea'}
             </button>
           </div>

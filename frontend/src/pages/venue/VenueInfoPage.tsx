@@ -255,16 +255,23 @@ export default function VenueInfoPage() {
       </div>
 
       {/* Save button */}
+      {/* Required fields warning */}
+      {(!form.address || !form.phone) && (
+        <div style={{ padding: '10px 14px', background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: 10, marginBottom: 4 }}>
+          <p style={{ fontSize: 12, color: '#fbbf24', fontWeight: 600 }}>⚠ Indirizzo e telefono sono obbligatori</p>
+        </div>
+      )}
+
       <button
         onClick={() => mutation.mutate()}
-        disabled={mutation.isPending}
+        disabled={mutation.isPending || !form.address || !form.phone}
         style={{
-          width: '100%', padding: '15px', borderRadius: 14, cursor: 'pointer',
+          width: '100%', padding: '15px', borderRadius: 14, border: 'none', cursor: 'pointer',
           background: saved ? 'rgba(34,197,94,0.15)' : 'linear-gradient(135deg, #e8622a, #f0884a)',
           border: saved ? '1px solid rgba(34,197,94,0.4)' : 'none',
           color: saved ? '#4ade80' : '#fff', fontSize: 14, fontWeight: 700,
           boxShadow: saved ? 'none' : '0 4px 20px rgba(232,98,42,0.4)',
-          opacity: mutation.isPending ? 0.6 : 1,
+          opacity: mutation.isPending || !form.address || !form.phone ? 0.5 : 1,
           transition: 'all 0.3s',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           marginBottom: 32,

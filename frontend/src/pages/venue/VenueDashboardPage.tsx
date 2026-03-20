@@ -1,378 +1,354 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { venueApi } from '@/lib/api'
-import { getCategoryConfig } from '@/types'
-import { Plus, Trash2, Tag, Users, TrendingUp, Clock, X } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
+import { venueApi } from '@/lib/api'
+import { Plus, Trash2, Tag, Users, Eye, X, ChevronDown, ChevronUp, Pencil, Clock, CheckCircle, BarChart2 } from 'lucide-react'
 
-// Fix timezone: convert YYYY-MM-DD to local ISO (not UTC midnight)
-const toLocalISO = (dateStr: string, endOfDay = false) => {
-  if (!dateStr) return dateStr
-  const [y, m, d] = dateStr.split('-').map(Number)
-  const date = new Date(y, m - 1, d, endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0)
-  return date.toISOString()
+const field = {
+  width: '100%', padding: '11px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.05)',
+  border: '1px solid rgba(255,255,255,0.1)', color: '#f0ede8', fontSize: 14, outline: 'none',
+  fontFamily: 'DM Sans, sans-serif', transition: 'border-color 0.2s', boxSizing: 'border-box' as const,
+}
+
+const today = () => new Date().toISOString().split('T')[0]
+
+const EMPTY_FORM = {
+  title: '', description: '', discountType: 'percentage', discountValue: '10',
+  conditions: '', validFrom: today(), validUntil: '', maxUses: '',
+}
+
+function formatDate(d: string) {
+  return new Date(d).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 export default function VenueDashboardPage() {
-  const [tab, setTab] = useState<'coupons' | 'info'>('coupons')
-  const [showCouponForm, setShowCouponForm] = useState(false)
-
-  const { data: placeData, isLoading: placeLoading } = useQuery({ queryKey: ['venue-me'], queryFn: venueApi.me })
-  const { data: couponsData, isLoading: couponsLoading } = useQuery({ queryKey: ['venue-coupons'], queryFn: venueApi.coupons })
-
-  const place = placeData?.data
-  const coupons = couponsData?.data ?? []
-  const activeCoupons = coupons.filter((c: any) => c.active && new Date() <= new Date(c.validUntil))
-  const cat = place ? getCategoryConfig(place.category) : null
-
-  if (placeLoading) return (
-    <div className="p-8 space-y-4">
-      <div className="skeleton rounded-2xl h-32" />
-      <div className="skeleton rounded-xl h-8 w-1/2" />
-    </div>
-  )
-
-  return (
-    <div className="space-y-6 max-w-2xl">
-      {/* Place header */}
-      {place && (
-        <div className="glass-light rounded-2xl p-5 flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
-            <img
-              src={place.media?.coverImage || 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=200&q=80'}
-              alt={place.name} className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-display font-bold text-white truncate"
-              style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: '22px', fontStyle: 'italic' }}>
-              {place.name}
-            </h1>
-            <p className="text-[var(--text-3)] text-xs mt-0.5 flex items-center gap-1.5">
-              {cat && <span>{cat.emoji} {cat.label}</span>}
-              <span>•</span>
-              <span>{place.location?.neighborhood}</span>
-            </p>
-          </div>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />
-        </div>
-      )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: 'Coupon attivi', value: activeCoupons.length, icon: Tag, color: 'var(--accent)' },
-          { label: 'Tot. emessi', value: coupons.reduce((s: number, c: any) => s + (c.usesCount || 0), 0), icon: Users, color: '#a855f7' },
-          { label: 'Visualizzazioni', value: place?.meta?.views ?? 0, icon: TrendingUp, color: '#22c55e' },
-        ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="glass-light rounded-xl p-3 text-center">
-            <Icon size={14} style={{ color, margin: '0 auto 4px' }} />
-            <p className="text-white font-bold text-lg">{value}</p>
-            <p className="text-[var(--text-3)] text-[9px] tracking-wide uppercase">{label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 glass-light rounded-xl p-1">
-        {(['coupons', 'info'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all"
-            style={tab === t ? { background: 'var(--accent)', color: '#fff' } : { color: 'var(--text-3)' }}>
-            {t === 'coupons' ? '🎫 Coupon' : '✏️ Informazioni'}
-          </button>
-        ))}
-      </div>
-
-      {/* Coupons tab */}
-      {tab === 'coupons' && (
-        <div className="space-y-4">
-          <button onClick={() => setShowCouponForm(true)} className="btn btn-accent w-full flex items-center gap-2">
-            <Plus size={15} /> Crea nuovo coupon
-          </button>
-          {couponsLoading ? (
-            <div className="space-y-2">{[1, 2].map(i => <div key={i} className="skeleton rounded-xl h-20" />)}</div>
-          ) : coupons.length === 0 ? (
-            <div className="text-center py-10 text-[var(--text-3)]">
-              <p className="text-3xl mb-2">🎫</p>
-              <p className="text-sm">Nessun coupon ancora. Crea il primo!</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {coupons.map((coupon: any) => (
-                <CouponRow key={coupon._id} coupon={coupon} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Info tab */}
-      {tab === 'info' && place && <VenueInfoForm place={place} />}
-
-      <AnimatePresence>
-        {showCouponForm && <CouponFormModal onClose={() => setShowCouponForm(false)} />}
-      </AnimatePresence>
-    </div>
-  )
-}
-
-function CouponRow({ coupon }: { coupon: any }) {
   const qc = useQueryClient()
+  const [showForm, setShowForm] = useState(false)
+  const [editCoupon, setEditCoupon] = useState<any>(null)
+  const [tab, setTab] = useState<'attivi' | 'storico'>('attivi')
+
+  const { data: venueData } = useQuery({ queryKey: ['venue-me'], queryFn: venueApi.me })
+  const { data: couponsData } = useQuery({ queryKey: ['venue-coupons'], queryFn: venueApi.coupons })
+
+  const place = venueData?.data
+  const allCoupons: any[] = couponsData?.data ?? []
+  const now = new Date()
+
+  const activeCoupons = allCoupons.filter(c => c.active && new Date(c.validUntil) >= now)
+  const historyCoupons = allCoupons.filter(c => !c.active || new Date(c.validUntil) < now)
+
+  const totalEmessi = allCoupons.reduce((s: number, c: any) => s + (c.usesCount || 0), 0)
+
   const deleteMutation = useMutation({
-    mutationFn: () => venueApi.deleteCoupon(coupon._id),
+    mutationFn: venueApi.deleteCoupon,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['venue-coupons'] }),
   })
 
-  const isExpired = new Date() > new Date(coupon.validUntil)
-  const remaining = coupon.maxUses !== null ? coupon.maxUses - coupon.usesCount : null
+  const openEdit = (coupon: any) => {
+    setEditCoupon(coupon)
+    setShowForm(true)
+  }
+
+  const openNew = () => {
+    setEditCoupon(null)
+    setShowForm(true)
+  }
 
   return (
-    <div className="glass-light rounded-xl p-4 flex items-center gap-3">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-white text-sm truncate">{coupon.title}</span>
-          <span style={{
-            fontSize: '10px', fontWeight: 800,
-            color: isExpired ? 'var(--text-3)' : 'var(--accent)',
-            background: isExpired ? 'rgba(255,255,255,0.05)' : 'rgba(232,98,42,0.12)',
-            border: `1px solid ${isExpired ? 'transparent' : 'rgba(232,98,42,0.25)'}`,
-            borderRadius: '6px', padding: '1px 6px',
-            fontFamily: 'DM Mono, monospace',
-          }}>
-            {coupon.discountType === 'percentage' ? `-${coupon.discountValue}%`
-              : coupon.discountType === 'fixed' ? `-€${coupon.discountValue}` : 'OMAGGIO'}
-          </span>
-        </div>
-        <div className="flex items-center gap-3 mt-1 text-[var(--text-3)] text-[10px]">
-          <span className="flex items-center gap-1">
-            <Clock size={9} />
-            {isExpired ? 'Scaduto' : `Fino al ${new Date(coupon.validUntil).toLocaleDateString('it-IT')}`}
-          </span>
-          <span className="flex items-center gap-1">
-            <Users size={9} /> {coupon.usesCount} scaricati
-            {remaining !== null && ` / ${coupon.maxUses} max`}
-          </span>
-        </div>
+    <div style={{ maxWidth: 480, margin: '0 auto' }}>
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 24 }}>
+        {[
+          { icon: Tag, label: 'Coupon attivi', value: activeCoupons.length, color: '#e8622a' },
+          { icon: Users, label: 'Tot. emessi', value: totalEmessi, color: '#a855f7' },
+          { icon: Eye, label: 'Visualizzazioni', value: place?.meta?.views ?? 0, color: '#22c55e' },
+        ].map(({ icon: Icon, label, value, color }) => (
+          <div key={label} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '14px 12px', textAlign: 'center' }}>
+            <Icon size={18} color={color} style={{ margin: '0 auto 8px' }} />
+            <p style={{ fontSize: 24, fontWeight: 800, color: '#f0ede8', lineHeight: 1 }}>{value}</p>
+            <p style={{ fontSize: 9, color: 'rgba(240,237,232,0.4)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 4 }}>{label}</p>
+          </div>
+        ))}
       </div>
-      <button
-        onClick={() => deleteMutation.mutate()}
-        className="p-2 rounded-lg text-[var(--text-3)] hover:text-red-400 hover:bg-red-400/10 transition-all"
-      >
-        <Trash2 size={14} />
-      </button>
+
+      {/* Tab switcher */}
+      <div style={{ display: 'flex', gap: 4, padding: 4, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, marginBottom: 16 }}>
+        {([
+          { id: 'attivi', icon: Tag, label: `Coupon (${activeCoupons.length})` },
+          { id: 'storico', icon: BarChart2, label: `Storico (${historyCoupons.length})` },
+        ] as const).map(({ id, icon: Icon, label }) => (
+          <button key={id} onClick={() => setTab(id)} style={{
+            flex: 1, padding: '9px 0', borderRadius: 10, border: 'none', cursor: 'pointer',
+            background: tab === id ? '#e8622a' : 'transparent',
+            color: tab === id ? '#fff' : 'rgba(240,237,232,0.4)',
+            fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            transition: 'all 0.2s',
+          }}>
+            <Icon size={13} /> {label}
+          </button>
+        ))}
+      </div>
+
+      <AnimatePresence mode="wait">
+        {/* ── COUPON ATTIVI ── */}
+        {tab === 'attivi' && (
+          <motion.div key="attivi" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <button onClick={openNew} style={{
+              width: '100%', padding: '13px', borderRadius: 14, border: '2px dashed rgba(232,98,42,0.35)',
+              background: 'rgba(232,98,42,0.06)', color: '#e8622a', cursor: 'pointer',
+              fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              marginBottom: 14, transition: 'all 0.2s',
+            }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(232,98,42,0.6)')}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(232,98,42,0.35)')}>
+              <Plus size={16} /> Crea nuovo coupon
+            </button>
+
+            {activeCoupons.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 0', color: 'rgba(240,237,232,0.3)' }}>
+                <Tag size={28} style={{ margin: '0 auto 10px', opacity: 0.3 }} />
+                <p style={{ fontSize: 13 }}>Nessun coupon attivo</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {activeCoupons.map((coupon: any) => (
+                  <CouponCard key={coupon._id} coupon={coupon} onEdit={() => openEdit(coupon)}
+                    onDelete={() => confirm(`Eliminare "${coupon.title}"?`) && deleteMutation.mutate(coupon._id)} />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* ── STORICO ── */}
+        {tab === 'storico' && (
+          <motion.div key="storico" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            {historyCoupons.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 0', color: 'rgba(240,237,232,0.3)' }}>
+                <Clock size={28} style={{ margin: '0 auto 10px', opacity: 0.3 }} />
+                <p style={{ fontSize: 13 }}>Nessun coupon nello storico</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {historyCoupons.map((coupon: any) => (
+                  <HistoryCouponCard key={coupon._id} coupon={coupon} />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Form modal */}
+      {showForm && (
+        <CouponFormModal
+          coupon={editCoupon}
+          onClose={() => { setShowForm(false); setEditCoupon(null) }}
+        />
+      )}
     </div>
   )
 }
 
-function CouponFormModal({ onClose }: { onClose: () => void }) {
-  const qc = useQueryClient()
-  const [form, setForm] = useState({
-    title: '', description: '', discountType: 'percentage', discountValue: '10',
-    conditions: '', validFrom: '', validUntil: '', maxUses: '',
-  })
-  const [error, setError] = useState('')
-
-  const today = new Date().toISOString().split('T')[0]
-
-  const mutation = useMutation({
-    mutationFn: () => venueApi.createCoupon({
-      ...form,
-      // ← FIX: convert dates using local timezone to avoid UTC midnight shift
-      validFrom:  toLocalISO(form.validFrom, false),
-      validUntil: toLocalISO(form.validUntil, true),
-      discountValue: Number(form.discountValue),
-      maxUses: form.maxUses ? Number(form.maxUses) : null,
-    }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['venue-coupons'] })
-      qc.invalidateQueries({ queryKey: ['active-coupons'] })
-      onClose()
-    },
-    onError: (err: any) => setError(err.response?.data?.error || 'Errore'),
-  })
-
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+function CouponCard({ coupon, onEdit, onDelete }: { coupon: any; onEdit: () => void; onDelete: () => void }) {
+  const daysLeft = Math.ceil((new Date(coupon.validUntil).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}
-      onClick={onClose}
-    >
+    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '14px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#e8622a', fontFamily: 'DM Mono,monospace', background: 'rgba(232,98,42,0.12)', border: '1px solid rgba(232,98,42,0.25)', borderRadius: 7, padding: '2px 8px' }}>
+              {coupon.discountType === 'percentage' ? `-${coupon.discountValue}%` : coupon.discountType === 'fixed' ? `-€${coupon.discountValue}` : 'OMAGGIO'}
+            </span>
+            {daysLeft <= 3 && <span style={{ fontSize: 9, color: '#fbbf24', fontWeight: 700, background: 'rgba(251,191,36,0.1)', borderRadius: 100, padding: '1px 6px' }}>⚠ {daysLeft}g rimasti</span>}
+          </div>
+          <p style={{ color: '#f0ede8', fontSize: 14, fontWeight: 700, marginBottom: 3 }}>{coupon.title}</p>
+          <p style={{ color: 'rgba(240,237,232,0.4)', fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Clock size={9} /> Fino al {formatDate(coupon.validUntil)}
+          </p>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: 4 }}>
+            <button onClick={onEdit} style={{ padding: 6, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}>
+              <Pencil size={13} />
+            </button>
+            <button onClick={onDelete} style={{ padding: 6, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'rgba(248,113,113,0.08)', color: '#f87171' }}>
+              <Trash2 size={13} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats bar */}
+      <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', gap: 16 }}>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: 16, fontWeight: 800, color: '#f0ede8' }}>{coupon.usesCount || 0}</p>
+          <p style={{ fontSize: 9, color: 'rgba(240,237,232,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Scaricati</p>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: 16, fontWeight: 800, color: '#f0ede8' }}>{coupon.maxUses || '∞'}</p>
+          <p style={{ fontSize: 9, color: 'rgba(240,237,232,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Max</p>
+        </div>
+        {coupon.maxUses > 0 && (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+            <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ height: '100%', background: '#e8622a', borderRadius: 2, width: `${Math.min(100, (coupon.usesCount / coupon.maxUses) * 100)}%`, transition: 'width 0.5s' }} />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function HistoryCouponCard({ coupon }: { coupon: any }) {
+  const expired = new Date(coupon.validUntil) < new Date()
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, padding: '12px 16px', opacity: 0.75 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <p style={{ color: '#f0ede8', fontSize: 13, fontWeight: 600 }}>{coupon.title}</p>
+            <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 100, background: expired ? 'rgba(248,113,113,0.1)' : 'rgba(255,255,255,0.05)', color: expired ? '#f87171' : 'rgba(240,237,232,0.35)' }}>
+              {expired ? 'Scaduto' : 'Disattivo'}
+            </span>
+          </div>
+          <p style={{ fontSize: 10, color: 'rgba(240,237,232,0.35)', fontFamily: 'DM Mono,monospace' }}>
+            {formatDate(coupon.validFrom)} → {formatDate(coupon.validUntil)}
+          </p>
+        </div>
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          <p style={{ fontSize: 18, fontWeight: 800, color: '#f0ede8' }}>{coupon.usesCount || 0}</p>
+          <p style={{ fontSize: 9, color: 'rgba(240,237,232,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Scaricati</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CouponFormModal({ coupon, onClose }: { coupon: any | null; onClose: () => void }) {
+  const qc = useQueryClient()
+  const isEdit = !!coupon
+  const [form, setForm] = useState(coupon ? {
+    title: coupon.title || '',
+    description: coupon.description || '',
+    discountType: coupon.discountType || 'percentage',
+    discountValue: String(coupon.discountValue || 10),
+    conditions: coupon.conditions || '',
+    validFrom: coupon.validFrom ? new Date(coupon.validFrom).toISOString().split('T')[0] : today(),
+    validUntil: coupon.validUntil ? new Date(coupon.validUntil).toISOString().split('T')[0] : '',
+    maxUses: coupon.maxUses ? String(coupon.maxUses) : '',
+  } : { ...EMPTY_FORM })
+
+  const [error, setError] = useState('')
+  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+
+  const mutation = useMutation({
+    mutationFn: () => {
+      const payload = {
+        title: form.title,
+        description: form.description,
+        discountType: form.discountType,
+        discountValue: parseFloat(form.discountValue),
+        conditions: form.conditions,
+        validFrom: form.validFrom,
+        validUntil: form.validUntil,
+        maxUses: form.maxUses ? parseInt(form.maxUses) : 0,
+      }
+      return isEdit ? venueApi.updateCoupon(coupon._id, payload) : venueApi.createCoupon(payload)
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['venue-coupons'] }); onClose() },
+    onError: (e: any) => setError(e.response?.data?.error || 'Errore'),
+  })
+
+  const isValid = form.title && form.discountValue && form.validUntil
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={onClose}>
       <motion.div
-        initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
+        initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        style={{ background: '#0f0f1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px 24px 0 0', padding: 24, width: '100%', maxWidth: 520, maxHeight: '90dvh', overflowY: 'auto' }}
         onClick={e => e.stopPropagation()}
-        style={{
-          background: 'var(--surface)', borderRadius: '24px 24px 0 0',
-          border: '1px solid var(--border2)', padding: '20px',
-          width: '100%', maxWidth: 560, maxHeight: '90dvh', overflowY: 'auto',
-        }}
       >
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-display font-bold text-white"
-            style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: '22px', fontStyle: 'italic' }}>
-            Nuovo coupon
-          </h2>
-          <button onClick={onClose}
-            className="p-2 rounded-xl text-[var(--text-3)] hover:text-white hover:bg-white/5 transition-all">
-            <X size={16} />
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <h2 style={{ color: '#f0ede8', fontSize: 18, fontWeight: 700 }}>{isEdit ? 'Modifica coupon' : 'Nuovo coupon'}</h2>
+          <button onClick={onClose} style={{ padding: 6, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', color: 'rgba(240,237,232,0.5)' }}><X size={16} /></button>
         </div>
 
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Titolo */}
           <div>
-            <label className="block text-xs text-[var(--text-3)] mb-1.5">Titolo *</label>
-            <input value={form.title} onChange={e => set('title', e.target.value)}
-              className="field" placeholder="Es: Aperitivo in omaggio" required />
+            <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>Titolo *</label>
+            <input value={form.title} onChange={e => set('title', e.target.value)} placeholder="Es: Aperitivo gratis con cena" style={field}
+              onFocus={e => (e.target.style.borderColor = '#e8622a')} onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
           </div>
 
+          {/* Tipo sconto */}
           <div>
-            <label className="block text-xs text-[var(--text-3)] mb-1.5">Descrizione</label>
-            <textarea value={form.description} onChange={e => set('description', e.target.value)}
-              className="field resize-none" rows={2} placeholder="Dettagli sull'offerta..." />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-[var(--text-3)] mb-1.5">Tipo sconto</label>
-              <select value={form.discountType} onChange={e => set('discountType', e.target.value)} className="field">
-                <option value="percentage">Percentuale (%)</option>
-                <option value="fixed">Fisso (€)</option>
-                <option value="freebie">Omaggio</option>
-              </select>
+            <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>Tipo di sconto</label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+              {[
+                { id: 'percentage', label: '% Percentuale' },
+                { id: 'fixed', label: '€ Fisso' },
+                { id: 'freebie', label: '🎁 Omaggio' },
+              ].map(({ id, label }) => (
+                <button key={id} onClick={() => set('discountType', id)} style={{
+                  padding: '10px 0', borderRadius: 10, border: `1px solid ${form.discountType === id ? '#e8622a' : 'rgba(255,255,255,0.1)'}`,
+                  background: form.discountType === id ? 'rgba(232,98,42,0.15)' : 'transparent',
+                  color: form.discountType === id ? '#e8622a' : 'rgba(240,237,232,0.5)',
+                  cursor: 'pointer', fontSize: 11, fontWeight: 700, transition: 'all 0.15s',
+                }}>{label}</button>
+              ))}
             </div>
-            {form.discountType !== 'freebie' && (
-              <div>
-                <label className="block text-xs text-[var(--text-3)] mb-1.5">
-                  Valore {form.discountType === 'percentage' ? '(%)' : '(€)'}
-                </label>
-                <input type="number" min="1" value={form.discountValue}
-                  onChange={e => set('discountValue', e.target.value)} className="field" />
+          </div>
+
+          {/* Valore */}
+          {form.discountType !== 'freebie' && (
+            <div>
+              <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+                Valore {form.discountType === 'percentage' ? '(%)' : '(€)'} *
+              </label>
+              <input type="number" value={form.discountValue} onChange={e => set('discountValue', e.target.value)}
+                placeholder={form.discountType === 'percentage' ? '10' : '5'} min="1" style={field}
+                onFocus={e => (e.target.style.borderColor = '#e8622a')} onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
+            </div>
+          )}
+
+          {/* Date */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {[
+              { k: 'validFrom', label: 'Valido dal *' },
+              { k: 'validUntil', label: 'Valido fino al *' },
+            ].map(({ k, label }) => (
+              <div key={k}>
+                <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>{label}</label>
+                <input type="date" value={(form as any)[k]} onChange={e => set(k, e.target.value)} min={today()}
+                  style={{ ...field, colorScheme: 'dark' }}
+                  onFocus={e => (e.target.style.borderColor = '#e8622a')} onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
               </div>
-            )}
+            ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-[var(--text-3)] mb-1.5">Valido dal *</label>
-              <input type="date" min={today} value={form.validFrom}
-                onChange={e => set('validFrom', e.target.value)} className="field" required />
-            </div>
-            <div>
-              <label className="block text-xs text-[var(--text-3)] mb-1.5">Valido fino al *</label>
-              <input type="date" min={form.validFrom || today} value={form.validUntil}
-                onChange={e => set('validUntil', e.target.value)} className="field" required />
-            </div>
-          </div>
-
-          {/* Preview fechas — ayuda visual */}
-          {form.validFrom && form.validUntil && (
-            <p className="text-[var(--text-3)] text-[10px] text-center">
-              📅 {new Date(toLocalISO(form.validFrom)).toLocaleDateString('it-IT')} →{' '}
-              {new Date(toLocalISO(form.validUntil, true)).toLocaleDateString('it-IT')}
-            </p>
-          )}
-
+          {/* Max uses */}
           <div>
-            <label className="block text-xs text-[var(--text-3)] mb-1.5">Max utilizzi (vuoto = illimitato)</label>
-            <input type="number" min="1" value={form.maxUses}
-              onChange={e => set('maxUses', e.target.value)} className="field" placeholder="Es: 50" />
+            <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>Utilizzi massimi (0 = illimitati)</label>
+            <input type="number" value={form.maxUses} onChange={e => set('maxUses', e.target.value)} placeholder="0" min="0" style={field}
+              onFocus={e => (e.target.style.borderColor = '#e8622a')} onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
           </div>
 
-          <div>
-            <label className="block text-xs text-[var(--text-3)] mb-1.5">Condizioni</label>
-            <input value={form.conditions} onChange={e => set('conditions', e.target.value)}
-              className="field" placeholder="Es: Solo cena, minimo €25" />
-          </div>
+          {error && <p style={{ color: '#f87171', fontSize: 12, textAlign: 'center', background: 'rgba(248,113,113,0.1)', borderRadius: 8, padding: '8px 12px' }}>{error}</p>}
 
-          {error && (
-            <p className="text-red-400 text-xs text-center bg-red-400/10 rounded-xl py-2">{error}</p>
-          )}
-
-          <div className="flex gap-3 pb-4">
-            <button onClick={onClose} className="btn btn-ghost flex-1">Annulla</button>
-            <button
-              onClick={() => mutation.mutate()}
-              disabled={mutation.isPending || !form.title || !form.validFrom || !form.validUntil}
-              className="btn btn-accent flex-1 disabled:opacity-50"
-            >
-              {mutation.isPending ? 'Creazione...' : 'Crea coupon'}
+          <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
+            <button onClick={onClose} style={{ flex: 1, padding: '13px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(240,237,232,0.5)', cursor: 'pointer', fontSize: 13 }}>Annulla</button>
+            <button onClick={() => mutation.mutate()} disabled={!isValid || mutation.isPending}
+              style={{ flex: 2, padding: '13px', borderRadius: 12, border: 'none', background: isValid ? 'linear-gradient(135deg,#e8622a,#f0884a)' : 'rgba(255,255,255,0.08)', color: isValid ? '#fff' : 'rgba(240,237,232,0.3)', cursor: isValid ? 'pointer' : 'not-allowed', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              {mutation.isPending ? 'Salvataggio...' : isEdit ? <><CheckCircle size={14} /> Salva modifiche</> : <><Plus size={14} /> Crea coupon</>}
             </button>
           </div>
         </div>
       </motion.div>
-    </motion.div>
-  )
-}
-
-function VenueInfoForm({ place }: { place: any }) {
-  const qc = useQueryClient()
-  const [form, setForm] = useState({
-    'contact.phone': place.contact?.phone || '',
-    'contact.website': place.contact?.website || '',
-    'contact.instagram': place.contact?.instagram || '',
-    'contact.email': place.contact?.email || '',
-    'location.address': place.location?.address || '',
-    'location.neighborhood': place.location?.neighborhood || '',
-    shortDescription: place.shortDescription || '',
-  })
-  const [saved, setSaved] = useState(false)
-
-  const mutation = useMutation({
-    mutationFn: () => venueApi.updateMe({
-      contact: {
-        phone: form['contact.phone'],
-        website: form['contact.website'],
-        instagram: form['contact.instagram'],
-        email: form['contact.email'],
-      },
-      location: {
-        ...place.location,
-        address: form['location.address'],
-        neighborhood: form['location.neighborhood'],
-      },
-      shortDescription: form.shortDescription,
-    }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['venue-me'] })
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
-    },
-  })
-
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
-
-  const fields = [
-    { key: 'shortDescription', label: 'Descrizione breve', placeholder: 'Una riga che descrive il locale' },
-    { key: 'location.address', label: 'Indirizzo', placeholder: 'Via Roma 1, Bologna' },
-    { key: 'location.neighborhood', label: 'Quartiere', placeholder: 'Centro Storico' },
-    { key: 'contact.phone', label: 'Telefono', placeholder: '+39 051 000000' },
-    { key: 'contact.website', label: 'Sito web', placeholder: 'https://...' },
-    { key: 'contact.instagram', label: 'Instagram', placeholder: 'handle (senza @)' },
-    { key: 'contact.email', label: 'Email pubblica', placeholder: 'info@locale.com' },
-  ]
-
-  return (
-    <div className="space-y-4 pb-8">
-      {fields.map(({ key, label, placeholder }) => (
-        <div key={key}>
-          <label className="block text-xs text-[var(--text-3)] mb-1.5 tracking-wide">{label}</label>
-          <input
-            value={(form as any)[key]}
-            onChange={e => set(key, e.target.value)}
-            className="field" placeholder={placeholder}
-          />
-        </div>
-      ))}
-      <button
-        onClick={() => mutation.mutate()}
-        disabled={mutation.isPending}
-        className="btn btn-accent w-full disabled:opacity-50"
-      >
-        {saved ? '✅ Salvato!' : mutation.isPending ? 'Salvataggio...' : 'Salva modifiche'}
-      </button>
     </div>
   )
 }

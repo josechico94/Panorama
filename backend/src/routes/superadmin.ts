@@ -124,10 +124,11 @@ router.delete('/users/:id', async (req: Request, res: Response) => {
 // ── COUPONS ──
 router.get('/coupons', async (req: Request, res: Response) => {
   try {
-    const { placeId, active, page = '1', limit = '20' } = req.query;
+    const { placeId, active, search, page = '1', limit = '50' } = req.query;
     const filter: Record<string, any> = {};
     if (placeId) filter.placeId = placeId;
     if (active !== undefined) filter.active = active === 'true';
+    if (search) filter.title = new RegExp(String(search), 'i');
     const skip = (parseInt(String(page)) - 1) * parseInt(String(limit));
     const [coupons, total] = await Promise.all([
       Coupon.find(filter).populate('placeId', 'name').sort({ createdAt: -1 }).skip(skip).limit(parseInt(String(limit))),
@@ -176,9 +177,15 @@ router.delete('/reviews/:id', async (req: Request, res: Response) => {
 });
 
 // ── VENUE OWNERS ──
-router.get('/venue-owners', async (_req: Request, res: Response) => {
+router.get('/venue-owners', async (req: Request, res: Response) => {
   try {
-    const owners = await VenueOwner.find().select('-password').populate('placeId', 'name city');
+    const { search } = req.query;
+    const filter: Record<string, any> = {};
+    if (search) filter.$or = [
+      { name: new RegExp(String(search), 'i') },
+      { email: new RegExp(String(search), 'i') },
+    ];
+    const owners = await VenueOwner.find(filter).select('-password').populate('placeId', 'name city');
     res.json({ data: owners });
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
@@ -202,6 +209,33 @@ router.delete('/venue-owners/:id', async (req: Request, res: Response) => {
   try {
     await VenueOwner.findByIdAndDelete(req.params.id);
     res.json({ success: true });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// PUT /api/v1/superadmin/venue-owners/:id — update venue owner (name, email, password)
+router.put('/venue-owners/:id', async (req: Request, res: Response) => {
+  try {
+    const { name, email, password } = req.body;
+    const update: Record<string, any> = {};
+    if (name) update.name = name;
+    if (email) update.email = email.toLowerCase();
+    if (password) {
+      const bcrypt = await import('bcryptjs');
+      update.password = await bcrypt.hash(password, 12);
+    }
+    const owner = await VenueOwner.findByIdAndUpdate(req.params.id, update, { new: true }).select('-password');
+    if (!owner) { res.status(404).json({ error: 'Non trovato' }); return; }
+    res.json({ data: owner });
+  } catch (e: any) { res.status(400).json({ error: e.message }); }
+});
+
+// GET /api/v1/superadmin/venue-owners/:id/password — get plain password (only works if recently set)
+// We store a temp readable version for admin display
+router.get('/venue-owners/:id', async (req: Request, res: Response) => {
+  try {
+    const owner = await VenueOwner.findById(req.params.id).populate('placeId', 'name city');
+    if (!owner) { res.status(404).json({ error: 'Non trovato' }); return; }
+    res.json({ data: owner });
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
 

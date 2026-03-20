@@ -1,113 +1,47 @@
 import axios from 'axios'
 
-const BASE_URL =
-  
-  (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
-    ? 'https://panoramabo.onrender.com/api/v1'
-    : '/api/v1')
+const BASE_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api/v1`
+  : '/api/v1'
 
-type Role = 'admin' | 'user' | 'venue' | 'any'
-
-const safeJsonParse = (value: string | null) => {
-  if (!value) return null
+const getToken = (role: 'admin' | 'user' | 'venue' | 'any'): string | null => {
   try {
-    return JSON.parse(value)
-  } catch {
-    return null
-  }
-}
-
-const extractToken = (raw: string | null): string | null => {
-  if (!raw) return null
-
-  // Caso simple: el token está guardado directamente como string JWT
-  if (!raw.startsWith('{') && !raw.startsWith('[')) {
-    return raw
-  }
-
-  const parsed = safeJsonParse(raw)
-  if (!parsed) return null
-
-  // Soporta varios formatos posibles
-  return (
-    parsed?.token ||
-    parsed?.state?.token ||
-    parsed?.auth?.token ||
-    parsed?.data?.token ||
-    null
-  )
-}
-
-const getToken = (role: Role): string | null => {
-  try {
-    // Prioridad a un esquema simple y unificado
     if (role === 'admin' || role === 'any') {
-      const direct = extractToken(localStorage.getItem('auth_token'))
-      const authRole = localStorage.getItem('auth_role')
-      if (direct && (authRole === 'admin' || role === 'any')) return direct
-
-      const legacyAdmin = extractToken(localStorage.getItem('cityapp_admin_token'))
-      if (legacyAdmin) return legacyAdmin
+      const t = localStorage.getItem('cityapp_admin_token')
+      if (t) return t
     }
-
     if (role === 'venue' || role === 'any') {
-      const direct = extractToken(localStorage.getItem('auth_token'))
-      const authRole = localStorage.getItem('auth_role')
-      if (direct && (authRole === 'venue' || role === 'any')) return direct
-
-      const legacyVenue = extractToken(localStorage.getItem('cityapp-venue'))
-      if (legacyVenue) return legacyVenue
+      const raw = localStorage.getItem('cityapp-venue')
+      if (raw) { const t = JSON.parse(raw)?.state?.token; if (t) return t }
     }
-
     if (role === 'user' || role === 'any') {
-      const direct = extractToken(localStorage.getItem('auth_token'))
-      const authRole = localStorage.getItem('auth_role')
-      if (direct && (authRole === 'user' || role === 'any')) return direct
-
-      const legacyUser = extractToken(localStorage.getItem('cityapp-user'))
-      if (legacyUser) return legacyUser
+      const raw = localStorage.getItem('cityapp-user')
+      if (raw) { const t = JSON.parse(raw)?.state?.token; if (t) return t }
     }
   } catch {}
-
   return null
 }
 
-const makeApi = (role: Role) => {
-  const instance = axios.create({
-    baseURL: BASE_URL,
-    withCredentials: false,
-  })
+const makeApi = (role: 'admin' | 'user' | 'venue' | 'any') => {
+  const instance = axios.create({ baseURL: BASE_URL })
 
   instance.interceptors.request.use((config) => {
     const token = getToken(role)
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
+    if (token) config.headers.Authorization = `Bearer ${token}`
     return config
   })
 
   instance.interceptors.response.use(
     (res) => res,
     (err) => {
-      if (typeof window !== 'undefined' && err.response?.status === 401) {
+      if (err.response?.status === 401) {
         const path = window.location.pathname
-
         if (role === 'admin' && path.startsWith('/admin') && path !== '/admin/login') {
           localStorage.removeItem('cityapp_admin_token')
-          localStorage.removeItem('auth_token')
-          localStorage.removeItem('auth_role')
           window.location.href = '/admin/login'
         }
-
         if (role === 'venue' && path.startsWith('/locale') && path !== '/locale/login') {
-          localStorage.removeItem('auth_token')
-          localStorage.removeItem('auth_role')
           window.location.href = '/locale/login'
-        }
-
-        if (role === 'user' && path.startsWith('/profile')) {
-          localStorage.removeItem('auth_token')
-          localStorage.removeItem('auth_role')
         }
       }
       return Promise.reject(err)
@@ -118,186 +52,85 @@ const makeApi = (role: Role) => {
 }
 
 const apiPublic = makeApi('any')
-const apiAdmin = makeApi('admin')
-const apiUser = makeApi('user')
-const apiVenue = makeApi('venue')
+const apiAdmin  = makeApi('admin')
+const apiUser   = makeApi('user')
+const apiVenue  = makeApi('venue')
 
 export const placesApi = {
-  list: (params?: Record<string, any>) =>
-    apiPublic.get('/places', { params }).then((r) => r.data),
-
-  get: (slug: string) =>
-    apiPublic.get(`/places/${slug}`).then((r) => r.data),
-
-  featured: () =>
-    apiPublic.get('/places/featured').then((r) => r.data),
+  list:     (params?: Record<string, any>) => apiPublic.get('/places', { params }).then(r => r.data),
+  get:      (slug: string) => apiPublic.get(`/places/${slug}`).then(r => r.data),
+  featured: () => apiPublic.get('/places/featured').then(r => r.data),
 }
 
 export const authApi = {
-  adminLogin: (email: string, password: string) =>
-    apiPublic.post('/auth/login', { email, password }).then((r) => r.data),
-
-  adminMe: () =>
-    apiAdmin.get('/auth/me').then((r) => r.data),
-
-  userRegister: (name: string, email: string, password: string) =>
-    apiPublic.post('/auth/user/register', { name, email, password }).then((r) => r.data),
-
-  userLogin: (email: string, password: string) =>
-    apiPublic.post('/auth/user/login', { email, password }).then((r) => r.data),
-
-  userMe: () =>
-    apiUser.get('/auth/user/me').then((r) => r.data),
-
-  venueLogin: (email: string, password: string) =>
-    apiPublic.post('/auth/venue/login', { email, password }).then((r) => r.data),
+  adminLogin:   (email: string, password: string) => apiPublic.post('/auth/login', { email, password }).then(r => r.data),
+  adminMe:      () => apiAdmin.get('/auth/me').then(r => r.data),
+  userRegister: (name: string, email: string, password: string) => apiPublic.post('/auth/user/register', { name, email, password }).then(r => r.data),
+  userLogin:    (email: string, password: string) => apiPublic.post('/auth/user/login', { email, password }).then(r => r.data),
+  userMe:       () => apiUser.get('/auth/user/me').then(r => r.data),
+  venueLogin:   (email: string, password: string) => apiPublic.post('/auth/venue/login', { email, password }).then(r => r.data),
 }
 
 export const couponsApi = {
-  active: () =>
-    apiPublic.get('/coupons/active').then((r) => r.data),
-
-  forPlace: (placeId: string) =>
-    apiPublic.get(`/coupons/place/${placeId}`).then((r) => r.data),
-
-  get: (id: string) =>
-    apiPublic.get(`/coupons/${id}`).then((r) => r.data),
-
-  claim: (id: string) =>
-    apiUser.post(`/coupons/${id}/claim`).then((r) => r.data),
-
-  myList: () =>
-    apiUser.get('/coupons/my/list').then((r) => r.data),
-
-  validate: (code: string) =>
-    apiPublic.get(`/coupons/validate/${code}`).then((r) => r.data),
-
-  markUsed: (code: string) =>
-    apiPublic.post(`/coupons/use/${code}`).then((r) => r.data),
+  active:   () => apiPublic.get('/coupons/active').then(r => r.data),
+  forPlace: (placeId: string) => apiPublic.get(`/coupons/place/${placeId}`).then(r => r.data),
+  get:      (id: string) => apiPublic.get(`/coupons/${id}`).then(r => r.data),
+  claim:    (id: string) => apiUser.post(`/coupons/${id}/claim`).then(r => r.data),
+  myList:   () => apiUser.get('/coupons/my/list').then(r => r.data),
+  validate: (code: string) => apiPublic.get(`/coupons/validate/${code}`).then(r => r.data),
+  markUsed: (code: string) => apiPublic.post(`/coupons/use/${code}`).then(r => r.data),
 }
 
 export const venueApi = {
-  me: () =>
-    apiVenue.get('/venue/me').then((r) => r.data),
-
-  updateMe: (data: any) =>
-    apiVenue.put('/venue/me', data).then((r) => r.data),
-
-  coupons: () =>
-    apiVenue.get('/venue/coupons').then((r) => r.data),
-
-  createCoupon: (data: any) =>
-    apiVenue.post('/venue/coupons', data).then((r) => r.data),
-
-  updateCoupon: (id: string, data: any) =>
-    apiVenue.put(`/venue/coupons/${id}`, data).then((r) => r.data),
-
-  deleteCoupon: (id: string) =>
-    apiVenue.delete(`/venue/coupons/${id}`).then((r) => r.data),
-
-  couponStats: (id: string) =>
-    apiVenue.get(`/venue/coupons/${id}/stats`).then((r) => r.data),
+  me:           () => apiVenue.get('/venue/me').then(r => r.data),
+  updateMe:     (data: any) => apiVenue.put('/venue/me', data).then(r => r.data),
+  coupons:      () => apiVenue.get('/venue/coupons').then(r => r.data),
+  createCoupon: (data: any) => apiVenue.post('/venue/coupons', data).then(r => r.data),
+  updateCoupon: (id: string, data: any) => apiVenue.put(`/venue/coupons/${id}`, data).then(r => r.data),
+  deleteCoupon: (id: string) => apiVenue.delete(`/venue/coupons/${id}`).then(r => r.data),
+  couponStats:  (id: string) => apiVenue.get(`/venue/coupons/${id}/stats`).then(r => r.data),
 }
 
 export const adminApi = {
-  login: (email: string, password: string) =>
-    apiPublic.post('/auth/login', { email, password }).then((r) => r.data),
-
-  me: () =>
-    apiAdmin.get('/auth/me').then((r) => r.data),
-
-  stats: () =>
-    apiAdmin.get('/admin/stats').then((r) => r.data),
-
-  listPlaces: (params?: any) =>
-    apiAdmin.get('/admin/places', { params }).then((r) => r.data),
-
-  createPlace: (data: any) =>
-    apiAdmin.post('/admin/places', data).then((r) => r.data),
-
-  updatePlace: (id: string, data: any) =>
-    apiAdmin.put(`/admin/places/${id}`, data).then((r) => r.data),
-
-  deletePlace: (id: string) =>
-    apiAdmin.delete(`/admin/places/${id}`).then((r) => r.data),
-
-  upload: (file: File) => {
-    const fd = new FormData()
-    fd.append('image', file)
-    return apiAdmin
-      .post('/admin/upload', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      .then((r) => r.data)
+  login:       (email: string, password: string) => apiPublic.post('/auth/login', { email, password }).then(r => r.data),
+  me:          () => apiAdmin.get('/auth/me').then(r => r.data),
+  stats:       () => apiAdmin.get('/admin/stats').then(r => r.data),
+  listPlaces:  (params?: any) => apiAdmin.get('/admin/places', { params }).then(r => r.data),
+  createPlace: (data: any) => apiAdmin.post('/admin/places', data).then(r => r.data),
+  updatePlace: (id: string, data: any) => apiAdmin.put(`/admin/places/${id}`, data).then(r => r.data),
+  deletePlace: (id: string) => apiAdmin.delete(`/admin/places/${id}`).then(r => r.data),
+  upload:      (file: File) => {
+    const fd = new FormData(); fd.append('image', file)
+    return apiAdmin.post('/admin/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data)
   },
 }
 
 export const superAdminApi = {
-  stats: () =>
-    apiAdmin.get('/superadmin/stats').then((r) => r.data),
-
-  listPlaces: (params?: any) =>
-    apiAdmin.get('/superadmin/places', { params }).then((r) => r.data),
-
-  createPlace: (data: any) =>
-    apiAdmin.post('/superadmin/places', data).then((r) => r.data),
-
-  updatePlace: (id: string, data: any) =>
-    apiAdmin.put(`/superadmin/places/${id}`, data).then((r) => r.data),
-
-  deletePlace: (id: string) =>
-    apiAdmin.delete(`/superadmin/places/${id}`).then((r) => r.data),
-
-  listUsers: (params?: any) =>
-    apiAdmin.get('/superadmin/users', { params }).then((r) => r.data),
-
-  deleteUser: (id: string) =>
-    apiAdmin.delete(`/superadmin/users/${id}`).then((r) => r.data),
-
-  listCoupons: (params?: any) =>
-    apiAdmin.get('/superadmin/coupons', { params }).then((r) => r.data),
-
-  updateCoupon: (id: string, data: any) =>
-    apiAdmin.put(`/superadmin/coupons/${id}`, data).then((r) => r.data),
-
-  deleteCoupon: (id: string) =>
-    apiAdmin.delete(`/superadmin/coupons/${id}`).then((r) => r.data),
-
-  listReviews: (params?: any) =>
-    apiAdmin.get('/superadmin/reviews', { params }).then((r) => r.data),
-
-  deleteReview: (id: string) =>
-    apiAdmin.delete(`/superadmin/reviews/${id}`).then((r) => r.data),
-
-  listVenueOwners: () =>
-    apiAdmin.get('/superadmin/venue-owners').then((r) => r.data),
-
-  createVenueOwner: (data: any) =>
-    apiAdmin.post('/superadmin/venue-owners', data).then((r) => r.data),
-
-  deleteVenueOwner: (id: string) =>
-    apiAdmin.delete(`/superadmin/venue-owners/${id}`).then((r) => r.data),
-
+  stats:            () => apiAdmin.get('/superadmin/stats').then(r => r.data),
+  listPlaces:       (params?: any) => apiAdmin.get('/superadmin/places', { params }).then(r => r.data),
+  createPlace:      (data: any) => apiAdmin.post('/superadmin/places', data).then(r => r.data),
+  updatePlace:      (id: string, data: any) => apiAdmin.put(`/superadmin/places/${id}`, data).then(r => r.data),
+  deletePlace:      (id: string) => apiAdmin.delete(`/superadmin/places/${id}`).then(r => r.data),
+  listUsers:        (params?: any) => apiAdmin.get('/superadmin/users', { params }).then(r => r.data),
+  deleteUser:       (id: string) => apiAdmin.delete(`/superadmin/users/${id}`).then(r => r.data),
+  listCoupons:      (params?: any) => apiAdmin.get('/superadmin/coupons', { params }).then(r => r.data),
+  updateCoupon:     (id: string, data: any) => apiAdmin.put(`/superadmin/coupons/${id}`, data).then(r => r.data),
+  deleteCoupon:     (id: string) => apiAdmin.delete(`/superadmin/coupons/${id}`).then(r => r.data),
+  listReviews:      (params?: any) => apiAdmin.get('/superadmin/reviews', { params }).then(r => r.data),
+  deleteReview:     (id: string) => apiAdmin.delete(`/superadmin/reviews/${id}`).then(r => r.data),
+  listVenueOwners:  (params?: any) => apiAdmin.get('/superadmin/venue-owners', { params }).then(r => r.data),
+  createVenueOwner: (data: any) => apiAdmin.post('/superadmin/venue-owners', data).then(r => r.data),
+  deleteVenueOwner: (id: string) => apiAdmin.delete(`/superadmin/venue-owners/${id}`).then(r => r.data),
   upload: (file: File) => {
-    const fd = new FormData()
-    fd.append('image', file)
-    return apiAdmin
-      .post('/superadmin/upload', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      .then((r) => r.data)
+    const fd = new FormData(); fd.append('image', file)
+    return apiAdmin.post('/superadmin/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data)
   },
 }
 
 export const reviewsApi = {
-  forPlace: (placeId: string) =>
-    apiPublic.get(`/reviews/place/${placeId}`).then((r) => r.data),
-
-  create: (placeId: string, data: { rating: number; comment: string }) =>
-    apiUser.post(`/reviews/place/${placeId}`, data).then((r) => r.data),
-
-  delete: (id: string) =>
-    apiUser.delete(`/reviews/${id}`).then((r) => r.data),
+  forPlace: (placeId: string) => apiPublic.get(`/reviews/place/${placeId}`).then(r => r.data),
+  create:   (placeId: string, data: { rating: number; comment: string }) => apiUser.post(`/reviews/place/${placeId}`, data).then(r => r.data),
+  delete:   (id: string) => apiUser.delete(`/reviews/${id}`).then(r => r.data),
 }
 
 export const api = apiPublic
