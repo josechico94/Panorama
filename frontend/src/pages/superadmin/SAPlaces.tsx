@@ -1,12 +1,11 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { superAdminApi } from '@/lib/api'
 import { getCategoryConfig, CATEGORIES } from '@/types'
-import { Plus, Pencil, Trash2, Eye, EyeOff, Star, X, Search } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, EyeOff, Star, X, Search, Upload, Link, Loader } from 'lucide-react'
 
 const card = { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16 }
 const field = { width: '100%', padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0ede8', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'DM Sans,sans-serif' }
-
 const EMPTY = { name: '', city: 'bologna', category: 'eat', shortDescription: '', description: '', tags: '', 'location.address': '', 'location.neighborhood': '', 'location.coordinates.lat': '44.4949', 'location.coordinates.lng': '11.3426', 'contact.phone': '', 'contact.website': '', 'contact.instagram': '', priceRange: '2', coverImage: '' }
 
 export default function SAPlaces() {
@@ -48,14 +47,12 @@ export default function SAPlaces() {
         </button>
       </div>
 
-      {/* Search */}
       <div style={{ position: 'relative', marginBottom: 16 }}>
         <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(240,237,232,0.3)' }} />
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca per nome..."
           style={{ ...field, paddingLeft: 36 }} />
       </div>
 
-      {/* Table */}
       <div style={{ ...card, overflow: 'hidden' }}>
         {isLoading ? (
           <div style={{ padding: 32, textAlign: 'center', color: 'rgba(240,237,232,0.3)' }}>Caricamento...</div>
@@ -63,7 +60,7 @@ export default function SAPlaces() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                {['Nome', 'Categoria', 'Città', 'Stato', ''].map(h => (
+                {['Immagine', 'Nome', 'Categoria', 'Città', 'Stato', ''].map(h => (
                   <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 10, fontWeight: 700, color: 'rgba(240,237,232,0.3)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{h}</th>
                 ))}
               </tr>
@@ -73,6 +70,15 @@ export default function SAPlaces() {
                 const cat = getCategoryConfig(place.category)
                 return (
                   <tr key={place._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <td style={{ padding: '8px 16px' }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 10, overflow: 'hidden', background: 'rgba(255,255,255,0.05)', flexShrink: 0 }}>
+                        {place.media?.coverImage ? (
+                          <img src={place.media.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{cat.emoji}</div>
+                        )}
+                      </div>
+                    </td>
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {place.meta?.featured && <Star size={11} color="#f59e0b" />}
@@ -120,6 +126,114 @@ function ActionBtn({ icon: Icon, onClick, color = 'rgba(240,237,232,0.35)' }: an
   )
 }
 
+function ImageUploader({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+  const [uploading, setUploading] = useState(false)
+  const [uploadMode, setUploadMode] = useState<'url' | 'file'>('url')
+  const [urlInput, setUrlInput] = useState(value || '')
+  const [error, setError] = useState('')
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 10 * 1024 * 1024) { setError('File troppo grande (max 10MB)'); return }
+    setUploading(true)
+    setError('')
+    try {
+      const { url } = await superAdminApi.upload(file)
+      onChange(url)
+      setUrlInput(url)
+    } catch {
+      setError('Upload fallito. Riprova o usa un URL.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleUrlConfirm = () => {
+    if (urlInput.startsWith('http')) onChange(urlInput)
+    else setError('URL non valido — deve iniziare con https://')
+  }
+
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+        Immagine copertina
+      </label>
+
+      {/* Preview */}
+      {value && (
+        <div style={{ position: 'relative', marginBottom: 10, borderRadius: 12, overflow: 'hidden', height: 140 }}>
+          <img src={value} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <button onClick={() => { onChange(''); setUrlInput('') }}
+            style={{ position: 'absolute', top: 8, right: 8, width: 26, height: 26, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'rgba(0,0,0,0.7)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <X size={13} />
+          </button>
+        </div>
+      )}
+
+      {/* Mode toggle */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 8, background: 'rgba(255,255,255,0.04)', padding: 3, borderRadius: 8 }}>
+        {(['url', 'file'] as const).map(m => (
+          <button key={m} onClick={() => { setUploadMode(m); setError('') }} style={{
+            flex: 1, padding: '6px', borderRadius: 6, border: 'none', cursor: 'pointer',
+            background: uploadMode === m ? 'rgba(232,98,42,0.2)' : 'transparent',
+            color: uploadMode === m ? '#e8622a' : 'rgba(240,237,232,0.4)',
+            fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+          }}>
+            {m === 'url' ? <><Link size={11} /> URL</> : <><Upload size={11} /> Carica file</>}
+          </button>
+        ))}
+      </div>
+
+      {uploadMode === 'url' ? (
+        <div style={{ display: 'flex', gap: 6 }}>
+          <input
+            value={urlInput}
+            onChange={e => setUrlInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleUrlConfirm()}
+            placeholder="https://images.unsplash.com/..."
+            style={{ ...field, flex: 1 }}
+            onFocus={e => (e.target.style.borderColor = '#e8622a')}
+            onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+          />
+          <button onClick={handleUrlConfirm} style={{
+            padding: '0 14px', borderRadius: 10, border: 'none', cursor: 'pointer',
+            background: 'rgba(232,98,42,0.2)', color: '#e8622a', fontSize: 12, fontWeight: 700, flexShrink: 0,
+          }}>
+            OK
+          </button>
+        </div>
+      ) : (
+        <div>
+          <input ref={fileRef} type="file" accept="image/*,image/gif" onChange={handleFile} style={{ display: 'none' }} />
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            style={{
+              width: '100%', padding: '12px', borderRadius: 10, border: '2px dashed rgba(232,98,42,0.3)',
+              background: 'rgba(232,98,42,0.05)', color: uploading ? '#e8622a' : 'rgba(240,237,232,0.5)',
+              cursor: uploading ? 'default' : 'pointer', fontSize: 13,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => !uploading && ((e.currentTarget as HTMLElement).style.borderColor = 'rgba(232,98,42,0.6)')}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(232,98,42,0.3)'}
+          >
+            {uploading ? (
+              <><Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> Caricamento...</>
+            ) : (
+              <><Upload size={14} /> Clicca per caricare (JPG, PNG, GIF — max 10MB)</>
+            )}
+          </button>
+        </div>
+      )}
+
+      {error && <p style={{ color: '#f87171', fontSize: 11, marginTop: 5 }}>{error}</p>}
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+    </div>
+  )
+}
+
 function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void }) {
   const qc = useQueryClient()
   const isEdit = !!place
@@ -147,10 +261,18 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
         name: form.name, city: form.city, category: form.category,
         shortDescription: form.shortDescription, description: form.description,
         tags: form.tags.split(',').map((t: string) => t.trim()).filter(Boolean),
-        location: { address: form['location.address'], neighborhood: form['location.neighborhood'], coordinates: { lat: parseFloat(form['location.coordinates.lat']), lng: parseFloat(form['location.coordinates.lng']) } },
-        contact: { phone: form['contact.phone'] || undefined, website: form['contact.website'] || undefined, instagram: form['contact.instagram'] || undefined },
+        location: {
+          address: form['location.address'],
+          neighborhood: form['location.neighborhood'],
+          coordinates: { lat: parseFloat(form['location.coordinates.lat']), lng: parseFloat(form['location.coordinates.lng']) }
+        },
+        contact: {
+          phone: form['contact.phone'] || undefined,
+          website: form['contact.website'] || undefined,
+          instagram: form['contact.instagram'] || undefined
+        },
         priceRange: parseInt(form.priceRange),
-        media: { coverImage: form.coverImage, gallery: place?.media?.gallery || [] },
+        media: { coverImage: form.coverImage || '', gallery: place?.media?.gallery || [] },
       }
       return isEdit ? superAdminApi.updatePlace(place._id, payload) : superAdminApi.createPlace(payload)
     },
@@ -160,21 +282,28 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
-      <div style={{ background: '#0f0f1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 24, width: '100%', maxWidth: 560, maxHeight: '85vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+      <div style={{ background: '#0f0f1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 24, width: '100%', maxWidth: 580, maxHeight: '88vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h2 style={{ color: '#f0ede8', fontSize: 18, fontWeight: 700 }}>{isEdit ? 'Modifica' : 'Nuovo'} posto</h2>
           <button onClick={onClose} style={{ padding: 6, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', color: 'rgba(240,237,232,0.5)' }}><X size={16} /></button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Image uploader */}
+          <ImageUploader
+            value={form.coverImage}
+            onChange={url => set('coverImage', url)}
+          />
+
+          {/* Text fields */}
           {[
-            { k: 'coverImage', label: 'URL Immagine copertina', ph: 'https://...' },
             { k: 'name', label: 'Nome *', ph: 'Nome del posto' },
             { k: 'shortDescription', label: 'Descrizione breve', ph: 'Max 160 caratteri' },
             { k: 'tags', label: 'Tag (virgola)', ph: 'aperitivo, vista, centro' },
             { k: 'location.address', label: 'Indirizzo', ph: 'Via Roma 1, Bologna' },
             { k: 'location.neighborhood', label: 'Quartiere', ph: 'Centro Storico' },
             { k: 'contact.phone', label: 'Telefono', ph: '+39 051...' },
+            { k: 'contact.website', label: 'Sito web', ph: 'https://...' },
             { k: 'contact.instagram', label: 'Instagram', ph: 'handle senza @' },
           ].map(({ k, label, ph }) => (
             <div key={k}>
