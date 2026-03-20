@@ -1,12 +1,23 @@
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { superAdminApi } from '@/lib/api'
-import { Trash2, Tag } from 'lucide-react'
+import { CATEGORIES, getCategoryConfig } from '@/types'
+import { Trash2, Tag, Filter } from 'lucide-react'
 
 const card = { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }
 
 export default function SACoupons() {
+  const [filterActive, setFilterActive] = useState('')  // '' | 'true' | 'false'
+  const [filterExpired, setFilterExpired] = useState(false)
   const qc = useQueryClient()
-  const { data, isLoading } = useQuery({ queryKey: ['sa-coupons'], queryFn: () => superAdminApi.listCoupons() })
+
+  const params: Record<string, any> = {}
+  if (filterActive !== '') params.active = filterActive
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['sa-coupons', filterActive, filterExpired],
+    queryFn: () => superAdminApi.listCoupons(Object.keys(params).length ? params : undefined),
+  })
 
   const deleteMutation = useMutation({
     mutationFn: superAdminApi.deleteCoupon,
@@ -18,8 +29,11 @@ export default function SACoupons() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['sa-coupons'] }),
   })
 
-  const coupons = data?.data ?? []
+  const allCoupons = data?.data ?? []
   const now = new Date()
+  const coupons = filterExpired
+    ? allCoupons
+    : allCoupons.filter((c: any) => new Date(c.validUntil) >= now)
 
   return (
     <div>

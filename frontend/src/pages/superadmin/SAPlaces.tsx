@@ -11,13 +11,20 @@ const EMPTY = { name: '', city: 'bologna', category: 'eat', shortDescription: ''
 
 export default function SAPlaces() {
   const [search, setSearch] = useState('')
+  const [activeCategory, setActiveCategory] = useState('')
+  const [activeStatus, setActiveStatus] = useState('')
   const [editPlace, setEditPlace] = useState<any>(null)
   const [showForm, setShowForm] = useState(false)
   const qc = useQueryClient()
 
+  const params: Record<string, any> = {}
+  if (search) params.search = search
+  if (activeCategory) params.category = activeCategory
+  if (activeStatus !== '') params.active = activeStatus
+
   const { data, isLoading } = useQuery({
-    queryKey: ['sa-places', search],
-    queryFn: () => superAdminApi.listPlaces(search ? { search } : undefined),
+    queryKey: ['sa-places', search, activeCategory, activeStatus],
+    queryFn: () => superAdminApi.listPlaces(Object.keys(params).length ? params : undefined),
   })
 
   const deleteMutation = useMutation({
