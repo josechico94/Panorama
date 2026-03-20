@@ -24,7 +24,7 @@ function QRCode({ value, size = 220 }: { value: string; size?: number }) {
 
   return (
     <div style={{ background: '#ffffff', padding: 12, borderRadius: 12, display: 'inline-block' }}>
-      <canvas ref={canvasRef} width={size} height={size} style={{ display: 'block' }} />
+      <canvas id="qr-canvas" ref={canvasRef} width={size} height={size} style={{ display: 'block' }} />
     </div>
   )
 }
