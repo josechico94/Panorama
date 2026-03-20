@@ -1,7 +1,9 @@
 import axios from 'axios'
 
-const BASE_URL = import.meta.env.VITE_API_URL
-  ? `${import.meta.env.VITE_API_URL}/api/v1`
+/// <reference types="vite/client" />
+
+const BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  ? 'https://panoramabo.onrender.com/api/v1'
   : '/api/v1'
 
 const getToken = (role: 'admin' | 'user' | 'venue' | 'any'): string | null => {
@@ -121,6 +123,7 @@ export const superAdminApi = {
   listVenueOwners:  (params?: any) => apiAdmin.get('/superadmin/venue-owners', { params }).then(r => r.data),
   createVenueOwner: (data: any) => apiAdmin.post('/superadmin/venue-owners', data).then(r => r.data),
   deleteVenueOwner: (id: string) => apiAdmin.delete(`/superadmin/venue-owners/${id}`).then(r => r.data),
+  updateVenueOwner: (id: string, data: any) => apiAdmin.put(`/superadmin/venue-owners/${id}`, data).then(r => r.data),
   upload: (file: File) => {
     const fd = new FormData(); fd.append('image', file)
     return apiAdmin.post('/superadmin/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data)
