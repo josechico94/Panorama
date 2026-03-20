@@ -2,7 +2,8 @@ import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { superAdminApi } from '@/lib/api'
 import { getCategoryConfig, CATEGORIES } from '@/types'
-import { Plus, Pencil, Trash2, Eye, EyeOff, Star, X, Search, Upload, Link, Loader } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, EyeOff, Star, X, Search, Upload, Link, Loader, MapPin, Check } from 'lucide-react'
+import { geocodeAddress } from '@/lib/geocode'
 
 const card = { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16 }
 const field = { width: '100%', padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0ede8', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'DM Sans,sans-serif' }
@@ -234,6 +235,86 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
   )
 }
 
+function AddressField({ value, city, onChange, onGeocode }: {
+  value: string
+  city: string
+  onChange: (v: string) => void
+  onGeocode: (lat: number, lng: number) => void
+}) {
+  const [geocoding, setGeocoding] = useState(false)
+  const [status, setStatus] = useState<'idle' | 'ok' | 'error'>('idle')
+
+  const handleGeocode = async () => {
+    if (!value.trim()) return
+    setGeocoding(true)
+    setStatus('idle')
+    const coords = await geocodeAddress(value, city)
+    setGeocoding(false)
+    if (coords) {
+      onGeocode(coords.lat, coords.lng)
+      setStatus('ok')
+      setTimeout(() => setStatus('idle'), 2000)
+    } else {
+      setStatus('error')
+      setTimeout(() => setStatus('idle'), 3000)
+    }
+  }
+
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', marginBottom: 5, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>
+        Indirizzo
+      </label>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <input
+          value={value}
+          onChange={e => { onChange(e.target.value); setStatus('idle') }}
+          placeholder="Via Roma 1, Bologna"
+          style={{ ...fieldStyle, flex: 1 }}
+          onFocus={e => (e.target.style.borderColor = '#e8622a')}
+          onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+          onKeyDown={e => e.key === 'Enter' && handleGeocode()}
+        />
+        <button
+          onClick={handleGeocode}
+          disabled={geocoding || !value.trim()}
+          title="Trova coordinate dall'indirizzo"
+          style={{
+            padding: '0 12px', borderRadius: 10, border: 'none', cursor: 'pointer', flexShrink: 0,
+            background: status === 'ok' ? 'rgba(34,197,94,0.2)' : status === 'error' ? 'rgba(248,113,113,0.15)' : 'rgba(232,98,42,0.15)',
+            color: status === 'ok' ? '#4ade80' : status === 'error' ? '#f87171' : '#e8622a',
+            fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4,
+            opacity: geocoding || !value.trim() ? 0.5 : 1, transition: 'all 0.2s',
+          }}
+        >
+          {geocoding ? (
+            <Loader size={13} style={{ animation: 'spin 1s linear infinite' }} />
+          ) : status === 'ok' ? (
+            <><Check size={13} /> OK</>
+          ) : status === 'error' ? (
+            <>✗ Non trovato</>
+          ) : (
+            <><MapPin size={13} /> Geocodifica</>
+          )}
+        </button>
+      </div>
+      {status === 'error' && (
+        <p style={{ fontSize: 10, color: '#f87171', marginTop: 4 }}>
+          Indirizzo non trovato. Verifica e riprova, o inserisci le coordinate manualmente.
+        </p>
+      )}
+      {status === 'ok' && (
+        <p style={{ fontSize: 10, color: '#4ade80', marginTop: 4 }}>
+          ✓ Coordinate aggiornate automaticamente
+        </p>
+      )}
+    </div>
+  )
+}
+
+const fieldStyle = { width: '100%', padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0ede8', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'DM Sans,sans-serif' }
+
+
 function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void }) {
   const qc = useQueryClient()
   const isEdit = !!place
@@ -243,6 +324,7 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
     tags: (place.tags || []).join(', '),
     'location.address': place.location?.address || '',
     'location.neighborhood': place.location?.neighborhood || '',
+    'location.address': place.location?.address || '',
     'location.coordinates.lat': String(place.location?.coordinates?.lat || 44.4949),
     'location.coordinates.lng': String(place.location?.coordinates?.lng || 11.3426),
     'contact.phone': place.contact?.phone || '',
@@ -295,12 +377,33 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
             onChange={url => set('coverImage', url)}
           />
 
+          {/* Address with geocoding */}
+          <AddressField
+            value={form['location.address'] || ''}
+            city={form.city || 'bologna'}
+            onChange={v => set('location.address', v)}
+            onGeocode={(lat, lng) => setForm((f: any) => ({
+              ...f,
+              'location.coordinates.lat': String(lat.toFixed(6)),
+              'location.coordinates.lng': String(lng.toFixed(6)),
+            }))}
+          />
+
+          {/* Coordinate display */}
+          {form['location.coordinates.lat'] !== '44.4949' && (
+            <div style={{ padding: '8px 12px', background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <MapPin size={11} color="#4ade80" />
+              <span style={{ fontSize: 11, color: 'rgba(240,237,232,0.5)', fontFamily: 'DM Mono,monospace' }}>
+                {parseFloat(form['location.coordinates.lat']).toFixed(4)}, {parseFloat(form['location.coordinates.lng']).toFixed(4)}
+              </span>
+            </div>
+          )}
+
           {/* Text fields */}
           {[
             { k: 'name', label: 'Nome *', ph: 'Nome del posto' },
             { k: 'shortDescription', label: 'Descrizione breve', ph: 'Max 160 caratteri' },
             { k: 'tags', label: 'Tag (virgola)', ph: 'aperitivo, vista, centro' },
-            { k: 'location.address', label: 'Indirizzo', ph: 'Via Roma 1, Bologna' },
             { k: 'location.neighborhood', label: 'Quartiere', ph: 'Centro Storico' },
             { k: 'contact.phone', label: 'Telefono', ph: '+39 051...' },
             { k: 'contact.website', label: 'Sito web', ph: 'https://...' },
