@@ -270,7 +270,7 @@ function AddressField({ value, city, onChange, onGeocode }: {
           value={value}
           onChange={e => { onChange(e.target.value); setStatus('idle') }}
           placeholder="Via Roma 1, Bologna"
-          style={{ ...fieldStyle, flex: 1 }}
+          style={{ ...field, flex: 1 }}
           onFocus={e => (e.target.style.borderColor = '#e8622a')}
           onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
           onKeyDown={e => e.key === 'Enter' && handleGeocode()}
@@ -312,7 +312,6 @@ function AddressField({ value, city, onChange, onGeocode }: {
   )
 }
 
-const fieldStyle = { width: '100%', padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0ede8', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'DM Sans,sans-serif' }
 
 
 function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void }) {
