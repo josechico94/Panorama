@@ -54,11 +54,23 @@ function QRCameraScanner({ onScan, onError }: { onScan: (code: string) => void; 
             experimentalFeatures: { useBarCodeDetectorIfSupported: true },
           },
           (decodedText: string) => {
-            const code = decodedText.includes('/validate/')
-              ? decodedText.split('/validate/').pop() || decodedText
-              : decodedText.trim()
-            // Prevent double scan
-            if (scannerRef.current) onScan(code)
+            // Extract code from URL or use as-is
+            let code = decodedText.trim()
+            if (code.includes('/validate/')) {
+              code = code.split('/validate/').pop() || code
+            }
+            code = code.toLowerCase().trim()
+            // Prevent double scan — stop scanner immediately
+            if (scannerRef.current) {
+              try {
+                const state = scannerRef.current.getState?.()
+                if (state === 2 || state === 3) {
+                  scannerRef.current.stop().catch(() => {})
+                }
+              } catch {}
+              scannerRef.current = null
+              onScan(code)
+            }
           },
           () => {}
         )

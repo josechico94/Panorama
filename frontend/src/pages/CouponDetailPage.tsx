@@ -7,8 +7,8 @@ import { useUserStore } from '@/store'
 import { getCategoryConfig } from '@/types'
 
 function QRCode({ value, size = 200 }: { value: string; size?: number }) {
-  const url = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}&bgcolor=07070f&color=f0ede8&margin=2`
-  return <img src={url} alt="QR" width={size} height={size} style={{ borderRadius: 12, display: 'block' }} />
+  const url = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}&bgcolor=ffffff&color=000000&margin=4&ecc=H`
+  return <img src={url} alt="QR" width={size} height={size} style={{ borderRadius: 8, display: 'block' }} />
 }
 
 function formatDate(d: string) {
@@ -61,7 +61,7 @@ export default function CouponDetailPage() {
     )}&bgcolor=07070f&color=f0ede8&margin=4`
     const a = document.createElement('a')
     a.href = qrUrl
-    a.download = `coupon-${myCoupon.uniqueCode.slice(0,12)}.png`
+    a.download = `coupon-${myCoupon.uniqueCode.slice(0,8)}.png`
     a.click()
   }
 
@@ -83,7 +83,7 @@ export default function CouponDetailPage() {
 
   const isExpired   = new Date() > new Date(coupon.validUntil)
   const isExhausted = coupon.maxUses !== null && coupon.usesCount >= coupon.maxUses
-  const qrValue     = myCoupon ? myCoupon.uniqueCode : ''
+  const qrValue     = myCoupon ? `https://panoramabo.onrender.com/validate/${myCoupon.uniqueCode}` : ''
   const daysLeft    = Math.ceil((new Date(coupon.validUntil).getTime() - Date.now()) / (1000*60*60*24))
 
   return (
@@ -184,7 +184,7 @@ export default function CouponDetailPage() {
                   </p>
                   <div className="flex justify-center mb-3">
                     <div style={{ background:'rgba(7,7,15,0.9)', border:'1px solid rgba(232,98,42,0.2)', borderRadius:16, padding:12 }}>
-                      <QRCode value={qrValue} size={176} />
+                      <QRCode value={qrValue} size={220} />
                     </div>
                   </div>
                   <p className="font-mono-dm text-[var(--text-3)] text-[10px] mb-1">
