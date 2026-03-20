@@ -1,3 +1,4 @@
+import { useEffect, useRef as useQRRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -6,9 +7,22 @@ import { couponsApi } from '@/lib/api'
 import { useUserStore } from '@/store'
 import { getCategoryConfig } from '@/types'
 
-function QRCode({ value, size = 200 }: { value: string; size?: number }) {
-  const url = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}&bgcolor=ffffff&color=000000&margin=4&ecc=H`
-  return <img src={url} alt="QR" width={size} height={size} style={{ borderRadius: 8, display: 'block' }} />
+function QRCode({ value, size = 220 }: { value: string; size?: number }) {
+  const canvasRef = useQRRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    if (!canvasRef.current || !value) return
+    import('qrcode').then(QRLib => {
+      QRLib.default.toCanvas(canvasRef.current!, value, {
+        width: size,
+        margin: 2,
+        errorCorrectionLevel: 'H',
+        color: { dark: '#000000', light: '#ffffff' },
+      })
+    })
+  }, [value, size])
+
+  return <canvas ref={canvasRef} width={size} height={size} style={{ borderRadius: 10, display: 'block' }} />
 }
 
 function formatDate(d: string) {
