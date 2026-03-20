@@ -317,6 +317,8 @@ function AddressField({ value, city, onChange, onGeocode }: {
 function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void }) {
   const qc = useQueryClient()
   const isEdit = !!place
+  // Use ref to always have latest coords in mutationFn closure
+  const coordsRef = useRef<{ lat: string; lng: string } | null>(null)
   const [form, setForm] = useState<any>(place ? {
     name: place.name, city: place.city, category: place.category,
     shortDescription: place.shortDescription || '', description: place.description || '',
@@ -344,7 +346,10 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
         location: {
           address: form['location.address'],
           neighborhood: form['location.neighborhood'],
-          coordinates: { lat: parseFloat(form['location.coordinates.lat']), lng: parseFloat(form['location.coordinates.lng']) }
+          coordinates: {
+            lat: parseFloat(coordsRef.current?.lat ?? form['location.coordinates.lat']),
+            lng: parseFloat(coordsRef.current?.lng ?? form['location.coordinates.lng']),
+          }
         },
         contact: {
           phone: form['contact.phone'] || undefined,
@@ -380,11 +385,16 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
             value={form['location.address'] || ''}
             city={form.city || 'bologna'}
             onChange={v => set('location.address', v)}
-            onGeocode={(lat, lng) => setForm((f: any) => ({
-              ...f,
-              'location.coordinates.lat': String(lat.toFixed(6)),
-              'location.coordinates.lng': String(lng.toFixed(6)),
-            }))}
+            onGeocode={(lat, lng) => {
+              const latStr = String(lat.toFixed(6))
+              const lngStr = String(lng.toFixed(6))
+              coordsRef.current = { lat: latStr, lng: lngStr }
+              setForm((f: any) => ({
+                ...f,
+                'location.coordinates.lat': latStr,
+                'location.coordinates.lng': lngStr,
+              }))
+            }}
           />
 
           {/* Coordinate display */}
