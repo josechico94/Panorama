@@ -266,9 +266,8 @@ export default function VenueInfoPage() {
         onClick={() => mutation.mutate()}
         disabled={mutation.isPending || !form.address || !form.phone}
         style={{
-          width: '100%', padding: '15px', borderRadius: 14, border: 'none', cursor: 'pointer',
+          width: '100%', padding: '15px', borderRadius: 14, cursor: 'pointer',
           background: saved ? 'rgba(34,197,94,0.15)' : 'linear-gradient(135deg, #e8622a, #f0884a)',
-          color: saved ? '#4ade80' : '#fff', fontSize: 14, fontWeight: 700,
           border: saved ? '1px solid rgba(34,197,94,0.4)' : 'none',
           boxShadow: saved ? 'none' : '0 4px 20px rgba(232,98,42,0.4)',
           opacity: mutation.isPending || !form.address || !form.phone ? 0.5 : 1,
