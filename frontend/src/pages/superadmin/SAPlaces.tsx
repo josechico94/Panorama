@@ -61,6 +61,54 @@ export default function SAPlaces() {
           style={{ ...field, paddingLeft: 36 }} />
       </div>
 
+      {/* ── Category + Status filters ── */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+        <button
+          onClick={() => setActiveCategory('')}
+          style={{
+            padding: '5px 14px', borderRadius: 100, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 700,
+            background: activeCategory === '' ? '#f0ede8' : 'rgba(255,255,255,0.05)',
+            color: activeCategory === '' ? '#07070f' : 'rgba(240,237,232,0.5)',
+            transition: 'all 0.15s',
+          }}
+        >Tutti</button>
+        {CATEGORIES.map(cat => (
+          <button
+            key={cat.id}
+            onClick={() => setActiveCategory(activeCategory === cat.id ? '' : cat.id)}
+            style={{
+              padding: '5px 12px', borderRadius: 100, cursor: 'pointer', fontSize: 11, fontWeight: 700,
+              border: `1px solid ${activeCategory === cat.id ? cat.color : 'transparent'}`,
+              background: activeCategory === cat.id ? `${cat.color}20` : 'rgba(255,255,255,0.04)',
+              color: activeCategory === cat.id ? cat.color : 'rgba(240,237,232,0.45)',
+              transition: 'all 0.15s',
+            }}
+          >{cat.emoji} {cat.label}</button>
+        ))}
+
+        <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.1)' }} />
+
+        {[
+          { value: '', label: 'Tutti gli stati' },
+          { value: 'true', label: '✅ Attivi' },
+          { value: 'false', label: '👁 Nascosti' },
+        ].map(({ value, label }) => (
+          <button key={value} onClick={() => setActiveStatus(value)} style={{
+            padding: '5px 12px', borderRadius: 100, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 700,
+            background: activeStatus === value ? 'rgba(232,98,42,0.15)' : 'rgba(255,255,255,0.04)',
+            color: activeStatus === value ? '#e8622a' : 'rgba(240,237,232,0.45)',
+            transition: 'all 0.15s',
+          }}>{label}</button>
+        ))}
+
+        {(activeCategory || activeStatus) && (
+          <button onClick={() => { setActiveCategory(''); setActiveStatus('') }} style={{
+            padding: '5px 12px', borderRadius: 100, cursor: 'pointer', fontSize: 11, fontWeight: 700,
+            border: '1px solid rgba(248,113,113,0.3)', background: 'rgba(248,113,113,0.08)', color: '#f87171',
+          }}>✕ Rimuovi filtri</button>
+        )}
+      </div>
+
       <div style={{ ...card, overflow: 'hidden' }}>
         {isLoading ? (
           <div style={{ padding: 32, textAlign: 'center', color: 'rgba(240,237,232,0.3)' }}>Caricamento...</div>
