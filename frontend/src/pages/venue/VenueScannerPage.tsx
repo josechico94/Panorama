@@ -26,17 +26,41 @@ function QRCameraScanner({ onScan, onError }: { onScan: (code: string) => void; 
         html5QrCode = new Html5Qrcode(regionId)
         scannerRef.current = html5QrCode
 
+        // Try rear camera first, fallback to any camera
+        let cameraId: any = { facingMode: 'environment' }
+        try {
+          const cameras = await Html5Qrcode.getCameras()
+          if (cameras && cameras.length > 0) {
+            // Prefer rear camera
+            const rear = cameras.find(c =>
+              c.label.toLowerCase().includes('back') ||
+              c.label.toLowerCase().includes('rear') ||
+              c.label.toLowerCase().includes('poste') ||
+              c.label.toLowerCase().includes('environment')
+            )
+            if (rear) cameraId = rear.id
+          }
+        } catch { /* use facingMode fallback */ }
+
+        const boxSize = Math.min(window.innerWidth * 0.7, 280)
+
         await html5QrCode.start(
-          { facingMode: 'environment' },
-          { fps: 10, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+          cameraId,
+          {
+            fps: 15,
+            qrbox: { width: boxSize, height: boxSize },
+            aspectRatio: window.innerHeight / window.innerWidth,
+            disableFlip: false,
+            experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+          },
           (decodedText: string) => {
-            // Extract uniqueCode from URL or use as-is
             const code = decodedText.includes('/validate/')
               ? decodedText.split('/validate/').pop() || decodedText
               : decodedText.trim()
-            onScan(code)
+            // Prevent double scan
+            if (scannerRef.current) onScan(code)
           },
-          () => {} // ignore scan failures (called on every frame)
+          () => {}
         )
         setStarted(true)
       } catch (err: any) {
@@ -48,8 +72,22 @@ function QRCameraScanner({ onScan, onError }: { onScan: (code: string) => void; 
 
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {})
-        scannerRef.current.clear()
+        try {
+          const state = scannerRef.current.getState?.()
+          // State 2 = SCANNING, State 3 = PAUSED — only stop if running
+          if (state === 2 || state === 3) {
+            scannerRef.current.stop().then(() => {
+              scannerRef.current?.clear()
+            }).catch(() => {
+              scannerRef.current?.clear()
+            })
+          } else {
+            scannerRef.current.clear?.()
+          }
+        } catch {
+          // ignore cleanup errors
+        }
+        scannerRef.current = null
       }
     }
   }, [])
@@ -96,12 +134,19 @@ function QRCameraScanner({ onScan, onError }: { onScan: (code: string) => void; 
       </p>
 
       <style>{`
-        #${regionId} video { object-fit: cover !important; width: 100% !important; height: 100% !important; }
-        #${regionId} img { display: none !important; }
         #${regionId} { width: 100% !important; height: 100% !important; }
+        #${regionId} video {
+          object-fit: cover !important;
+          width: 100% !important;
+          height: 100% !important;
+          border-radius: 18px;
+        }
+        #${regionId} img { display: none !important; }
+        #${regionId} > div { border: none !important; }
+        #${regionId} canvas { display: none !important; }
         @keyframes scanLine {
-          0%, 100% { top: 20%; }
-          50% { top: 80%; }
+          0%, 100% { top: 22%; }
+          50% { top: 78%; }
         }
       `}</style>
     </div>
