@@ -8,15 +8,22 @@ import { getCategoryConfig } from '@/types'
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1485738422979-f5c462d49f74?w=900&q=80'
 
-function getYouTubeId(url: string) {
-  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&
-?#]+)/)
-  return match ? match[1] : null
+function getYouTubeId(url: string): string | null {
+  try {
+    const u = new URL(url)
+    if (u.hostname.includes('youtube.com')) return u.searchParams.get('v')
+    if (u.hostname.includes('youtu.be')) return u.pathname.slice(1)
+    if (u.pathname.includes('/embed/')) return u.pathname.split('/embed/')[1]
+  } catch {}
+  return null
 }
 
-function getVimeoId(url: string) {
-  const match = url.match(/vimeo\.com\/(\d+)/)
-  return match ? match[1] : null
+function getVimeoId(url: string): string | null {
+  try {
+    const u = new URL(url)
+    if (u.hostname.includes('vimeo.com')) return u.pathname.replace('/', '')
+  } catch {}
+  return null
 }
 
 function VideoPlayer({ url }: { url: string }) {
