@@ -123,7 +123,7 @@ export default function ExperienceDetailPage() {
 
   return (
     <div className="max-w-2xl mx-auto pb-10">
-      {/* Hero */}
+      {/* Hero 10 */}
       <div className="relative overflow-hidden" style={{ aspectRatio: '16/8' }}>
         <img src={exp.coverImage || PLACEHOLDER} alt={exp.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(7,7,15,0.3) 0%, rgba(7,7,15,0.8) 100%)' }} />
