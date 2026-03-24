@@ -39,30 +39,52 @@ router.get('/:slug', async (req: Request, res: Response) => {
 });
 
 // ── Admin CRUD ──
+function makeSlug(title: string) {
+  return title.toLowerCase()
+    .replace(/[àáâãäå]/g, 'a').replace(/[èéêë]/g, 'e')
+    .replace(/[ìíîï]/g, 'i').replace(/[òóôõö]/g, 'o').replace(/[ùúûü]/g, 'u')
+    .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()
+    + '-' + Date.now().toString(36);
+}
+
+function sanitizeBody(body: any) {
+  const b = { ...body };
+  if (!b.slug && b.title) b.slug = makeSlug(b.title);
+  // Ensure stops have valid structure
+  if (Array.isArray(b.stops)) {
+    b.stops = b.stops
+      .filter((s: any) => s.placeId && String(s.placeId).length === 24)
+      .map((s: any, i: number) => ({
+        placeId: s.placeId,
+        order: s.order ?? i + 1,
+        note: s.note || '',
+        duration: parseInt(s.duration) || 60,
+      }));
+  }
+  return b;
+}
+
 router.post('/', requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const body = { ...req.body };
-    if (!body.slug && body.title) {
-      body.slug = body.title.toLowerCase()
-        .replace(/[àáâãäå]/g, 'a').replace(/[èéêë]/g, 'e')
-        .replace(/[ìíîï]/g, 'i').replace(/[òóôõö]/g, 'o')
-        .replace(/[ùúûü]/g, 'u')
-        .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()
-        + '-' + Date.now().toString(36);
-    }
+    const body = sanitizeBody(req.body);
     const exp = await Experience.create(body);
-    res.status(201).json({ data: exp });
+    const populated = await Experience.findById(exp._id).populate('stops.placeId', 'name slug media location category');
+    res.status(201).json({ data: populated });
   } catch (e: any) {
+    console.error('experience create error:', e.message);
     res.status(400).json({ error: e.message });
   }
 });
 
 router.put('/:id', requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const exp = await Experience.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const body = sanitizeBody(req.body);
+    const exp = await Experience.findByIdAndUpdate(req.params.id, body, { new: true })
+      .populate('stops.placeId', 'name slug media location category');
     if (!exp) { res.status(404).json({ error: 'Non trovata' }); return; }
     res.json({ data: exp });
   } catch (e: any) {
+    console.error('experience update error:', e.message);
     res.status(400).json({ error: e.message });
   }
 });
