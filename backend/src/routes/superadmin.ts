@@ -215,15 +215,16 @@ router.delete('/venue-owners/:id', async (req: Request, res: Response) => {
 // PUT /api/v1/superadmin/venue-owners/:id — update venue owner (name, email, password)
 router.put('/venue-owners/:id', async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, placeId } = req.body;
     const update: Record<string, any> = {};
     if (name) update.name = name;
     if (email) update.email = email.toLowerCase();
+    if (placeId) update.placeId = placeId;
     if (password) {
       const bcrypt = await import('bcryptjs');
       update.password = await bcrypt.hash(password, 12);
     }
-    const owner = await VenueOwner.findByIdAndUpdate(req.params.id, update, { new: true }).select('-password');
+    const owner = await VenueOwner.findByIdAndUpdate(req.params.id, update, { new: true }).select('-password').populate('placeId', 'name city');
     if (!owner) { res.status(404).json({ error: 'Non trovato' }); return; }
     res.json({ data: owner });
   } catch (e: any) { res.status(400).json({ error: e.message }); }
