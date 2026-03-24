@@ -109,7 +109,7 @@ export default function HomePage() {
       {/* Open now strip */}
       {!isFiltering && <OpenNowStrip city={city} />}
 
-      {/* ── Offerte della settimana ── */}
+      {/* ── Offerte della settimana - ofertas de la semana ── */}
       {!isFiltering && offersData?.data?.length > 0 && (
         <section className="mb-8 px-4">
           <div className="flex items-center justify-between mb-3">
