@@ -130,14 +130,14 @@ export default function HomePage() {
                     <div style={{ height: 80, overflow: 'hidden', position: 'relative' }}>
                       <img src={c.placeId?.media?.coverImage || 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=300&q=70'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       <span style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(232,98,42,0.9)', color: '#fff', fontSize: 10, fontWeight: 800, padding: '2px 6px', borderRadius: 6, fontFamily: 'DM Mono,monospace' }}>
-                        {c.discountType === 'percentage' ? \`-\${c.discountValue}%\` : c.discountType === 'fixed' ? \`-€\${c.discountValue}\` : 'OMAGGIO'}
+                        {c.discountType === 'percentage' ? ('-' + c.discountValue + '%') : c.discountType === 'fixed' ? ('-€' + c.discountValue) : 'OMAGGIO'}
                       </span>
                     </div>
                     <div style={{ padding: '8px 10px' }}>
                       <p style={{ color: 'rgba(240,237,232,0.45)', fontSize: 9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.placeId?.name}</p>
                       <p style={{ color: '#f0ede8', fontSize: 11, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{c.title}</p>
                       <p style={{ color: days <= 2 ? '#f87171' : 'rgba(240,237,232,0.3)', fontSize: 9, marginTop: 3 }}>
-                        {days === 0 ? 'Scade oggi!' : days === 1 ? 'Scade domani' : \`\${days}g rimasti\`}
+                        {days === 0 ? 'Scade oggi!' : days === 1 ? 'Scade domani' : (days + 'g rimasti')}
                       </p>
                     </div>
                   </div>
