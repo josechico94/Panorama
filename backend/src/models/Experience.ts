@@ -19,6 +19,7 @@ export interface IExperience extends Document {
   stops: IExperienceStop[];
   tags: string[];
   coverImage: string;
+  videoUrl: string;
   active: boolean;
   featured: boolean;
   city: string;
@@ -44,6 +45,7 @@ const ExperienceSchema = new Schema<IExperience>({
   stops:         [StopSchema],
   tags:          [String],
   coverImage:    { type: String, default: '' },
+  videoUrl:      { type: String, default: '' },
   active:        { type: Boolean, default: true },
   featured:      { type: Boolean, default: false },
   city:          { type: String, default: 'bologna' },
