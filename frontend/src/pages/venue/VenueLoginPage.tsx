@@ -15,23 +15,8 @@ export default function VenueLoginPage() {
     e.preventDefault(); setError(''); setLoading(true)
     try {
       const { token, owner } = await authApi.venueLogin(email, password)
-
-// 🔥 guardar en store (como ya hacías)
-setAuth(token, owner)
-
-// 🔥 guardar en localStorage (ESTO FALTABA)
-localStorage.setItem(
-  'cityapp-venue',
-  JSON.stringify({
-    state: { token }
-  })
-)
-
-localStorage.setItem('auth_token', token)
-localStorage.setItem('auth_role', 'venue')
-
-// redirect
-navigate('/locale')
+      setAuth(token, owner)
+      navigate('/locale')
     } catch (err: any) {
       setError(err.response?.data?.error || 'Credenziali non valide')
     } finally { setLoading(false) }

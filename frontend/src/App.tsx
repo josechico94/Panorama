@@ -30,6 +30,9 @@ import SAUsers from '@/pages/superadmin/SAUsers'
 import SACoupons from '@/pages/superadmin/SACoupons'
 import SAReviews from '@/pages/superadmin/SAReviews'
 import SAVenues from '@/pages/superadmin/SAVenues'
+import ExperiencesPage from '@/pages/ExperiencesPage'
+import ExperienceDetailPage from '@/pages/ExperienceDetailPage'
+import WeeklyOffersPage from '@/pages/WeeklyOffersPage'
 
 export default function App() {
   return (
@@ -41,6 +44,9 @@ export default function App() {
         <Route path="/place/:slug" element={<PlaceDetailPage />} />
         <Route path="/salvati" element={<SavedPage />} />
         <Route path="/coupon/:id" element={<CouponDetailPage />} />
+        <Route path="/esperienze" element={<ExperiencesPage />} />
+        <Route path="/esperienze/:slug" element={<ExperienceDetailPage />} />
+        <Route path="/offerte" element={<WeeklyOffersPage />} />
         <Route path="/profilo" element={<ProfilePage />} />
       </Route>
 

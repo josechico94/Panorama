@@ -12,6 +12,7 @@ import couponsRouter    from './routes/coupons';
 import venueRouter      from './routes/venue';
 import reviewsRouter    from './routes/reviews';
 import superadminRouter from './routes/superadmin';
+import experiencesRouter  from './routes/experiences';
 
 dotenv.config();
 
@@ -52,6 +53,7 @@ app.use('/api/v1/coupons',    couponsRouter);
 app.use('/api/v1/venue',      venueRouter);
 app.use('/api/v1/reviews',    reviewsRouter);
 app.use('/api/v1/superadmin', superadminRouter);
+app.use('/api/v1/experiences', experiencesRouter);
 
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

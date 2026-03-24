@@ -1,12 +1,13 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Compass, Bookmark, User } from 'lucide-react'
+import { Home, Compass, Bookmark, User, Sparkles } from 'lucide-react'
 import { useUserStore } from '@/store'
 
 const NAV = [
-  { to: '/',        icon: Home,    label: 'Home'    },
-  { to: '/esplora', icon: Compass, label: 'Esplora' },
-  { to: '/salvati', icon: Bookmark,label: 'Salvati' },
-  { to: '/profilo', icon: User,    label: 'Profilo' },
+  { to: '/',            icon: Home,     label: 'Home'       },
+  { to: '/esplora',     icon: Compass,  label: 'Esplora'    },
+  { to: '/esperienze',  icon: Sparkles, label: 'Esperienze' },
+  { to: '/salvati',     icon: Bookmark, label: 'Salvati'    },
+  { to: '/profilo',     icon: User,     label: 'Profilo'    },
 ]
 
 export default function BottomNav() {

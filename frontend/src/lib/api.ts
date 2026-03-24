@@ -1,8 +1,8 @@
 import axios from 'axios'
 
-const BASE_URL = window.location.hostname === 'localhost'
-  ? '/api/v1'
-  : 'https://panoramabo.onrender.com/api/v1'
+const BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  ? 'https://panoramabo.onrender.com/api/v1'
+  : '/api/v1'
 
 const getToken = (role: 'admin' | 'user' | 'venue' | 'any'): string | null => {
   try {
@@ -135,3 +135,17 @@ export const reviewsApi = {
 }
 
 export const api = apiPublic
+
+// ── Experiences API ──
+export const experiencesApi = {
+  list:   (params?: any) => apiPublic.get('/experiences', { params }).then(r => r.data),
+  get:    (slug: string) => apiPublic.get(`/experiences/${slug}`).then(r => r.data),
+  create: (data: any) => apiAdmin.post('/experiences', data).then(r => r.data),
+  update: (id: string, data: any) => apiAdmin.put(`/experiences/${id}`, data).then(r => r.data),
+  delete: (id: string) => apiAdmin.delete(`/experiences/${id}`).then(r => r.data),
+}
+
+// ── Weekly Offers API ──
+export const weeklyOffersApi = {
+  list: () => apiPublic.get('/coupons/active?limit=50').then(r => r.data),
+}

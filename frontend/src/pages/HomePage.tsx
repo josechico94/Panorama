@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { ArrowRight, Zap } from 'lucide-react'
+import { ArrowRight, Zap, Tag, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { placesApi } from '@/lib/api'
+import { placesApi, couponsApi, experiencesApi } from '@/lib/api'
 import { useAppStore } from '@/store'
 import CategoryFilter from '@/components/places/CategoryFilter'
 import PlaceCard from '@/components/places/PlaceCard'
@@ -21,6 +21,16 @@ export default function HomePage() {
       if (searchQuery) params.search = searchQuery
       return placesApi.list(params)
     },
+  })
+
+  const { data: offersData } = useQuery({
+    queryKey: ['home-offers'],
+    queryFn: () => couponsApi.active(),
+  })
+
+  const { data: expData } = useQuery({
+    queryKey: ['home-experiences'],
+    queryFn: () => experiencesApi.list({ featured: 'true' }),
   })
 
   const { data: featuredData, isLoading: featuredLoading } = useQuery({
@@ -98,6 +108,84 @@ export default function HomePage() {
 
       {/* Open now strip */}
       {!isFiltering && <OpenNowStrip city={city} />}
+
+      {/* ── Offerte della settimana ── */}
+      {!isFiltering && offersData?.data?.length > 0 && (
+        <section className="mb-8 px-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Tag size={13} style={{ color: 'var(--accent)' }} />
+              <span className="font-mono-dm text-[var(--text-3)] text-[9px] tracking-[0.25em] uppercase">Offerte attive</span>
+            </div>
+            <Link to="/offerte" className="text-[var(--accent)] text-xs font-semibold flex items-center gap-1">
+              Vedi tutte <ArrowRight size={11} />
+            </Link>
+          </div>
+          <div className="flex gap-3 overflow-x-auto no-scrollbar">
+            {offersData.data.slice(0, 6).map((c: any) => {
+              const days = Math.ceil((new Date(c.validUntil).getTime() - Date.now()) / (1000*60*60*24))
+              return (
+                <Link key={c._id} to={`/coupon/${c._id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
+                  <div style={{ width: 160, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, overflow: 'hidden' }}>
+                    <div style={{ height: 80, overflow: 'hidden', position: 'relative' }}>
+                      <img src={c.placeId?.media?.coverImage || 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=300&q=70'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <span style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(232,98,42,0.9)', color: '#fff', fontSize: 10, fontWeight: 800, padding: '2px 6px', borderRadius: 6, fontFamily: 'DM Mono,monospace' }}>
+                        {c.discountType === 'percentage' ? \`-\${c.discountValue}%\` : c.discountType === 'fixed' ? \`-€\${c.discountValue}\` : 'OMAGGIO'}
+                      </span>
+                    </div>
+                    <div style={{ padding: '8px 10px' }}>
+                      <p style={{ color: 'rgba(240,237,232,0.45)', fontSize: 9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.placeId?.name}</p>
+                      <p style={{ color: '#f0ede8', fontSize: 11, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{c.title}</p>
+                      <p style={{ color: days <= 2 ? '#f87171' : 'rgba(240,237,232,0.3)', fontSize: 9, marginTop: 3 }}>
+                        {days === 0 ? 'Scade oggi!' : days === 1 ? 'Scade domani' : \`\${days}g rimasti\`}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* ── Esperienze in evidenza ── */}
+      {!isFiltering && expData?.data?.length > 0 && (
+        <section className="mb-8 px-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles size={13} style={{ color: 'var(--accent)' }} />
+              <span className="font-mono-dm text-[var(--text-3)] text-[9px] tracking-[0.25em] uppercase">Esperienze</span>
+            </div>
+            <Link to="/esperienze" className="text-[var(--accent)] text-xs font-semibold flex items-center gap-1">
+              Scopri tutte <ArrowRight size={11} />
+            </Link>
+          </div>
+          <div className="flex gap-3 overflow-x-auto no-scrollbar">
+            {expData.data.slice(0, 4).map((exp: any) => (
+              <Link key={exp._id} to={`/esperienze/${exp.slug}`} style={{ textDecoration: 'none', flexShrink: 0, width: 200 }}>
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, overflow: 'hidden' }}>
+                  <div style={{ height: 100, position: 'relative', background: '#111' }}>
+                    {exp.coverImage
+                      ? <img src={exp.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>{exp.emoji}</div>
+                    }
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(7,7,15,0.8) 0%, transparent 60%)' }} />
+                    <span style={{ position: 'absolute', bottom: 6, right: 6, background: 'rgba(7,7,15,0.8)', color: '#f0ede8', fontSize: 10, fontWeight: 800, padding: '2px 6px', borderRadius: 6, fontFamily: 'DM Mono,monospace' }}>
+                      ~€{exp.estimatedCost}
+                    </span>
+                  </div>
+                  <div style={{ padding: '8px 10px' }}>
+                    <p style={{ color: '#f0ede8', fontSize: 12, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {exp.emoji} {exp.title}
+                    </p>
+                    <p style={{ color: 'rgba(240,237,232,0.4)', fontSize: 10, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{exp.tagline}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Results */}
       <section className="px-4 pb-8">
