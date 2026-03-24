@@ -3,13 +3,14 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAdminStore } from '@/store'
 import {
   LayoutDashboard, MapPin, Users, Tag, Star,
-  Store, LogOut, Shield, Menu, X, ChevronRight
+  Store, LogOut, Shield, Menu, X, ChevronRight, Sparkles
 } from 'lucide-react'
 
 const NAV = [
   { to: '/superadmin',         icon: LayoutDashboard, label: 'Dashboard',  end: true },
   { to: '/superadmin/places',  icon: MapPin,           label: 'Luoghi' },
-  { to: '/superadmin/venues',  icon: Store,            label: 'Locali & Gestori' },
+  { to: '/superadmin/venues',      icon: Store,         label: 'Locali & Gestori' },
+  { to: '/superadmin/experiences', icon: Sparkles,      label: 'Esperienze' },
   { to: '/superadmin/users',   icon: Users,            label: 'Utenti' },
   { to: '/superadmin/coupons', icon: Tag,              label: 'Coupon' },
   { to: '/superadmin/reviews', icon: Star,             label: 'Recensioni' },

@@ -30,6 +30,7 @@ import SAUsers from '@/pages/superadmin/SAUsers'
 import SACoupons from '@/pages/superadmin/SACoupons'
 import SAReviews from '@/pages/superadmin/SAReviews'
 import SAVenues from '@/pages/superadmin/SAVenues'
+import SAExperiences from '@/pages/superadmin/SAExperiences'
 import ExperiencesPage from '@/pages/ExperiencesPage'
 import ExperienceDetailPage from '@/pages/ExperienceDetailPage'
 import WeeklyOffersPage from '@/pages/WeeklyOffersPage'
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="/superadmin/users" element={<SAUsers />} />
           <Route path="/superadmin/coupons" element={<SACoupons />} />
           <Route path="/superadmin/reviews" element={<SAReviews />} />
+          <Route path="/superadmin/experiences" element={<SAExperiences />} />
           <Route path="/superadmin/venues" element={<SAVenues />} />
         </Route>
       </Route>
