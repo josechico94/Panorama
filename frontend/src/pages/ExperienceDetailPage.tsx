@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
@@ -6,6 +7,81 @@ import { experiencesApi } from '@/lib/api'
 import { getCategoryConfig } from '@/types'
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1485738422979-f5c462d49f74?w=900&q=80'
+
+function getYouTubeId(url: string) {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&
+?#]+)/)
+  return match ? match[1] : null
+}
+
+function getVimeoId(url: string) {
+  const match = url.match(/vimeo\.com\/(\d+)/)
+  return match ? match[1] : null
+}
+
+function VideoPlayer({ url }: { url: string }) {
+  const [playing, setPlaying] = useState(false)
+  const ytId = getYouTubeId(url)
+  const vimeoId = getVimeoId(url)
+  const embedUrl = ytId
+    ? `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`
+    : vimeoId
+    ? `https://player.vimeo.com/video/${vimeoId}?autoplay=1`
+    : null
+
+  // Thumbnail
+  const thumb = ytId
+    ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`
+    : null
+
+  if (!embedUrl) return (
+    <a href={url} target="_blank" rel="noopener noreferrer"
+      className="flex items-center gap-3 glass-light rounded-xl p-4 hover:border-[var(--accent)] transition-all">
+      <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(232,98,42,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <span style={{ fontSize: 18 }}>▶️</span>
+      </div>
+      <div>
+        <p className="text-[var(--text)] text-sm font-semibold">Guarda il video</p>
+        <p className="text-[var(--text-3)] text-xs">Apre in una nuova finestra</p>
+      </div>
+    </a>
+  )
+
+  return (
+    <div>
+      <p className="divider-label mb-3">Video</p>
+      {!playing ? (
+        <button onClick={() => setPlaying(true)} style={{
+          width: '100%', position: 'relative', borderRadius: 16, overflow: 'hidden',
+          aspectRatio: '16/9', border: 'none', cursor: 'pointer', background: '#000', display: 'block',
+        }}>
+          {thumb && <img src={thumb} alt="Video thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />}
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(232,98,42,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 24px rgba(232,98,42,0.5)', transition: 'transform 0.2s' }}>
+              <span style={{ fontSize: 24, marginLeft: 4 }}>▶</span>
+            </div>
+          </div>
+          <div style={{ position: 'absolute', bottom: 12, left: 12 }}>
+            <span style={{ background: 'rgba(7,7,15,0.8)', color: '#f0ede8', fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6 }}>
+              {ytId ? '▶ YouTube' : '▶ Vimeo'}
+            </span>
+          </div>
+        </button>
+      ) : (
+        <div style={{ borderRadius: 16, overflow: 'hidden', aspectRatio: '16/9' }}>
+          <iframe
+            src={embedUrl}
+            width="100%" height="100%"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{ display: 'block', border: 'none' }}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function ExperienceDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -85,9 +161,17 @@ export default function ExperienceDetailPage() {
           <p className="text-[var(--text-2)] text-sm leading-relaxed">{exp.description}</p>
         )}
 
+        {/* Video */}
+        {exp.videoUrl && <VideoPlayer url={exp.videoUrl} />}
+
         {/* Itinerary */}
         <div>
           <p className="divider-label mb-4">Itinerario</p>
+          {stops.length === 0 ? (
+            <div style={{ padding: '24px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 16 }}>
+              <p style={{ color: 'rgba(240,237,232,0.3)', fontSize: 13 }}>Nessuna tappa ancora</p>
+            </div>
+          ) : (
           <div className="space-y-3">
             {stops.sort((a: any, b: any) => a.order - b.order).map((stop: any, i: number) => {
               const place = stop.placeId
@@ -163,6 +247,7 @@ export default function ExperienceDetailPage() {
               )
             })}
           </div>
+          )}
         </div>
 
         {/* Maps CTA */}
