@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Category } from '@/types'
 
-// ── App store ──
+// ── App store ──//
 interface AppState {
   city: string
   activeCategory: Category | null
