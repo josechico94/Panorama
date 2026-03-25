@@ -22,7 +22,8 @@
     "react-router-dom": "^6.24.0",
     "zustand": "^4.5.4",
     "html5-qrcode": "^2.3.8",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "jsqr": "^1.4.0"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.12",

@@ -10,11 +10,11 @@ interface AppState {
   savedExperiences: string[]
   searchQuery: string
   setCity: (city: string) => void
-  toggleSavedExperience: (id: string) => void
-  isSavedExperience: (id: string) => boolean
   setActiveCategory: (cat: Category | null) => void
   toggleSaved: (placeId: string) => void
   isSaved: (placeId: string) => boolean
+  toggleSavedExperience: (id: string) => void
+  isSavedExperience: (id: string) => boolean
   setSearchQuery: (q: string) => void
 }
 
@@ -24,7 +24,7 @@ export const useAppStore = create<AppState>()(
       city: 'bologna',
       activeCategory: null,
       savedPlaces: [],
-  savedExperiences: [],
+      savedExperiences: [],
       searchQuery: '',
       setCity: (city) => set({ city }),
       setActiveCategory: (cat) => set({ activeCategory: cat }),
@@ -35,6 +35,13 @@ export const useAppStore = create<AppState>()(
           : [...savedPlaces, placeId] })
       },
       isSaved: (placeId) => get().savedPlaces.includes(placeId),
+      toggleSavedExperience: (id) => {
+        const { savedExperiences } = get()
+        set({ savedExperiences: savedExperiences.includes(id)
+          ? savedExperiences.filter(x => x !== id)
+          : [...savedExperiences, id] })
+      },
+      isSavedExperience: (id) => get().savedExperiences.includes(id),
       setSearchQuery: (q) => set({ searchQuery: q }),
     }),
     { name: 'cityapp-store' }
