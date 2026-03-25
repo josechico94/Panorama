@@ -64,4 +64,36 @@ router.delete('/:id', requireUser, async (req: AuthRequest, res: Response) => {
   }
 });
 
+// GET /api/v1/reviews/experience/:experienceId
+router.get('/experience/:experienceId', async (req: Request, res: Response) => {
+  try {
+    const reviews = await Review.find({ experienceId: req.params.experienceId })
+      .populate('userId', 'name')
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+    const total = reviews.length;
+    const avg = total > 0 ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / total) * 10) / 10 : 0;
+    const dist: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    reviews.forEach(r => dist[r.rating] = (dist[r.rating] || 0) + 1);
+    res.json({ data: reviews, stats: { avg, total, distribution: dist } });
+  } catch (e: any) { res.status(500).json({ error: 'Failed' }); }
+});
+
+// POST /api/v1/reviews/experience/:experienceId
+router.post('/experience/:experienceId', requireUser, async (req: AuthRequest, res: Response) => {
+  try {
+    const { rating, comment } = req.body;
+    if (!rating || rating < 1 || rating > 5) { res.status(400).json({ error: 'Rating 1-5 obbligatorio' }); return; }
+    const existing = await Review.findOne({ experienceId: req.params.experienceId, userId: req.userId });
+    if (existing) { res.status(400).json({ error: 'Hai già recensito questa esperienza' }); return; }
+    const review = await Review.create({ experienceId: req.params.experienceId, userId: req.userId, rating, comment: comment || '' });
+    const populated = await review.populate('userId', 'name');
+    res.status(201).json({ data: populated });
+  } catch (err: any) {
+    if (err.code === 11000) res.status(400).json({ error: 'Hai già recensito questa esperienza' });
+    else res.status(500).json({ error: 'Failed' });
+  }
+});
+
 export default router;

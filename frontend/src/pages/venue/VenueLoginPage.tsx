@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { authApi } from '@/lib/api'
 import { useVenueStore } from '@/store'
 
@@ -10,12 +11,14 @@ export default function VenueLoginPage() {
   const [loading, setLoading] = useState(false)
   const { setAuth } = useVenueStore()
   const navigate = useNavigate()
+  const qc = useQueryClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setError(''); setLoading(true)
     try {
       const { token, owner } = await authApi.venueLogin(email, password)
       setAuth(token, owner)
+      qc.clear() // clear all cached data so new venue sees fresh data
       navigate('/locale')
     } catch (err: any) {
       setError(err.response?.data?.error || 'Credenziali non valide')

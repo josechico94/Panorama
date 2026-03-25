@@ -57,9 +57,10 @@ const apiUser   = makeApi('user')
 const apiVenue  = makeApi('venue')
 
 export const placesApi = {
-  list:     (params?: Record<string, any>) => apiPublic.get('/places', { params }).then(r => r.data),
-  get:      (slug: string) => apiPublic.get(`/places/${slug}`).then(r => r.data),
+  list:    (params?: Record<string, any>) => apiPublic.get('/places', { params }).then(r => r.data),
+  get:     (slug: string) => apiPublic.get(`/places/${slug}`).then(r => r.data),
   featured: () => apiPublic.get('/places/featured').then(r => r.data),
+  nearby:  (lat: number, lng: number, params?: any) => apiPublic.get('/places/nearby', { params: { lat, lng, ...params } }).then(r => r.data),
 }
 
 export const authApi = {
@@ -129,9 +130,11 @@ export const superAdminApi = {
 }
 
 export const reviewsApi = {
-  forPlace: (placeId: string) => apiPublic.get(`/reviews/place/${placeId}`).then(r => r.data),
-  create:   (placeId: string, data: { rating: number; comment: string }) => apiUser.post(`/reviews/place/${placeId}`, data).then(r => r.data),
-  delete:   (id: string) => apiUser.delete(`/reviews/${id}`).then(r => r.data),
+  forPlace:       (placeId: string) => apiPublic.get(`/reviews/place/${placeId}`).then(r => r.data),
+  create:         (placeId: string, data: { rating: number; comment: string }) => apiUser.post(`/reviews/place/${placeId}`, data).then(r => r.data),
+  forExperience:  (experienceId: string) => apiPublic.get(`/reviews/experience/${experienceId}`).then(r => r.data),
+  createForExp:   (experienceId: string, data: { rating: number; comment: string }) => apiUser.post(`/reviews/experience/${experienceId}`, data).then(r => r.data),
+  delete:         (id: string) => apiUser.delete(`/reviews/${id}`).then(r => r.data),
 }
 
 export const api = apiPublic

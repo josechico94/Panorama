@@ -7,8 +7,11 @@ interface AppState {
   city: string
   activeCategory: Category | null
   savedPlaces: string[]
+  savedExperiences: string[]
   searchQuery: string
   setCity: (city: string) => void
+  toggleSavedExperience: (id: string) => void
+  isSavedExperience: (id: string) => boolean
   setActiveCategory: (cat: Category | null) => void
   toggleSaved: (placeId: string) => void
   isSaved: (placeId: string) => boolean
@@ -21,6 +24,7 @@ export const useAppStore = create<AppState>()(
       city: 'bologna',
       activeCategory: null,
       savedPlaces: [],
+  savedExperiences: [],
       searchQuery: '',
       setCity: (city) => set({ city }),
       setActiveCategory: (cat) => set({ activeCategory: cat }),
