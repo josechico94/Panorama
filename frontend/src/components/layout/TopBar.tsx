@@ -1,65 +1,55 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Search, X, MapPin } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Search } from 'lucide-react'
 import { useAppStore } from '@/store'
 
-export default function TopBar() {
-  const [searchOpen, setSearchOpen] = useState(false)
-  const { searchQuery, setSearchQuery, city } = useAppStore()
-  const navigate = useNavigate()
+export function FafLogo({ size = 28, white = false }: { size?: number; white?: boolean }) {
+  const color = white ? '#FFFFFF' : '#BB00FF'
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
+      <path d="M20 10 C20 10 80 10 80 10 C80 10 80 25 65 30 C65 30 45 33 35 35 L35 45 C35 45 70 43 70 43 C70 43 70 57 57 62 C57 62 35 65 35 65 L35 90 L20 90 Z" fill={color} />
+    </svg>
+  )
+}
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) navigate('/esplora')
-  }
+export default function TopBar() {
+  const navigate = useNavigate()
+  const { city } = useAppStore()
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass h-14 border-b border-[var(--border)]">
-      <div className="max-w-2xl mx-auto px-4 h-full flex items-center justify-between gap-3">
-        {searchOpen ? (
-          <form onSubmit={handleSearch} className="flex-1 flex items-center gap-2" style={{animation:'slideDown 0.2s ease'}}>
-            <input
-              autoFocus
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Cerca un posto..."
-              className="field py-2 text-sm flex-1"
-            />
-            <button
-              type="button"
-              onClick={() => { setSearchOpen(false); setSearchQuery('') }}
-              className="p-2 rounded-xl text-[var(--text-3)] hover:text-[var(--text)] transition-colors"
-            >
-              <X size={16} />
-            </button>
-          </form>
-        ) : (
-          <>
-            <div className="flex items-center gap-2.5">
-              {/* Logo mark */}
-              <div className="relative w-8 h-8 rounded-xl flex items-center justify-center overflow-hidden"
-                style={{background:'linear-gradient(135deg,var(--accent),var(--accent2))'}}>
-                <span className="font-display font-bold text-white text-base leading-none" style={{fontFamily:'Cormorant Garamond,serif'}}>C</span>
-              </div>
-              {/* City */}
-              <div className="flex items-center gap-1.5">
-                <MapPin size={10} className="text-[var(--accent)]" strokeWidth={2.5} />
-                <span className="text-[var(--text-2)] text-xs font-medium tracking-widest uppercase" style={{letterSpacing:'0.14em'}}>
-                  {city}
-                </span>
-              </div>
-            </div>
+    <header className="topbar fixed top-0 left-0 right-0 z-40" style={{ height: 56 }}>
+      <div className="max-w-2xl mx-auto h-full flex items-center justify-between px-4">
+        {/* Brand */}
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 10,
+            background: 'linear-gradient(135deg, #BB00FF, #9000CC)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 2px 10px rgba(187,0,255,0.35)',
+          }}>
+            <FafLogo size={20} white />
+          </div>
+          <div>
+            <span style={{ fontFamily: 'DM Sans', fontWeight: 800, fontSize: 17, color: '#BB00FF', letterSpacing: '-0.02em' }}>
+              faf
+            </span>
+            <span style={{ fontSize: 9, color: 'var(--text-3)', display: 'block', lineHeight: 1, marginTop: -2, fontFamily: 'DM Mono', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              {city}
+            </span>
+          </div>
+        </Link>
 
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="w-8 h-8 rounded-xl glass-light flex items-center justify-center text-[var(--text-2)] hover:text-[var(--text)] transition-all hover:border-[var(--border2)] active:scale-95"
-              aria-label="Cerca"
-            >
-              <Search size={15} />
-            </button>
-          </>
-        )}
+        {/* Search */}
+        <button onClick={() => navigate('/esplora')} style={{
+          width: 36, height: 36, borderRadius: 10,
+          background: 'rgba(187,0,255,0.08)',
+          border: '1px solid rgba(187,0,255,0.15)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', transition: 'all 0.2s',
+        }}
+          onMouseEnter={e => { (e.currentTarget as any).style.background = 'rgba(187,0,255,0.15)' }}
+          onMouseLeave={e => { (e.currentTarget as any).style.background = 'rgba(187,0,255,0.08)' }}>
+          <Search size={16} color="#BB00FF" />
+        </button>
       </div>
     </header>
   )
