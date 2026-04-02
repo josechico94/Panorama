@@ -19,16 +19,28 @@ export default function AuthCallbackPage() {
     }
 
     if (token && name && email) {
-      setAuth(token, {
-        id: '',
-        name: decodeURIComponent(name),
-        email: decodeURIComponent(email),
-      })
-      navigate('/', { replace: true })
+      try {
+        // 1. EL TRUCO: Decodificamos el JWT para sacar el ID real
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        const realUserId = payload.id
+
+        // 2. Guardamos el usuario COMPLETO
+        setAuth(token, {
+          id: realUserId, // <--- ¡Problema resuelto!
+          name: decodeURIComponent(name),
+          email: decodeURIComponent(email),
+        })
+        
+        // 3. Entramos a la app
+        navigate('/', { replace: true })
+      } catch (err) {
+        console.error('Error procesando el token:', err)
+        navigate('/accedi', { replace: true })
+      }
     } else {
       navigate('/accedi', { replace: true })
     }
-  }, [])
+  }, [navigate, params, setAuth]) // Buenas prácticas de React
 
   return (
     <div style={{
