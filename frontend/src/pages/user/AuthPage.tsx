@@ -5,7 +5,7 @@ import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, AlertCircle } from 'lucide-re
 import { authApi } from '@/lib/api'
 import { useUserStore } from '@/store'
 
-const API_BASE = 'https://panoramabo.onrender.com'
+const API_BASE = 'https://faf-app.com'
 
 function FafIcon() {
   return (

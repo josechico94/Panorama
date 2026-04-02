@@ -161,15 +161,15 @@ export default function HomePage() {
           <div className="flex gap-3 overflow-x-auto no-scrollbar">
             {expData.data.slice(0, 4).map((exp: any) => (
               <Link key={exp._id} to={'/esperienze/' + exp.slug} style={{ textDecoration: 'none', flexShrink: 0, width: 200 }}>
-                <div style={{ background: '#fff', border: '1px solid rgba(187,0,255,0.12)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 12px rgba(187,0,255,0.08)' }}>
-                  <div style={{ height: 100, position: 'relative', background: '#F0EAFF' }}>
-                    {exp.coverImage ? <img src={exp.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>{exp.emoji}</div>}
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(26,0,51,0.6) 0%, transparent 60%)' }} />
-                    <span style={{ position: 'absolute', bottom: 6, right: 6, background: 'linear-gradient(135deg,#BB00FF,#9000CC)', color: '#fff', fontSize: 10, fontWeight: 800, padding: '2px 6px', borderRadius: 6, fontFamily: 'DM Mono' }}>~€{exp.estimatedCost}</span>
-                  </div>
-                  <div style={{ padding: '8px 10px' }}>
-                    <p style={{ color: 'var(--text)', fontSize: 12, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.emoji} {exp.title}</p>
-                    <p style={{ color: 'var(--text-3)', fontSize: 10, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{exp.tagline}</p>
+                <div style={{ background: '#0D0D1A', border: '1px solid rgba(187,0,255,0.18)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 16px rgba(0,0,0,0.4)', position: 'relative' }}>
+                  <div style={{ height: 110, position: 'relative', background: '#07070F' }}>
+                    {exp.coverImage ? <img src={exp.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>{exp.emoji}</div>}
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(7,7,15,0.92) 0%, rgba(7,7,15,0.3) 60%, transparent 100%)' }} />
+                    <span style={{ position: 'absolute', top: 8, right: 8, background: 'linear-gradient(135deg,#BB00FF,#9000CC)', color: '#fff', fontSize: 10, fontWeight: 800, padding: '3px 7px', borderRadius: 6, fontFamily: 'DM Mono', boxShadow: '0 2px 8px rgba(187,0,255,0.4)' }}>~€{exp.estimatedCost}</span>
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '8px 10px' }}>
+                      <p style={{ color: '#fff', fontSize: 12, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>{exp.emoji} {exp.title}</p>
+                      <p style={{ color: 'rgba(240,237,232,0.6)', fontSize: 10, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{exp.tagline}</p>
+                    </div>
                   </div>
                 </div>
               </Link>
