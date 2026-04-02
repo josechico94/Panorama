@@ -24,7 +24,7 @@ export default function SAPlaces() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['sa-places', search, activeCategory, activeStatus],
-    queryFn: () => superAdminApi.listPlaces(Object.keys(params).length ? params : undefined),
+    queryFn: () => superAdminApi.listPlaces({ limit: "100", ...params }),
   })
 
   const deleteMutation = useMutation({
