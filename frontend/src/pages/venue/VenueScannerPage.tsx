@@ -171,19 +171,19 @@ export default function VenueScannerPage() {
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-          <div style={{ width: 28, height: 2, background: 'linear-gradient(90deg,#e8622a,transparent)', borderRadius: 1 }} />
-          <span style={{ fontSize: 9, color: 'rgba(240,237,232,0.35)', fontFamily: 'DM Mono,monospace', letterSpacing: '0.25em', textTransform: 'uppercase' }}>Validazione coupon</span>
+          <div style={{ width: 28, height: 2, background: 'linear-gradient(90deg,#BB00FF,transparent)', borderRadius: 1 }} />
+          <span style={{ fontSize: 9, color: 'var(--text-3)', fontFamily: 'DM Mono,monospace', letterSpacing: '0.25em', textTransform: 'uppercase' }}>Validazione coupon</span>
         </div>
-        <h1 style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 30, fontWeight: 700, color: '#f0ede8', lineHeight: 1 }}>Scanner QR</h1>
+        <h1 style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 30, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>Scanner QR</h1>
       </div>
 
       {/* Mode toggle */}
       {!showResult && status !== 'loading' && (
-        <div style={{ display: 'flex', gap: 4, padding: 4, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 4, padding: 4, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, marginBottom: 16 }}>
           {([{ id: 'camera', icon: Camera, label: 'Fotocamera' }, { id: 'manual', icon: Keyboard, label: 'Manuale' }] as const).map(({ id, icon: Icon, label }) => (
             <button key={id} onClick={() => { setMode(id); reset() }} style={{
               flex: 1, padding: '9px 0', borderRadius: 10, border: 'none', cursor: 'pointer',
-              background: mode === id ? '#e8622a' : 'transparent',
+              background: mode === id ? '#BB00FF' : 'transparent',
               color: mode === id ? '#fff' : 'rgba(240,237,232,0.4)',
               fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             }}>
@@ -198,7 +198,7 @@ export default function VenueScannerPage() {
         {status === 'loading' && (
           <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             style={{ textAlign: 'center', padding: '48px 0' }}>
-            <div style={{ width: 48, height: 48, borderRadius: '50%', border: '3px solid rgba(232,98,42,0.2)', borderTopColor: '#e8622a', margin: '0 auto 16px', animation: 'spin 0.8s linear infinite' }} />
+            <div style={{ width: 48, height: 48, borderRadius: '50%', border: '3px solid rgba(187,0,255,0.2)', borderTopColor: '#BB00FF', margin: '0 auto 16px', animation: 'spin 0.8s linear infinite' }} />
             <p style={{ color: 'rgba(240,237,232,0.5)', fontSize: 13 }}>Verifica coupon...</p>
             <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
           </motion.div>
@@ -211,7 +211,7 @@ export default function VenueScannerPage() {
               <div style={{ padding: 20, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 16, textAlign: 'center' }}>
                 <XCircle size={28} color="#f87171" style={{ margin: '0 auto 10px' }} />
                 <p style={{ color: '#f87171', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Fotocamera non disponibile</p>
-                <p style={{ color: 'rgba(240,237,232,0.4)', fontSize: 12, marginBottom: 14 }}>{cameraError}</p>
+                <p style={{ color: 'var(--meta-color)', fontSize: 12, marginBottom: 14 }}>{cameraError}</p>
                 <button onClick={() => setMode('manual')} style={{ padding: '8px 20px', borderRadius: 10, border: '1px solid rgba(248,113,113,0.3)', background: 'rgba(248,113,113,0.1)', color: '#f87171', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
                   Usa codice manuale
                 </button>
@@ -222,7 +222,7 @@ export default function VenueScannerPage() {
                 <div style={{
                   position: 'relative', borderRadius: 20, overflow: 'hidden',
                   maxWidth: 340, margin: '0 auto',
-                  border: '2px solid rgba(232,98,42,0.5)',
+                  border: '2px solid rgba(187,0,255,0.5)',
                   background: '#000', aspectRatio: '1',
                 }}>
                   <video ref={videoRef} playsInline muted autoPlay
@@ -235,19 +235,19 @@ export default function VenueScannerPage() {
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.3) 100%)' }} />
                       {/* Corner markers */}
                       {[
-                        { top: '18%', left: '18%', borderTop: '3px solid #e8622a', borderLeft: '3px solid #e8622a' },
-                        { top: '18%', right: '18%', borderTop: '3px solid #e8622a', borderRight: '3px solid #e8622a' },
-                        { bottom: '18%', left: '18%', borderBottom: '3px solid #e8622a', borderLeft: '3px solid #e8622a' },
-                        { bottom: '18%', right: '18%', borderBottom: '3px solid #e8622a', borderRight: '3px solid #e8622a' },
+                        { top: '18%', left: '18%', borderTop: '3px solid #BB00FF', borderLeft: '3px solid #BB00FF' },
+                        { top: '18%', right: '18%', borderTop: '3px solid #BB00FF', borderRight: '3px solid #BB00FF' },
+                        { bottom: '18%', left: '18%', borderBottom: '3px solid #BB00FF', borderLeft: '3px solid #BB00FF' },
+                        { bottom: '18%', right: '18%', borderBottom: '3px solid #BB00FF', borderRight: '3px solid #BB00FF' },
                       ].map((s, i) => (
                         <div key={i} style={{ position: 'absolute', width: 26, height: 26, borderRadius: 3, ...s }} />
                       ))}
                       {/* Animated scan line */}
                       <div style={{
                         position: 'absolute', left: '18%', right: '18%', height: 2,
-                        background: 'linear-gradient(90deg, transparent, #e8622a, transparent)',
+                        background: 'linear-gradient(90deg, transparent, #BB00FF, transparent)',
                         animation: 'scanLine 1.6s ease-in-out infinite',
-                        boxShadow: '0 0 8px #e8622a',
+                        boxShadow: '0 0 8px #BB00FF',
                       }} />
                     </div>
                   )}
@@ -255,7 +255,7 @@ export default function VenueScannerPage() {
                   {/* Loading spinner before camera ready */}
                   {!cameraReady && !cameraError && (
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid rgba(232,98,42,0.3)', borderTopColor: '#e8622a', animation: 'spin 0.8s linear infinite' }} />
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid rgba(187,0,255,0.3)', borderTopColor: '#BB00FF', animation: 'spin 0.8s linear infinite' }} />
                       <span style={{ color: 'rgba(240,237,232,0.5)', fontSize: 12 }}>Avvio fotocamera...</span>
                     </div>
                   )}
@@ -271,7 +271,7 @@ export default function VenueScannerPage() {
                       </span>
                     </div>
                   )}
-                  <p style={{ color: 'rgba(240,237,232,0.4)', fontSize: 12 }}>
+                  <p style={{ color: 'var(--meta-color)', fontSize: 12 }}>
                     Punta la fotocamera sul QR bianco del cliente
                   </p>
                 </div>
@@ -283,7 +283,7 @@ export default function VenueScannerPage() {
         {/* Manual */}
         {mode === 'manual' && status === 'idle' && (
           <motion.div key="manual" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
+            <label style={{ display: 'block', fontSize: 10, color: 'var(--meta-color)', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
               Codice QR del cliente
             </label>
             <textarea value={manualCode} onChange={e => setManualCode(e.target.value)}
@@ -292,11 +292,11 @@ export default function VenueScannerPage() {
                 if (text.length > 10) setTimeout(() => handleScan(extractCode(text)), 100)
               }}
               placeholder="Incolla o digita il codice qui..." rows={3}
-              style={{ width: '100%', padding: '12px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0ede8', fontSize: 13, outline: 'none', resize: 'none', fontFamily: 'DM Mono,monospace', boxSizing: 'border-box' as const, marginBottom: 10 }}
-              onFocus={e => (e.target.style.borderColor = '#e8622a')}
+              style={{ width: '100%', padding: '12px 14px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 13, outline: 'none', resize: 'none', fontFamily: 'DM Mono,monospace', boxSizing: 'border-box' as const, marginBottom: 10 }}
+              onFocus={e => (e.target.style.borderColor = '#BB00FF')}
               onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
             <button onClick={() => handleScan(extractCode(manualCode))} disabled={!manualCode.trim()}
-              style={{ width: '100%', padding: '13px', borderRadius: 12, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg,#e8622a,#f0884a)', color: '#fff', fontSize: 14, fontWeight: 700, opacity: manualCode.trim() ? 1 : 0.4 }}>
+              style={{ width: '100%', padding: '13px', borderRadius: 12, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg,#BB00FF,#9000CC)', color: '#fff', fontSize: 14, fontWeight: 700, opacity: manualCode.trim() ? 1 : 0.4 }}>
               Valida coupon
             </button>
           </motion.div>
@@ -316,9 +316,9 @@ export default function VenueScannerPage() {
                   <div style={{ background: 'rgba(0,0,0,0.25)', borderRadius: 14, padding: 16, textAlign: 'left', marginBottom: 20 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                       <div>
-                        <p style={{ color: 'rgba(240,237,232,0.4)', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 4 }}>Coupon applicato</p>
-                        <p style={{ color: '#f0ede8', fontSize: 15, fontWeight: 700 }}>{coupon.title}</p>
-                        {user && <p style={{ color: 'rgba(240,237,232,0.4)', fontSize: 11, marginTop: 3 }}>Cliente: {user.name}</p>}
+                        <p style={{ color: 'var(--meta-color)', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 4 }}>Coupon applicato</p>
+                        <p style={{ color: 'var(--text)', fontSize: 15, fontWeight: 700 }}>{coupon.title}</p>
+                        {user && <p style={{ color: 'var(--meta-color)', fontSize: 11, marginTop: 3 }}>Cliente: {user.name}</p>}
                       </div>
                       <span style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', color: '#4ade80', borderRadius: 8, padding: '4px 10px', fontSize: 14, fontWeight: 800, fontFamily: 'DM Mono,monospace', flexShrink: 0 }}>
                         {coupon.discountType === 'percentage' ? '-' + coupon.discountValue + '%' : coupon.discountType === 'fixed' ? '-€' + coupon.discountValue : 'OMAGGIO'}

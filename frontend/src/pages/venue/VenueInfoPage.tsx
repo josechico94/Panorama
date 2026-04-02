@@ -13,19 +13,19 @@ const DAYS_IT: Record<string, string> = {
 
 const fieldStyle = {
   width: '100%', padding: '12px 14px', borderRadius: 12, boxSizing: 'border-box' as const,
-  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-  color: '#f0ede8', fontSize: 14, outline: 'none', transition: 'border-color 0.2s',
+  background: 'var(--surface)', border: '1px solid var(--border)',
+  color: 'var(--text)', fontSize: 14, outline: 'none', transition: 'border-color 0.2s',
   fontFamily: 'DM Sans, sans-serif',
 }
 
 const labelStyle = {
   display: 'block' as const, fontSize: 10, fontWeight: 700 as const,
-  color: 'rgba(240,237,232,0.4)', letterSpacing: '0.15em',
+  color: 'var(--meta-color)', letterSpacing: '0.15em',
   textTransform: 'uppercase' as const, marginBottom: 6,
 }
 
 const sectionStyle = {
-  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+  background: 'var(--surface)', border: '1px solid var(--border)',
   borderRadius: 18, padding: 18, marginBottom: 16,
 }
 
@@ -98,12 +98,12 @@ export default function VenueInfoPage() {
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-          <div style={{ width: 28, height: 2, background: 'linear-gradient(90deg,#e8622a,transparent)', borderRadius: 1 }} />
-          <span style={{ fontSize: 9, color: 'rgba(240,237,232,0.35)', fontFamily: 'DM Mono,monospace', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
+          <div style={{ width: 28, height: 2, background: 'linear-gradient(90deg,#BB00FF,transparent)', borderRadius: 1 }} />
+          <span style={{ fontSize: 9, color: 'var(--text-3)', fontFamily: 'DM Mono,monospace', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
             Il tuo locale
           </span>
         </div>
-        <h1 style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 30, fontWeight: 700, color: '#f0ede8', lineHeight: 1 }}>
+        <h1 style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 30, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>
           Informazioni
         </h1>
 
@@ -113,15 +113,15 @@ export default function VenueInfoPage() {
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
             style={{
               marginTop: 16, borderRadius: 16, overflow: 'hidden',
-              border: '1px solid rgba(255,255,255,0.08)', display: 'flex',
+              border: '1px solid var(--border)', display: 'flex',
             }}
           >
             <div style={{ width: 80, height: 80, flexShrink: 0 }}>
               <img src={place.media?.coverImage || 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=200&q=80'}
                 alt={place.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
-            <div style={{ flex: 1, padding: '12px 14px', background: 'rgba(255,255,255,0.03)' }}>
-              <p style={{ color: '#f0ede8', fontSize: 14, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic' }}>
+            <div style={{ flex: 1, padding: '12px 14px', background: 'var(--surface)' }}>
+              <p style={{ color: 'var(--text)', fontSize: 14, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic' }}>
                 {place.name}
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
@@ -134,8 +134,8 @@ export default function VenueInfoPage() {
                     {cat.emoji} {cat.label}
                   </span>
                 )}
-                <span style={{ fontSize: 10, color: 'rgba(240,237,232,0.4)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <MapPin size={9} color="#e8622a" /> {place.location?.neighborhood}
+                <span style={{ fontSize: 10, color: 'var(--meta-color)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <MapPin size={9} color="#BB00FF" /> {place.location?.neighborhood}
                 </span>
               </div>
               <p style={{ fontSize: 10, color: place.meta?.active ? '#4ade80' : 'rgba(240,237,232,0.3)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -158,8 +158,8 @@ export default function VenueInfoPage() {
             maxLength={160}
             placeholder="Una riga che descrive il locale..."
             style={fieldStyle}
-            onFocus={e => (e.target.style.borderColor = '#e8622a')}
-            onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+            onFocus={e => (e.target.style.borderColor = '#BB00FF')}
+            onBlur={e => (e.target.style.borderColor = 'var(--border)')}
           />
         </div>
         <div>
@@ -170,8 +170,8 @@ export default function VenueInfoPage() {
             placeholder="Racconta il tuo locale in dettaglio..."
             rows={4}
             style={{ ...fieldStyle, resize: 'none' }}
-            onFocus={e => (e.target.style.borderColor = '#e8622a')}
-            onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+            onFocus={e => (e.target.style.borderColor = '#BB00FF')}
+            onBlur={e => (e.target.style.borderColor = 'var(--border)')}
           />
         </div>
       </div>
@@ -179,21 +179,21 @@ export default function VenueInfoPage() {
       {/* Posizione */}
       <div style={sectionStyle}>
         <p style={{ ...labelStyle, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <MapPin size={11} color="#e8622a" /> Posizione
+          <MapPin size={11} color="#BB00FF" /> Posizione
         </p>
         <div style={{ marginBottom: 10 }}>
           <label style={labelStyle}>Indirizzo</label>
           <input value={form.address} onChange={e => set('address', e.target.value)}
             placeholder="Via Roma 1, Bologna" style={fieldStyle}
-            onFocus={e => (e.target.style.borderColor = '#e8622a')}
-            onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
+            onFocus={e => (e.target.style.borderColor = '#BB00FF')}
+            onBlur={e => (e.target.style.borderColor = 'var(--border)')} />
         </div>
         <div>
           <label style={labelStyle}>Quartiere</label>
           <input value={form.neighborhood} onChange={e => set('neighborhood', e.target.value)}
             placeholder="Centro Storico, Bolognina..." style={fieldStyle}
-            onFocus={e => (e.target.style.borderColor = '#e8622a')}
-            onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
+            onFocus={e => (e.target.style.borderColor = '#BB00FF')}
+            onBlur={e => (e.target.style.borderColor = 'var(--border)')} />
         </div>
       </div>
 
@@ -209,12 +209,12 @@ export default function VenueInfoPage() {
           <div key={key} style={{ marginBottom: 10, position: 'relative' }}>
             <label style={labelStyle}>{label}</label>
             <div style={{ position: 'relative' }}>
-              <Icon size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(240,237,232,0.3)' }} />
+              <Icon size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
               <input value={(form as any)[key]} onChange={e => set(key, e.target.value)}
                 placeholder={placeholder}
                 style={{ ...fieldStyle, paddingLeft: 36 }}
-                onFocus={e => (e.target.style.borderColor = '#e8622a')}
-                onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
+                onFocus={e => (e.target.style.borderColor = '#BB00FF')}
+                onBlur={e => (e.target.style.borderColor = 'var(--border)')} />
             </div>
           </div>
         ))}
@@ -223,27 +223,27 @@ export default function VenueInfoPage() {
       {/* Orari */}
       <div style={sectionStyle}>
         <p style={{ ...labelStyle, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Clock size={11} color="#e8622a" /> Orari di apertura
+          <Clock size={11} color="#BB00FF" /> Orari di apertura
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {DAYS.map(day => {
             const h = form.hours?.[day] || { open: '10:00', close: '22:00', closed: false }
             return (
               <div key={day} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ width: 72, fontSize: 12, color: 'rgba(240,237,232,0.6)', flexShrink: 0 }}>
+                <span style={{ width: 72, fontSize: 12, color: 'var(--text-2)', flexShrink: 0 }}>
                   {DAYS_IT[day]}
                 </span>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', flexShrink: 0 }}>
                   <input type="checkbox" checked={h.closed}
                     onChange={e => setHour(day, 'closed', e.target.checked)}
-                    style={{ accentColor: '#e8622a', width: 14, height: 14 }} />
-                  <span style={{ fontSize: 10, color: 'rgba(240,237,232,0.4)' }}>Chiuso</span>
+                    style={{ accentColor: '#BB00FF', width: 14, height: 14 }} />
+                  <span style={{ fontSize: 10, color: 'var(--meta-color)' }}>Chiuso</span>
                 </label>
                 {!h.closed && (
                   <>
                     <input type="time" value={h.open} onChange={e => setHour(day, 'open', e.target.value)}
                       style={{ ...fieldStyle, padding: '8px 10px', width: 'auto', flex: 1, fontSize: 12, colorScheme: 'dark' }} />
-                    <span style={{ color: 'rgba(240,237,232,0.3)', fontSize: 12, flexShrink: 0 }}>–</span>
+                    <span style={{ color: 'var(--text-3)', fontSize: 12, flexShrink: 0 }}>–</span>
                     <input type="time" value={h.close} onChange={e => setHour(day, 'close', e.target.value)}
                       style={{ ...fieldStyle, padding: '8px 10px', width: 'auto', flex: 1, fontSize: 12, colorScheme: 'dark' }} />
                   </>
@@ -267,9 +267,9 @@ export default function VenueInfoPage() {
         disabled={mutation.isPending || !form.address || !form.phone}
         style={{
           width: '100%', padding: '15px', borderRadius: 14, cursor: 'pointer',
-          background: saved ? 'rgba(34,197,94,0.15)' : 'linear-gradient(135deg, #e8622a, #f0884a)',
+          background: saved ? 'rgba(34,197,94,0.15)' : 'linear-gradient(135deg, #BB00FF, #9000CC)',
           border: saved ? '1px solid rgba(34,197,94,0.4)' : 'none',
-          boxShadow: saved ? 'none' : '0 4px 20px rgba(232,98,42,0.4)',
+          boxShadow: saved ? 'none' : '0 4px 20px rgba(187,0,255,0.4)',
           opacity: mutation.isPending || !form.address || !form.phone ? 0.5 : 1,
           transition: 'all 0.3s',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,

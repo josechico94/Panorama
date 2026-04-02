@@ -27,12 +27,12 @@ export default function SuperAdminLayout() {
     <>
       {/* Logo */}
       <div style={{ padding: '20px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg,#e8622a,#f0884a)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg,#BB00FF,#9000CC)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <Shield size={16} color="white" />
         </div>
         <div>
-          <p style={{ color: '#f0ede8', fontSize: 13, fontWeight: 700, lineHeight: 1 }}>Super Admin</p>
-          <p style={{ color: 'rgba(240,237,232,0.3)', fontSize: 10, marginTop: 2 }}>{admin?.email || 'CityApp'}</p>
+          <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 700, lineHeight: 1 }}>Super Admin</p>
+          <p style={{ color: 'var(--text-3)', fontSize: 10, marginTop: 2 }}>{admin?.email || 'FafApp'}</p>
         </div>
       </div>
 
@@ -45,9 +45,9 @@ export default function SuperAdminLayout() {
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
                 borderRadius: 10, fontSize: 13, fontWeight: 500, transition: 'all 0.15s',
-                background: isActive ? 'rgba(232,98,42,0.12)' : 'transparent',
-                color: isActive ? '#e8622a' : 'rgba(240,237,232,0.5)',
-                borderLeft: `2px solid ${isActive ? '#e8622a' : 'transparent'}`,
+                background: isActive ? 'rgba(187,0,255,0.12)' : 'transparent',
+                color: isActive ? '#BB00FF' : 'rgba(240,237,232,0.5)',
+                borderLeft: `2px solid ${isActive ? '#BB00FF' : 'transparent'}`,
               }}>
                 <Icon size={15} />
                 <span style={{ flex: 1 }}>{label}</span>
@@ -61,13 +61,13 @@ export default function SuperAdminLayout() {
       {/* User + logout */}
       <div style={{ padding: '12px 8px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ padding: '8px 12px', marginBottom: 4 }}>
-          <p style={{ color: '#f0ede8', fontSize: 12, fontWeight: 600 }}>{admin?.name || 'Admin'}</p>
-          <p style={{ color: 'rgba(240,237,232,0.3)', fontSize: 10 }}>{admin?.role}</p>
+          <p style={{ color: 'var(--text)', fontSize: 12, fontWeight: 600 }}>{admin?.name || 'Admin'}</p>
+          <p style={{ color: 'var(--text-3)', fontSize: 10 }}>{admin?.role}</p>
         </div>
         <button onClick={handleLogout} style={{
           width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px',
           borderRadius: 10, border: 'none', cursor: 'pointer',
-          background: 'transparent', color: 'rgba(240,237,232,0.4)', fontSize: 13,
+          background: 'transparent', color: 'var(--meta-color)', fontSize: 13,
           transition: 'all 0.15s',
         }}
           onMouseEnter={e => { (e.currentTarget as any).style.color = '#f87171'; (e.currentTarget as any).style.background = 'rgba(248,113,113,0.08)' }}
@@ -80,7 +80,7 @@ export default function SuperAdminLayout() {
   )
 
   return (
-    <div style={{ display: 'flex', minHeight: '100dvh', background: '#0d0d1a', color: '#f0ede8', fontFamily: 'DM Sans,sans-serif' }}>
+    <div style={{ display: 'flex', minHeight: '100dvh', background: '#0d0d1a', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif' }}>
       {/* Desktop sidebar */}
       <aside style={{
         width: 230, background: '#090910', borderRight: '1px solid rgba(255,255,255,0.07)',
@@ -110,14 +110,14 @@ export default function SuperAdminLayout() {
           display: 'flex', alignItems: 'center', padding: '0 16px', gap: 12,
           position: 'sticky', top: 0, zIndex: 30,
         }}>
-          <button onClick={() => setMobileOpen(true)} style={{ padding: 6, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', color: '#f0ede8' }}>
+          <button onClick={() => setMobileOpen(true)} style={{ padding: 6, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--surface)', color: 'var(--text)' }}>
             <Menu size={18} />
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: 'linear-gradient(135deg,#e8622a,#f0884a)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 26, height: 26, borderRadius: 7, background: 'linear-gradient(135deg,#BB00FF,#9000CC)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Shield size={13} color="white" />
             </div>
-            <span style={{ fontWeight: 700, fontSize: 14, color: '#f0ede8' }}>Super Admin</span>
+            <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>Super Admin</span>
           </div>
         </header>
 

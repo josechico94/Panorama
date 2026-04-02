@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { superAdminApi } from '@/lib/api'
 import { Trash2, Star } from 'lucide-react'
 
-const card = { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }
+const card = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, overflow: 'hidden' }
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -28,15 +28,15 @@ export default function SAReviews() {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 28, fontWeight: 700, color: '#f0ede8' }}>Recensioni</h1>
-        <p style={{ color: 'rgba(240,237,232,0.35)', fontSize: 12, marginTop: 2 }}>{data?.total ?? 0} totali</p>
+        <h1 style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 28, fontWeight: 700, color: 'var(--text)' }}>Recensioni</h1>
+        <p style={{ color: 'var(--text-3)', fontSize: 12, marginTop: 2 }}>{data?.total ?? 0} totali</p>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {isLoading ? (
-          <div style={{ ...card, padding: 32, textAlign: 'center', color: 'rgba(240,237,232,0.3)' }}>Caricamento...</div>
+          <div style={{ ...card, padding: 32, textAlign: 'center', color: 'var(--text-3)' }}>Caricamento...</div>
         ) : reviews.length === 0 ? (
-          <div style={{ ...card, padding: 48, textAlign: 'center', color: 'rgba(240,237,232,0.3)' }}>
+          <div style={{ ...card, padding: 48, textAlign: 'center', color: 'var(--text-3)' }}>
             <Star size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
             <p>Nessuna recensione</p>
           </div>
@@ -48,19 +48,19 @@ export default function SAReviews() {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                  <span style={{ color: '#f0ede8', fontSize: 13, fontWeight: 600 }}>{(r.userId as any)?.name}</span>
+                  <span style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>{(r.userId as any)?.name}</span>
                   <Stars rating={r.rating} />
-                  <span style={{ color: 'rgba(240,237,232,0.3)', fontSize: 11, marginLeft: 'auto' }}>
+                  <span style={{ color: 'var(--text-3)', fontSize: 11, marginLeft: 'auto' }}>
                     {(r.placeId as any)?.name}
                   </span>
                 </div>
-                {r.comment && <p style={{ color: 'rgba(240,237,232,0.55)', fontSize: 12, lineHeight: 1.5 }}>{r.comment}</p>}
-                <p style={{ color: 'rgba(240,237,232,0.25)', fontSize: 10, fontFamily: 'DM Mono,monospace', marginTop: 4 }}>
+                {r.comment && <p style={{ color: 'var(--text-2)', fontSize: 12, lineHeight: 1.5 }}>{r.comment}</p>}
+                <p style={{ color: 'var(--text-3)', fontSize: 10, fontFamily: 'DM Mono,monospace', marginTop: 4 }}>
                   {new Date(r.createdAt).toLocaleDateString('it-IT')}
                 </p>
               </div>
               <button onClick={() => confirm('Eliminare questa recensione?') && deleteMutation.mutate(r._id)}
-                style={{ padding: 6, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'transparent', color: 'rgba(240,237,232,0.3)', alignSelf: 'flex-start' }}
+                style={{ padding: 6, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'transparent', color: 'var(--text-3)', alignSelf: 'flex-start' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#f87171' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(240,237,232,0.3)' }}>
                 <Trash2 size={14} />

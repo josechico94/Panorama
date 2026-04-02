@@ -5,8 +5,8 @@ import { getCategoryConfig, CATEGORIES } from '@/types'
 import { Plus, Pencil, Trash2, Eye, EyeOff, Star, X, Search, Upload, Link, Loader, MapPin, Check } from 'lucide-react'
 import { geocodeAddress } from '@/lib/geocode'
 
-const card = { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16 }
-const field = { width: '100%', padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0ede8', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'DM Sans,sans-serif' }
+const card = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16 }
+const field = { width: '100%', padding: '10px 14px', borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'DM Sans,sans-serif' }
 const EMPTY = { name: '', city: 'bologna', category: 'eat', shortDescription: '', description: '', tags: '', 'location.address': '', 'location.neighborhood': '', 'location.coordinates.lat': '44.4949', 'location.coordinates.lng': '11.3426', 'contact.phone': '', 'contact.website': '', 'contact.instagram': '', priceRange: '2', coverImage: '' }
 
 export default function SAPlaces() {
@@ -44,19 +44,19 @@ export default function SAPlaces() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 28, fontWeight: 700, color: '#f0ede8' }}>Luoghi</h1>
-          <p style={{ color: 'rgba(240,237,232,0.35)', fontSize: 12, marginTop: 2 }}>{data?.total ?? 0} totali</p>
+          <h1 style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 28, fontWeight: 700, color: 'var(--text)' }}>Luoghi</h1>
+          <p style={{ color: 'var(--text-3)', fontSize: 12, marginTop: 2 }}>{data?.total ?? 0} totali</p>
         </div>
         <button onClick={() => { setEditPlace(null); setShowForm(true) }} style={{
           display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 12,
-          background: 'linear-gradient(135deg,#e8622a,#f0884a)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
+          background: 'linear-gradient(135deg,#BB00FF,#9000CC)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
         }}>
           <Plus size={14} /> Nuovo posto
         </button>
       </div>
 
       <div style={{ position: 'relative', marginBottom: 16 }}>
-        <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(240,237,232,0.3)' }} />
+        <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca per nome..."
           style={{ ...field, paddingLeft: 36 }} />
       </div>
@@ -95,8 +95,8 @@ export default function SAPlaces() {
         ].map(({ value, label }) => (
           <button key={value} onClick={() => setActiveStatus(value)} style={{
             padding: '5px 12px', borderRadius: 100, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 700,
-            background: activeStatus === value ? 'rgba(232,98,42,0.15)' : 'rgba(255,255,255,0.04)',
-            color: activeStatus === value ? '#e8622a' : 'rgba(240,237,232,0.45)',
+            background: activeStatus === value ? 'rgba(187,0,255,0.15)' : 'rgba(255,255,255,0.04)',
+            color: activeStatus === value ? '#BB00FF' : 'rgba(240,237,232,0.45)',
             transition: 'all 0.15s',
           }}>{label}</button>
         ))}
@@ -111,13 +111,13 @@ export default function SAPlaces() {
 
       <div style={{ ...card, overflow: 'hidden' }}>
         {isLoading ? (
-          <div style={{ padding: 32, textAlign: 'center', color: 'rgba(240,237,232,0.3)' }}>Caricamento...</div>
+          <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-3)' }}>Caricamento...</div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                 {['Immagine', 'Nome', 'Categoria', 'Città', 'Stato', ''].map(h => (
-                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 10, fontWeight: 700, color: 'rgba(240,237,232,0.3)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{h}</th>
+                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 10, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -127,7 +127,7 @@ export default function SAPlaces() {
                 return (
                   <tr key={place._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                     <td style={{ padding: '8px 16px' }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 10, overflow: 'hidden', background: 'rgba(255,255,255,0.05)', flexShrink: 0 }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 10, overflow: 'hidden', background: 'var(--surface)', flexShrink: 0 }}>
                         {place.media?.coverImage ? (
                           <img src={place.media.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
@@ -138,7 +138,7 @@ export default function SAPlaces() {
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {place.meta?.featured && <Star size={11} color="#f59e0b" />}
-                        <span style={{ color: '#f0ede8', fontSize: 13, fontWeight: 600 }}>{place.name}</span>
+                        <span style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>{place.name}</span>
                       </div>
                     </td>
                     <td style={{ padding: '12px 16px' }}>
@@ -146,7 +146,7 @@ export default function SAPlaces() {
                         {cat.emoji} {cat.label}
                       </span>
                     </td>
-                    <td style={{ padding: '12px 16px', color: 'rgba(240,237,232,0.4)', fontSize: 12 }}>{place.city}</td>
+                    <td style={{ padding: '12px 16px', color: 'var(--meta-color)', fontSize: 12 }}>{place.city}</td>
                     <td style={{ padding: '12px 16px' }}>
                       <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 100, background: place.meta?.active ? 'rgba(34,197,94,0.12)' : 'rgba(255,255,255,0.05)', color: place.meta?.active ? '#4ade80' : 'rgba(240,237,232,0.3)', border: `1px solid ${place.meta?.active ? 'rgba(34,197,94,0.25)' : 'transparent'}` }}>
                         {place.meta?.active ? 'Attivo' : 'Nascosto'}
@@ -213,7 +213,7 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
 
   return (
     <div>
-      <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+      <label style={{ display: 'block', fontSize: 10, color: 'var(--meta-color)', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
         Immagine copertina
       </label>
 
@@ -229,12 +229,12 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
       )}
 
       {/* Mode toggle */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 8, background: 'rgba(255,255,255,0.04)', padding: 3, borderRadius: 8 }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 8, background: 'var(--surface)', padding: 3, borderRadius: 8 }}>
         {(['url', 'file'] as const).map(m => (
           <button key={m} onClick={() => { setUploadMode(m); setError('') }} style={{
             flex: 1, padding: '6px', borderRadius: 6, border: 'none', cursor: 'pointer',
-            background: uploadMode === m ? 'rgba(232,98,42,0.2)' : 'transparent',
-            color: uploadMode === m ? '#e8622a' : 'rgba(240,237,232,0.4)',
+            background: uploadMode === m ? 'rgba(187,0,255,0.2)' : 'transparent',
+            color: uploadMode === m ? '#BB00FF' : 'rgba(240,237,232,0.4)',
             fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
           }}>
             {m === 'url' ? <><Link size={11} /> URL</> : <><Upload size={11} /> Carica file</>}
@@ -250,12 +250,12 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
             onKeyDown={e => e.key === 'Enter' && handleUrlConfirm()}
             placeholder="https://images.unsplash.com/..."
             style={{ ...field, flex: 1 }}
-            onFocus={e => (e.target.style.borderColor = '#e8622a')}
-            onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+            onFocus={e => (e.target.style.borderColor = '#BB00FF')}
+            onBlur={e => (e.target.style.borderColor = 'var(--border)')}
           />
           <button onClick={handleUrlConfirm} style={{
             padding: '0 14px', borderRadius: 10, border: 'none', cursor: 'pointer',
-            background: 'rgba(232,98,42,0.2)', color: '#e8622a', fontSize: 12, fontWeight: 700, flexShrink: 0,
+            background: 'rgba(187,0,255,0.2)', color: '#BB00FF', fontSize: 12, fontWeight: 700, flexShrink: 0,
           }}>
             OK
           </button>
@@ -267,13 +267,13 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
             style={{
-              width: '100%', padding: '12px', borderRadius: 10, border: '2px dashed rgba(232,98,42,0.3)',
-              background: 'rgba(232,98,42,0.05)', color: uploading ? '#e8622a' : 'rgba(240,237,232,0.5)',
+              width: '100%', padding: '12px', borderRadius: 10, border: '2px dashed rgba(187,0,255,0.3)',
+              background: 'rgba(232,98,42,0.05)', color: uploading ? '#BB00FF' : 'rgba(240,237,232,0.5)',
               cursor: uploading ? 'default' : 'pointer', fontSize: 13,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s',
             }}
             onMouseEnter={e => !uploading && ((e.currentTarget as HTMLElement).style.borderColor = 'rgba(232,98,42,0.6)')}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(232,98,42,0.3)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(187,0,255,0.3)'}
           >
             {uploading ? (
               <><Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> Caricamento...</>
@@ -317,7 +317,7 @@ function AddressField({ value, city, onChange, onGeocode }: {
 
   return (
     <div>
-      <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', marginBottom: 5, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>
+      <label style={{ display: 'block', fontSize: 10, color: 'var(--meta-color)', marginBottom: 5, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>
         Indirizzo
       </label>
       <div style={{ display: 'flex', gap: 6 }}>
@@ -326,8 +326,8 @@ function AddressField({ value, city, onChange, onGeocode }: {
           onChange={e => { onChange(e.target.value); setStatus('idle') }}
           placeholder="Via Roma 1, Bologna"
           style={{ ...field, flex: 1 }}
-          onFocus={e => (e.target.style.borderColor = '#e8622a')}
-          onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+          onFocus={e => (e.target.style.borderColor = '#BB00FF')}
+          onBlur={e => (e.target.style.borderColor = 'var(--border)')}
           onKeyDown={e => e.key === 'Enter' && handleGeocode()}
         />
         <button
@@ -336,8 +336,8 @@ function AddressField({ value, city, onChange, onGeocode }: {
           title="Trova coordinate dall'indirizzo"
           style={{
             padding: '0 12px', borderRadius: 10, border: 'none', cursor: 'pointer', flexShrink: 0,
-            background: status === 'ok' ? 'rgba(34,197,94,0.2)' : status === 'error' ? 'rgba(248,113,113,0.15)' : 'rgba(232,98,42,0.15)',
-            color: status === 'ok' ? '#4ade80' : status === 'error' ? '#f87171' : '#e8622a',
+            background: status === 'ok' ? 'rgba(34,197,94,0.2)' : status === 'error' ? 'rgba(248,113,113,0.15)' : 'rgba(187,0,255,0.15)',
+            color: status === 'ok' ? '#4ade80' : status === 'error' ? '#f87171' : '#BB00FF',
             fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4,
             opacity: geocoding || !value.trim() ? 0.5 : 1, transition: 'all 0.2s',
           }}
@@ -422,10 +422,10 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
-      <div style={{ background: '#0f0f1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 24, width: '100%', maxWidth: 580, maxHeight: '88vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+      <div style={{ background: '#0f0f1a', border: '1px solid var(--border)', borderRadius: 20, padding: 24, width: '100%', maxWidth: 580, maxHeight: '88vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h2 style={{ color: '#f0ede8', fontSize: 18, fontWeight: 700 }}>{isEdit ? 'Modifica' : 'Nuovo'} posto</h2>
-          <button onClick={onClose} style={{ padding: 6, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', color: 'rgba(240,237,232,0.5)' }}><X size={16} /></button>
+          <h2 style={{ color: 'var(--text)', fontSize: 18, fontWeight: 700 }}>{isEdit ? 'Modifica' : 'Nuovo'} posto</h2>
+          <button onClick={onClose} style={{ padding: 6, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--surface)', color: 'var(--text-2)' }}><X size={16} /></button>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -456,7 +456,7 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
           {form['location.coordinates.lat'] !== '44.4949' && (
             <div style={{ padding: '8px 12px', background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
               <MapPin size={11} color="#4ade80" />
-              <span style={{ fontSize: 11, color: 'rgba(240,237,232,0.5)', fontFamily: 'DM Mono,monospace' }}>
+              <span style={{ fontSize: 11, color: 'var(--text-2)', fontFamily: 'DM Mono,monospace' }}>
                 {parseFloat(form['location.coordinates.lat']).toFixed(4)}, {parseFloat(form['location.coordinates.lng']).toFixed(4)}
               </span>
             </div>
@@ -473,22 +473,22 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
             { k: 'contact.instagram', label: 'Instagram', ph: 'handle senza @' },
           ].map(({ k, label, ph }) => (
             <div key={k}>
-              <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', marginBottom: 5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{label}</label>
+              <label style={{ display: 'block', fontSize: 10, color: 'var(--meta-color)', marginBottom: 5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{label}</label>
               <input value={form[k] || ''} onChange={e => set(k, e.target.value)} placeholder={ph} style={field}
-                onFocus={e => (e.target.style.borderColor = '#e8622a')}
-                onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
+                onFocus={e => (e.target.style.borderColor = '#BB00FF')}
+                onBlur={e => (e.target.style.borderColor = 'var(--border)')} />
             </div>
           ))}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', marginBottom: 5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Categoria</label>
+              <label style={{ display: 'block', fontSize: 10, color: 'var(--meta-color)', marginBottom: 5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Categoria</label>
               <select value={form.category} onChange={e => set('category', e.target.value)} style={{ ...field, cursor: 'pointer' }}>
                 {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>)}
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 10, color: 'rgba(240,237,232,0.4)', marginBottom: 5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Prezzo</label>
+              <label style={{ display: 'block', fontSize: 10, color: 'var(--meta-color)', marginBottom: 5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Prezzo</label>
               <select value={form.priceRange} onChange={e => set('priceRange', e.target.value)} style={{ ...field, cursor: 'pointer' }}>
                 <option value="1">€ Economico</option>
                 <option value="2">€€ Medio</option>
@@ -501,14 +501,14 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
           {error && <p style={{ color: '#f87171', fontSize: 12, textAlign: 'center', background: 'rgba(248,113,113,0.1)', borderRadius: 8, padding: '8px 12px' }}>{error}</p>}
 
           <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
-            <button onClick={onClose} style={{ flex: 1, padding: '11px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(240,237,232,0.5)', cursor: 'pointer', fontSize: 13 }}>Annulla</button>
+            <button onClick={onClose} style={{ flex: 1, padding: '11px', borderRadius: 12, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-2)', cursor: 'pointer', fontSize: 13 }}>Annulla</button>
             {(!form.name || !form['location.address'] || !form['contact.phone']) && (
               <p style={{ fontSize: 11, color: '#fbbf24', background: 'rgba(251,191,36,0.08)', borderRadius: 8, padding: '7px 12px', textAlign: 'center' }}>
                 ⚠ Nome, indirizzo e telefono sono obbligatori
               </p>
             )}
             <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !form.name || !form['location.address'] || !form['contact.phone']}
-              style={{ flex: 1, padding: '11px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#e8622a,#f0884a)', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 700, opacity: mutation.isPending || !form.name || !form['location.address'] || !form['contact.phone'] ? 0.5 : 1 }}>
+              style={{ flex: 1, padding: '11px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#BB00FF,#9000CC)', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 700, opacity: mutation.isPending || !form.name || !form['location.address'] || !form['contact.phone'] ? 0.5 : 1 }}>
               {mutation.isPending ? 'Salvataggio...' : isEdit ? 'Salva' : 'Crea'}
             </button>
           </div>
