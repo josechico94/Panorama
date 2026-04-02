@@ -1,157 +1,184 @@
+import { useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate, Link } from 'react-router-dom'
+import { LogOut, Tag, CheckCircle, Bookmark, ChevronRight, QrCode, Clock } from 'lucide-react'
 import { useState } from 'react'
-import {
-  LogOut, Tag, CheckCircle, Clock, MapPin, ChevronRight,
-  User, Bookmark, Route, Ticket, QrCode
-} from 'lucide-react'
-import { couponsApi, placesApi } from '@/lib/api'
 import { useUserStore, useAppStore } from '@/store'
+import { couponsApi } from '@/lib/api'
 import { getCategoryConfig } from '@/types'
-import type { Place } from '@/types'
 
-const PLACEHOLDER = 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=400&q=80'
+type Tab = 'coupon' | 'usati' | 'salvati'
 
-function formatDiscount(type: string, value: number) {
-  if (type === 'percentage') return `-${value}%`
-  if (type === 'fixed') return `-€${value}`
-  return 'OMAGGIO'
+function Avatar({ name }: { name: string }) {
+  const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+  return (
+    <div style={{
+      width: 56, height: 56, borderRadius: '50%',
+      background: 'linear-gradient(135deg, #BB00FF, #9000CC)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: 20, fontWeight: 800, color: '#fff',
+      boxShadow: '0 4px 20px rgba(187,0,255,0.4)',
+      flexShrink: 0,
+    }}>
+      {initials}
+    </div>
+  )
 }
-
-type Tab = 'coupons' | 'used' | 'saved'
 
 export default function ProfilePage() {
   const { user, logout, isLoggedIn } = useUserStore()
   const { savedPlaces } = useAppStore()
   const navigate = useNavigate()
-  const [tab, setTab] = useState<Tab>('coupons')
+  const [activeTab, setActiveTab] = useState<Tab>('coupon')
 
-  const { data: couponsData, isLoading: couponsLoading } = useQuery({
-    queryKey: ['my-coupons'],
-    queryFn: couponsApi.myList,
-    enabled: isLoggedIn(),
+  const { data } = useQuery({
+    queryKey: ['my-coupons', user?.id],
+    queryFn: () => couponsApi.myList(),
+    enabled: !!user,
   })
 
-  const { data: placesData } = useQuery({
-    queryKey: ['all-places-profile'],
-    queryFn: () => placesApi.list({ city: 'bologna', limit: '100' }),
-    enabled: savedPlaces.length > 0,
-  })
+  const allCoupons = data?.data ?? []
+  const activeCoupons = allCoupons.filter((c: any) => c.status === 'active')
+  const usedCoupons = allCoupons.filter((c: any) => c.status === 'used')
 
   if (!isLoggedIn()) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center space-y-5">
-        <div className="w-20 h-20 rounded-3xl glass-light flex items-center justify-center mx-auto"
-          style={{ border: '1px solid var(--border2)' }}>
-          <User size={32} className="text-[var(--text-3)]" />
-        </div>
-        <div>
-          <h2 className="font-display font-bold text-white text-2xl"
-            style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic' }}>
-            Il tuo profilo
+      <div style={{
+        minHeight: '80dvh', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', padding: '32px 24px',
+      }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center', maxWidth: 340 }}>
+          <div style={{
+            width: 72, height: 72, borderRadius: 22,
+            background: 'linear-gradient(135deg, #BB00FF22, #BB00FF11)',
+            border: '1px solid rgba(187,0,255,0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 20px', fontSize: 32,
+          }}>🗺️</div>
+          <h2 style={{
+            fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic',
+            fontSize: 30, fontWeight: 700, color: 'var(--text)', marginBottom: 8,
+          }}>
+            Il tuo profilo faf
           </h2>
-          <p className="text-[var(--text-3)] text-sm mt-2 leading-relaxed">
-            Accedi per vedere i tuoi coupon,<br />i posti salvati e la cronologia
+          <p style={{ color: 'var(--text-3)', fontSize: 14, lineHeight: 1.6, marginBottom: 28 }}>
+            Accedi per vedere i tuoi coupon, i posti salvati e gestire il tuo account.
           </p>
-        </div>
-        <div className="flex flex-col gap-2 max-w-xs mx-auto">
-          <button onClick={() => navigate('/accedi')} className="btn btn-accent w-full">
-            Accedi o registrati
-          </button>
-          <button onClick={() => navigate('/')} className="btn btn-ghost w-full text-sm">
-            Continua come ospite
-          </button>
-        </div>
+          <Link to="/accedi" style={{
+            display: 'block', textDecoration: 'none',
+            padding: '14px 28px', borderRadius: 14,
+            background: 'linear-gradient(135deg, #BB00FF, #9000CC)',
+            color: '#fff', fontWeight: 700, fontSize: 15,
+            boxShadow: '0 4px 20px rgba(187,0,255,0.4)',
+            textAlign: 'center',
+          }}>
+            Accedi o Registrati
+          </Link>
+        </motion.div>
       </div>
     )
   }
 
-  const allCoupons = couponsData?.data ?? []
-  const activeCoupons = allCoupons.filter((uc: any) => uc.status === 'active')
-  const usedCoupons = allCoupons.filter((uc: any) => uc.status === 'used')
-  const allPlaces: Place[] = placesData?.data ?? []
-  const savedPlacesList = allPlaces.filter(p => savedPlaces.includes(p._id))
-
-  const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
-
-  const TABS = [
-    { id: 'coupons' as Tab, label: 'Coupon', icon: Ticket, count: activeCoupons.length },
-    { id: 'used' as Tab,    label: 'Usati',  icon: CheckCircle, count: usedCoupons.length },
-    { id: 'saved' as Tab,   label: 'Salvati', icon: Bookmark, count: savedPlacesList.length },
-  ]
-
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="px-4 pt-6 pb-5">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
-        >
-          <div className="flex items-center gap-3">
-            {/* Avatar */}
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-white text-lg"
-              style={{ background: 'linear-gradient(135deg, var(--accent), var(--accent2))' }}>
-              {user?.name?.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h1 className="font-display font-bold text-white leading-none"
-                style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: '22px', fontStyle: 'italic' }}>
-                {user?.name}
-              </h1>
-              <p className="text-[var(--text-3)] text-xs mt-0.5">{user?.email}</p>
-            </div>
+    <div style={{ maxWidth: 672, margin: '0 auto', paddingBottom: 24 }}>
+      {/* ── Hero Profile Card ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          margin: '24px 16px 20px',
+          background: 'linear-gradient(135deg, rgba(187,0,255,0.12) 0%, rgba(144,0,204,0.06) 100%)',
+          border: '1px solid rgba(187,0,255,0.2)',
+          borderRadius: 22,
+          padding: '20px',
+          backdropFilter: 'blur(12px)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
+          <Avatar name={user!.name} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{
+              color: 'var(--text)', fontSize: 16, fontWeight: 700,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {user!.name}
+            </h2>
+            <p style={{
+              color: 'var(--text-3)', fontSize: 12, marginTop: 2,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {user!.email}
+            </p>
           </div>
           <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[var(--text-3)] hover:text-red-400 hover:bg-red-400/10 transition-all text-xs font-medium"
+            onClick={() => { logout(); navigate('/') }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '7px 12px', borderRadius: 9, border: 'none',
+              background: 'rgba(248,113,113,0.1)',
+              color: '#f87171', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+              flexShrink: 0,
+            }}
           >
             <LogOut size={13} /> Esci
           </button>
-        </motion.div>
+        </div>
 
         {/* Stats row */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-3 gap-2 mt-5"
-        >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           {[
-            { label: 'Coupon attivi', value: activeCoupons.length, color: 'var(--accent)' },
-            { label: 'Utilizzati',    value: usedCoupons.length,   color: '#22c55e' },
-            { label: 'Salvati',       value: savedPlacesList.length, color: '#a855f7' },
+            { label: 'Coupon attivi', value: activeCoupons.length, color: '#BB00FF' },
+            { label: 'Utilizzati', value: usedCoupons.length, color: '#4ade80' },
+            { label: 'Salvati', value: savedPlaces.length, color: '#f59e0b' },
           ].map(({ label, value, color }) => (
-            <div key={label} className="glass-light rounded-xl p-3 text-center">
-              <p className="font-bold text-xl" style={{ color }}>{value}</p>
-              <p className="text-[var(--text-3)] text-[9px] font-semibold tracking-wide uppercase mt-0.5">{label}</p>
+            <div key={label} style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 14, padding: '10px 8px', textAlign: 'center',
+            }}>
+              <p style={{ fontSize: 24, fontWeight: 800, color, fontFamily: 'DM Mono', lineHeight: 1 }}>{value}</p>
+              <p style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 4, fontWeight: 500 }}>{label}</p>
             </div>
           ))}
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
 
-      {/* Tabs */}
-      <div className="px-4 mb-4">
-        <div className="flex gap-1 glass-light rounded-xl p-1">
-          {TABS.map(({ id, label, icon: Icon, count }) => (
-            <button key={id} onClick={() => setTab(id)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all"
-              style={tab === id
-                ? { background: 'var(--accent)', color: '#fff' }
-                : { color: 'var(--text-3)' }
-              }>
+      {/* ── Tabs ── */}
+      <div style={{ padding: '0 16px 16px' }}>
+        <div style={{
+          display: 'flex', gap: 4, padding: 4,
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: 14,
+        }}>
+          {([
+            { id: 'coupon',  label: 'Coupon',  icon: QrCode,       count: activeCoupons.length },
+            { id: 'usati',   label: 'Usati',   icon: CheckCircle,  count: usedCoupons.length },
+            { id: 'salvati', label: 'Salvati', icon: Bookmark,     count: savedPlaces.length },
+          ] as { id: Tab; label: string; icon: any; count: number }[]).map(({ id, label, icon: Icon, count }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              style={{
+                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: 5, padding: '8px 4px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                background: activeTab === id
+                  ? 'linear-gradient(135deg, #BB00FF, #9000CC)'
+                  : 'transparent',
+                color: activeTab === id ? '#fff' : 'var(--text-3)',
+                fontSize: 11, fontWeight: 600,
+                transition: 'all 0.2s',
+              }}
+            >
               <Icon size={12} />
               {label}
               {count > 0 && (
                 <span style={{
-                  fontSize: '9px', fontWeight: 800,
-                  background: tab === id ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)',
-                  borderRadius: '100px', padding: '0 4px', minWidth: 14, textAlign: 'center',
+                  fontSize: 9, fontWeight: 800, minWidth: 16, height: 16,
+                  borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: activeTab === id ? 'rgba(255,255,255,0.25)' : 'rgba(187,0,255,0.15)',
+                  color: activeTab === id ? '#fff' : '#BB00FF',
+                  fontFamily: 'DM Mono',
                 }}>
                   {count}
                 </span>
@@ -161,90 +188,75 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Tab content */}
-      <div className="px-4 pb-8">
-        <AnimatePresence mode="wait">
-          {/* Active coupons */}
-          {tab === 'coupons' && (
-            <motion.div key="coupons"
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="space-y-3"
-            >
-              {couponsLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="skeleton rounded-2xl h-24" />
-                ))
-              ) : activeCoupons.length === 0 ? (
-                <EmptyState
-                  icon="🎫"
-                  title="Nessun coupon attivo"
-                  sub="Sfoglia le offerte e scarica il tuo primo coupon"
-                  action={{ label: 'Vedi offerte', to: '/' }}
-                />
-              ) : (
-                activeCoupons.map((uc: any, i: number) => (
+      {/* ── Tab Content ── */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2 }}
+          style={{ padding: '0 16px' }}
+        >
+          {activeTab === 'coupon' && (
+            activeCoupons.length === 0 ? (
+              <EmptyState
+                emoji="🎫"
+                title="Nessun coupon attivo"
+                desc="Sfoglia le offerte e scarica il tuo primo coupon"
+                action={{ label: 'Vedi offerte', to: '/offerte' }}
+              />
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {activeCoupons.map((uc: any, i: number) => (
                   <CouponCard key={uc._id} userCoupon={uc} index={i} />
-                ))
-              )}
-            </motion.div>
+                ))}
+              </div>
+            )
           )}
 
-          {/* Used coupons */}
-          {tab === 'used' && (
-            <motion.div key="used"
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="space-y-3"
-            >
-              {usedCoupons.length === 0 ? (
-                <EmptyState
-                  icon="✅"
-                  title="Nessun coupon utilizzato"
-                  sub="I coupon che usi appariranno qui"
-                />
-              ) : (
-                usedCoupons.map((uc: any, i: number) => (
+          {activeTab === 'usati' && (
+            usedCoupons.length === 0 ? (
+              <EmptyState emoji="✅" title="Nessun coupon usato" desc="I coupon che usi appariranno qui" />
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {usedCoupons.map((uc: any, i: number) => (
                   <CouponCard key={uc._id} userCoupon={uc} index={i} used />
-                ))
-              )}
-            </motion.div>
+                ))}
+              </div>
+            )
           )}
 
-          {/* Saved places */}
-          {tab === 'saved' && (
-            <motion.div key="saved"
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="space-y-3"
-            >
-              {savedPlacesList.length === 0 ? (
-                <EmptyState
-                  icon="🔖"
-                  title="Nessun posto salvato"
-                  sub="Tocca 🔖 su qualsiasi posto per salvarlo"
-                  action={{ label: 'Esplora Bologna', to: '/esplora' }}
-                />
-              ) : (
-                savedPlacesList.map((place, i) => (
-                  <SavedPlaceRow key={place._id} place={place} index={i} />
-                ))
-              )}
-            </motion.div>
+          {activeTab === 'salvati' && (
+            savedPlaces.length === 0 ? (
+              <EmptyState
+                emoji="🔖"
+                title="Nessun posto salvato"
+                desc="Tocca il segnalibro su un posto per salvarlo qui"
+                action={{ label: 'Esplora', to: '/esplora' }}
+              />
+            ) : (
+              <p style={{ color: 'var(--text-3)', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>
+                {savedPlaces.length} post{savedPlaces.length === 1 ? 'o' : 'i'} salvat{savedPlaces.length === 1 ? 'o' : 'i'} — visibili in <Link to="/salvati" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Salvati</Link>
+              </p>
+            )
           )}
-        </AnimatePresence>
-      </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   )
 }
 
-// ── Coupon card ──
 function CouponCard({ userCoupon, index, used = false }: { userCoupon: any; index: number; used?: boolean }) {
   const coupon = userCoupon.couponId
-  const place  = userCoupon.placeId
-  const cat    = place ? getCategoryConfig(place.category) : null
+  const place = userCoupon.placeId
+  const cat = place ? getCategoryConfig(place.category) : null
 
-  if (!coupon || !place) return null
-
-  const daysLeft = Math.ceil((new Date(coupon.validUntil).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-  const isExpiringSoon = !used && daysLeft <= 3
+  const discount = coupon?.discountType === 'percentage'
+    ? `-${coupon.discountValue}%`
+    : coupon?.discountType === 'fixed'
+    ? `-€${coupon.discountValue}`
+    : 'OMAGGIO'
 
   return (
     <motion.div
@@ -252,165 +264,89 @@ function CouponCard({ userCoupon, index, used = false }: { userCoupon: any; inde
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06 }}
     >
-      <Link to={`/coupon/${coupon._id}`}>
+      <Link
+        to={used ? '#' : `/coupon/${userCoupon._id}`}
+        style={{ textDecoration: 'none', display: 'block' }}
+        onClick={e => used && e.preventDefault()}
+      >
         <div style={{
-          background: used ? 'rgba(255,255,255,0.02)' : 'var(--surface)',
-          border: `1px solid ${used ? 'rgba(255,255,255,0.05)' : isExpiringSoon ? 'rgba(232,98,42,0.3)' : 'var(--border)'}`,
-          borderRadius: '18px',
-          overflow: 'hidden',
+          background: used ? 'var(--surface)' : 'rgba(187,0,255,0.04)',
+          border: `1px solid ${used ? 'var(--border)' : 'rgba(187,0,255,0.18)'}`,
+          borderRadius: 18, overflow: 'hidden',
           display: 'flex',
-          opacity: used ? 0.6 : 1,
-          transition: 'border-color 0.2s',
+          opacity: used ? 0.65 : 1,
+          transition: 'all 0.2s',
         }}>
           {/* Place image */}
-          <div style={{ width: 80, position: 'relative', flexShrink: 0 }}>
+          <div style={{ width: 80, height: 80, flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
             <img
-              src={place.media?.coverImage || PLACEHOLDER}
-              alt={place.name}
+              src={place?.media?.coverImage || 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=200&q=70'}
+              alt={place?.name}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
             {used && (
               <div style={{
                 position: 'absolute', inset: 0,
-                background: 'rgba(7,7,15,0.6)',
+                background: 'rgba(0,0,0,0.4)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <CheckCircle size={20} className="text-green-400" />
+                <CheckCircle size={22} color="#4ade80" />
               </div>
             )}
           </div>
 
           {/* Content */}
-          <div style={{ flex: 1, padding: '12px 14px', minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-              <div style={{ minWidth: 0 }}>
-                <p style={{
-                  fontSize: '12px', fontWeight: 700, color: 'var(--text)',
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>
-                  {place.name}
-                </p>
-                <p style={{
-                  fontSize: '11px', color: 'var(--text-2)', marginTop: 2,
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>
-                  {coupon.title}
-                </p>
-              </div>
-              {/* Discount */}
-              <span style={{
-                fontSize: '11px', fontWeight: 800,
-                color: used ? 'var(--text-3)' : 'var(--accent)',
-                background: used ? 'transparent' : 'rgba(232,98,42,0.12)',
-                border: `1px solid ${used ? 'transparent' : 'rgba(232,98,42,0.25)'}`,
-                borderRadius: '8px', padding: '2px 7px', flexShrink: 0,
-                fontFamily: 'DM Mono, monospace',
-              }}>
-                {formatDiscount(coupon.discountType, coupon.discountValue)}
+          <div style={{ flex: 1, padding: '10px 12px', minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            {cat && (
+              <span style={{ fontSize: 9, color: cat.color, fontWeight: 700, display: 'block', marginBottom: 3 }}>
+                {cat.emoji} {place?.name}
               </span>
-            </div>
-
-            {/* Footer row */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-              {cat && (
-                <span style={{
-                  fontSize: '8px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-                  color: cat.color, background: `${cat.color}15`,
-                  border: `1px solid ${cat.color}30`, borderRadius: '100px', padding: '2px 6px',
-                }}>
-                  {cat.emoji} {cat.label}
-                </span>
-              )}
-              <span style={{
-                fontSize: '9px', color: used ? '#4ade80' : isExpiringSoon ? 'var(--accent)' : 'var(--text-3)',
-                fontFamily: 'DM Mono, monospace', marginLeft: 'auto',
-                display: 'flex', alignItems: 'center', gap: 3,
-              }}>
-                {used
-                  ? <>✓ Usato {new Date(userCoupon.usedAt).toLocaleDateString('it-IT')}</>
-                  : isExpiringSoon
-                    ? <><Clock size={9} /> Scade tra {daysLeft}g</>
-                    : <><Clock size={9} /> {daysLeft}g rimasti</>
-                }
-              </span>
-              {!used && <QrCode size={11} style={{ color: 'var(--text-3)', flexShrink: 0 }} />}
-            </div>
-          </div>
-        </div>
-      </Link>
-    </motion.div>
-  )
-}
-
-// ── Saved place row ──
-function SavedPlaceRow({ place, index }: { place: Place; index: number }) {
-  const cat = getCategoryConfig(place.category)
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-    >
-      <Link to={`/place/${place.slug}`}>
-        <div style={{
-          background: 'var(--surface)', border: '1px solid var(--border)',
-          borderRadius: '16px', overflow: 'hidden',
-          display: 'flex', alignItems: 'center', gap: 0,
-          transition: 'border-color 0.2s',
-        }}
-        onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(232,98,42,0.2)')}
-        onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
-        >
-          <div style={{ width: 64, height: 64, flexShrink: 0 }}>
-            <img
-              src={place.media?.coverImage || PLACEHOLDER}
-              alt={place.name}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
-          <div style={{ flex: 1, padding: '10px 14px', minWidth: 0 }}>
+            )}
             <p style={{
-              fontSize: '13px', fontWeight: 600, color: 'var(--text)',
-              fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic',
+              color: 'var(--text)', fontSize: 13, fontWeight: 700,
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
-              {place.name}
+              {coupon?.title}
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
-              <span style={{
-                fontSize: '8px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-                color: cat.color, background: `${cat.color}15`,
-                border: `1px solid ${cat.color}28`, borderRadius: '100px', padding: '1px 5px',
-              }}>
-                {cat.emoji} {cat.label}
-              </span>
-              <span style={{ fontSize: '10px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                <MapPin size={9} style={{ color: 'var(--accent)' }} />
-                {place.location?.neighborhood}
-              </span>
-            </div>
+            <p style={{ color: 'var(--text-3)', fontSize: 10, marginTop: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Clock size={9} />
+              {used && userCoupon.usedAt
+                ? 'Usato il ' + new Date(userCoupon.usedAt).toLocaleDateString('it-IT')
+                : 'Scade il ' + new Date(coupon?.validUntil).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
+            </p>
           </div>
-          <ChevronRight size={14} style={{ color: 'var(--text-3)', marginRight: 14, flexShrink: 0 }} />
+
+          {/* Discount badge */}
+          <div style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            <span style={{
+              fontSize: 12, fontWeight: 800, fontFamily: 'DM Mono',
+              color: used ? 'var(--text-3)' : '#BB00FF',
+              background: used ? 'rgba(255,255,255,0.05)' : 'rgba(187,0,255,0.12)',
+              border: `1px solid ${used ? 'var(--border)' : 'rgba(187,0,255,0.25)'}`,
+              borderRadius: 8, padding: '4px 8px',
+            }}>
+              {discount}
+            </span>
+          </div>
         </div>
       </Link>
     </motion.div>
   )
 }
 
-// ── Empty state ──
-function EmptyState({ icon, title, sub, action }: {
-  icon: string; title: string; sub: string
-  action?: { label: string; to: string }
-}) {
+function EmptyState({ emoji, title, desc, action }: { emoji: string; title: string; desc: string; action?: { label: string; to: string } }) {
   return (
-    <div className="text-center py-14 space-y-3">
-      <p className="text-4xl">{icon}</p>
-      <div>
-        <p className="text-[var(--text-2)] font-medium text-sm">{title}</p>
-        <p className="text-[var(--text-3)] text-xs mt-1 leading-relaxed">{sub}</p>
-      </div>
+    <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+      <span style={{ fontSize: 44, display: 'block', marginBottom: 14 }}>{emoji}</span>
+      <p style={{ color: 'var(--text)', fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{title}</p>
+      <p style={{ color: 'var(--text-3)', fontSize: 13, lineHeight: 1.5, marginBottom: action ? 20 : 0 }}>{desc}</p>
       {action && (
-        <Link to={action.to} className="btn btn-ghost inline-flex text-xs mt-2">
+        <Link to={action.to} style={{
+          display: 'inline-flex', padding: '10px 22px', borderRadius: 12,
+          background: 'rgba(187,0,255,0.1)', color: '#BB00FF',
+          border: '1px solid rgba(187,0,255,0.22)',
+          textDecoration: 'none', fontSize: 13, fontWeight: 700,
+        }}>
           {action.label}
         </Link>
       )}

@@ -7,19 +7,9 @@ import PWAInstallPrompt from '@/components/ui/PWAInstallPrompt'
 
 export default function AppLayout() {
   return (
-    <div style={{
-      minHeight: '100dvh',
-      display: 'flex',
-      flexDirection: 'column',
-      background: 'var(--bg)',
-      transition: 'background 0.3s ease',
-    }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
       <TopBar />
-      <main style={{
-        flex: 1,
-        paddingTop: '56px',    /* TopBar height */
-        paddingBottom: '136px', /* BottomNav + CouponSlider */
-      }}>
+      <main style={{ flex: 1, paddingTop: '56px', paddingBottom: '140px' }}>
         <Outlet />
       </main>
       <CouponNotifications />
