@@ -2,13 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Download } from 'lucide-react'
 
-function FafIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
-      <path d="M18 10 L82 10 C82 10 82 27 65 32 L36 37 L36 47 L69 45 C69 45 69 59 57 64 L36 67 L36 90 L18 90 Z" fill="white"/>
-    </svg>
-  )
-}
+
 
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
@@ -50,14 +44,7 @@ export default function PWAInstallPrompt() {
             boxShadow: '0 8px 32px rgba(187,0,255,0.2)',
           }}
         >
-          <div style={{
-            width: 44, height: 44, borderRadius: 12,
-            background: 'linear-gradient(135deg, #BB00FF, #9000CC)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0, boxShadow: '0 2px 10px rgba(187,0,255,0.4)',
-          }}>
-            <FafIcon />
-          </div>
+          <img src="/icons/icon-192.png" alt="faf" style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, display: 'block' }} />
           <div style={{ flex: 1 }}>
             <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 700, marginBottom: 2 }}>
               Installa FafApp

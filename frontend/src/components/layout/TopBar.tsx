@@ -44,7 +44,7 @@ export default function TopBar() {
               color: '#BB00FF', letterSpacing: '-0.03em',
               display: 'block', lineHeight: 1.1,
             }}>
-              faf
+              FAF
             </span>
             <span style={{
               fontSize: 8, color: 'var(--text-3)',

@@ -5,15 +5,9 @@ import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, AlertCircle } from 'lucide-re
 import { authApi } from '@/lib/api'
 import { useUserStore } from '@/store'
 
-const API_BASE = 'https://faf-app.com'
+const API_BASE = 'https://panoramabo.onrender.com'
 
-function FafIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
-      <path d="M18 10 L82 10 C82 10 82 27 65 32 L36 37 L36 47 L69 45 C69 45 69 59 57 64 L36 67 L36 90 L18 90 Z" fill="white"/>
-    </svg>
-  )
-}
+
 
 export default function AuthPage() {
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login')
@@ -82,9 +76,7 @@ export default function AuthPage() {
             <div style={{ position: 'relative', display: 'inline-flex', marginBottom: 16 }}>
               {/* Glow ring */}
               <div style={{ position: 'absolute', inset: -8, borderRadius: '50%', background: 'radial-gradient(circle, rgba(187,0,255,0.3), transparent 70%)', animation: 'pulse-ring 3s ease-in-out infinite' }} />
-              <div style={{ width: 64, height: 64, borderRadius: 20, background: 'linear-gradient(135deg, #BB00FF 0%, #7700CC 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(187,0,255,0.5), inset 0 1px 0 rgba(255,255,255,0.15)', position: 'relative' }}>
-                <FafIcon />
-              </div>
+              <img src="/icons/icon-192.png" alt="faf" style={{ width: 64, height: 64, borderRadius: 20, boxShadow: '0 8px 32px rgba(187,0,255,0.5)', display: 'block' }} />
             </div>
             <AnimatePresence mode="wait">
               <motion.div key={mode} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
