@@ -49,7 +49,7 @@ router.get('/places', async (req: Request, res: Response) => {
     if (active === 'false') filter['meta.active'] = { $ne: true };
     const skip = (parseInt(String(page)) - 1) * parseInt(String(limit));
     const [places, total] = await Promise.all([
-      Place.find(filter).sort({ createdAt: -1 }).skip(skip).limit(parseInt(String(limit))),
+      Place.find(filter).sort({ _id: -1 }).skip(skip).limit(parseInt(String(limit))),
       Place.countDocuments(filter),
     ]);
     res.json({ data: places, total });

@@ -20,7 +20,8 @@ export default function SAPlaces() {
   const params: Record<string, any> = { limit: '100' }
   if (search) params.search = search
   if (activeCategory && activeCategory !== 'tutti') params.category = activeCategory
-  if (activeStatus === 'true' || activeStatus === 'false') params.active = activeStatus
+  if (activeStatus === 'true') params.active = 'true'
+  else if (activeStatus === 'false') params.active = 'false'
 
   const { data, isLoading } = useQuery({
     queryKey: ['sa-places', search, activeCategory, activeStatus],
