@@ -1,66 +1,30 @@
-const CACHE_NAME = 'cityapp-v1'
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-]
+const CACHE = 'faf-v1'
+const ASSETS = ['/', '/index.html', '/manifest.json']
 
-// Install
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
   )
-  self.skipWaiting()
 })
 
-// Activate - clean old caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
+self.addEventListener('activate', e => {
+  e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
   )
-  self.clients.claim()
 })
 
-// Fetch - network first, cache fallback
-self.addEventListener('fetch', (event) => {
-  const { request } = event
-  const url = new URL(request.url)
-
-  // Skip API calls and non-GET requests
-  if (request.method !== 'GET' || url.pathname.startsWith('/api/')) return
-
-  event.respondWith(
-    fetch(request)
-      .then(response => {
-        // Cache successful responses for static assets
-        if (response.ok && (url.pathname.match(/\.(js|css|woff2?|png|svg|ico)$/) || url.pathname === '/')) {
-          const clone = response.clone()
-          caches.open(CACHE_NAME).then(cache => cache.put(request, clone))
-        }
-        return response
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return
+  if (e.request.url.includes('/api/')) return
+  e.respondWith(
+    fetch(e.request)
+      .then(res => {
+        const clone = res.clone()
+        caches.open(CACHE).then(c => c.put(e.request, clone))
+        return res
       })
-      .catch(() => caches.match(request).then(r => r || caches.match('/')))
+      .catch(() => caches.match(e.request))
   )
-})
-
-// Push notifications
-self.addEventListener('push', (event) => {
-  if (!event.data) return
-  const data = event.data.json()
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-96.png',
-      data: { url: data.url || '/' },
-      vibrate: [200, 100, 200],
-    })
-  )
-})
-
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close()
-  const url = event.notification.data?.url || '/'
-  event.waitUntil(clients.openWindow(url))
 })
