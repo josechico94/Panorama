@@ -17,14 +17,14 @@ export default function SAPlaces() {
   const [showForm, setShowForm] = useState(false)
   const qc = useQueryClient()
 
-  const params: Record<string, any> = {}
+  const params: Record<string, any> = { limit: '100' }
   if (search) params.search = search
-  if (activeCategory) params.category = activeCategory
-  if (activeStatus !== '') params.active = activeStatus
+  if (activeCategory && activeCategory !== 'tutti') params.category = activeCategory
+  if (activeStatus === 'true' || activeStatus === 'false') params.active = activeStatus
 
   const { data, isLoading } = useQuery({
     queryKey: ['sa-places', search, activeCategory, activeStatus],
-    queryFn: () => superAdminApi.listPlaces({ limit: "100", ...params }),
+    queryFn: () => superAdminApi.listPlaces(params),
   })
 
   const deleteMutation = useMutation({
