@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
-import { Tag, X, ChevronRight } from 'lucide-react'
+import { Tag, X, ChevronRight, Zap } from 'lucide-react'
 import { couponsApi } from '@/lib/api'
 
 export default function CouponSlider() {
@@ -23,97 +23,63 @@ export default function CouponSlider() {
         initial={{ y: 80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 80, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 28 }}
         style={{
           position: 'fixed', bottom: 68, left: 0, right: 0, zIndex: 38,
-          background: 'linear-gradient(135deg, #BB00FF, #9000CC)',
-          padding: '10px 16px',
-          boxShadow: '0 -4px 24px rgba(187,0,255,0.35)',
+          background: 'linear-gradient(135deg, #BB00FF 0%, #7700CC 100%)',
+          padding: '8px 12px',
+          boxShadow: '0 -4px 28px rgba(187,0,255,0.45)',
         }}
       >
-        <div style={{
-          maxWidth: 672, margin: '0 auto',
-          display: 'flex', alignItems: 'center', gap: 10,
-        }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
-          }}>
-            <Tag size={13} color="rgba(255,255,255,0.8)" />
-            <span style={{
-              fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.75)',
-              letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Mono',
-            }}>
+        <div style={{ maxWidth: 672, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+
+          {/* Label */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+            <Zap size={12} color="rgba(255,255,255,0.9)" fill="rgba(255,255,255,0.9)" />
+            <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Mono' }}>
               OFFERTE
             </span>
-            <span style={{
-              fontSize: 9, fontWeight: 800, background: 'rgba(255,255,255,0.2)',
-              borderRadius: '50%', width: 16, height: 16,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontFamily: 'DM Mono',
-            }}>
+            <span style={{ fontSize: 10, fontWeight: 800, background: 'rgba(255,255,255,0.25)', borderRadius: 20, minWidth: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: 'DM Mono', padding: '0 4px' }}>
               {coupons.length}
             </span>
           </div>
 
-          {/* Scrolling coupons */}
-          <div style={{ flex: 1, overflow: 'hidden' }}>
-            <div style={{ display: 'flex', gap: 8, overflow: 'hidden' }}>
-              {coupons.slice(0, 3).map((c: any) => (
-                <Link
-                  key={c._id}
-                  to={`/coupon/${c._id}`}
-                  style={{ textDecoration: 'none', flexShrink: 0 }}
-                >
+          {/* Coupon pills */}
+          <div style={{ flex: 1, display: 'flex', gap: 6, overflow: 'hidden' }}>
+            {coupons.slice(0, 3).map((c: any) => {
+              const discount = c.discountType === 'percentage'
+                ? `-${c.discountValue}%`
+                : c.discountType === 'fixed'
+                ? `-€${c.discountValue}`
+                : 'OMAGGIO'
+              return (
+                <Link key={c._id} to={`/coupon/${c._id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
                   <div style={{
                     display: 'flex', alignItems: 'center', gap: 6,
-                    background: 'rgba(255,255,255,0.15)',
-                    borderRadius: 8, padding: '4px 8px',
-                    border: '1px solid rgba(255,255,255,0.2)',
+                    background: 'rgba(255,255,255,0.18)',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    borderRadius: 20, padding: '4px 10px',
+                    transition: 'background 0.15s',
                   }}>
-                    {c.placeId?.media?.coverImage && (
-                      <img
-                        src={c.placeId.media.coverImage}
-                        alt=""
-                        style={{ width: 20, height: 20, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }}
-                      />
-                    )}
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{
-                        color: '#fff', fontSize: 11, fontWeight: 700,
-                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                        maxWidth: 100,
-                      }}>
-                        {c.title}
-                      </p>
-                      <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontFamily: 'DM Mono', fontWeight: 600 }}>
-                        {c.discountType === 'percentage' ? `-${c.discountValue}%`
-                          : c.discountType === 'fixed' ? `-€${c.discountValue}`
-                          : 'OMAGGIO'}
-                      </p>
-                    </div>
+                    <span style={{ color: '#fff', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap', maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {c.placeId?.name || c.title}
+                    </span>
+                    <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 10, fontFamily: 'DM Mono', fontWeight: 700, flexShrink: 0 }}>
+                      {discount}
+                    </span>
                   </div>
                 </Link>
-              ))}
-            </div>
+              )
+            })}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-            <Link to="/offerte" style={{
-              display: 'flex', alignItems: 'center', gap: 3,
-              color: 'rgba(255,255,255,0.85)', textDecoration: 'none',
-              fontSize: 10, fontWeight: 600,
-            }}>
-              Tutte <ChevronRight size={11} />
+          {/* Tutte + Close */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+            <Link to="/offerte" style={{ display: 'flex', alignItems: 'center', gap: 2, color: '#fff', textDecoration: 'none', fontSize: 11, fontWeight: 700, opacity: 0.9 }}>
+              Tutte <ChevronRight size={12} />
             </Link>
-            <button
-              onClick={() => setDismissed(true)}
-              style={{
-                width: 22, height: 22, borderRadius: 6, border: 'none',
-                background: 'rgba(255,255,255,0.15)', color: '#fff',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginLeft: 4,
-              }}
-            >
-              <X size={11} />
+            <button onClick={() => setDismissed(true)} style={{ width: 20, height: 20, borderRadius: 5, border: 'none', background: 'rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <X size={10} />
             </button>
           </div>
         </div>

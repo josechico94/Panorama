@@ -40,14 +40,16 @@ router.get('/stats', async (_req: Request, res: Response) => {
 // ── PLACES ──
 router.get('/places', async (req: Request, res: Response) => {
   try {
-    const { city, category, search, page = '1', limit = '20' } = req.query;
+    const { city, category, search, active, page = '1', limit = '100' } = req.query;
     const filter: Record<string, any> = {};
     if (city) filter.city = city;
     if (category) filter.category = category;
     if (search) filter.name = new RegExp(String(search), 'i');
+    if (active === 'true') filter['meta.active'] = true;
+    if (active === 'false') filter['meta.active'] = { $ne: true };
     const skip = (parseInt(String(page)) - 1) * parseInt(String(limit));
     const [places, total] = await Promise.all([
-      Place.find(filter).sort({ 'meta.createdAt': -1 }).skip(skip).limit(parseInt(String(limit))),
+      Place.find(filter).sort({ createdAt: -1 }).skip(skip).limit(parseInt(String(limit))),
       Place.countDocuments(filter),
     ]);
     res.json({ data: places, total });
