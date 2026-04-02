@@ -95,8 +95,8 @@ export default function ExplorePage() {
               style={{ height: '100%', width: '100%' }}
             >
               <TileLayer
-                url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
-                attribution='© <a href="https://stadiamaps.com/">Stadia Maps</a>'
+                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>'
               />
               {places.map(place => {
                 const cat = getCategoryConfig(place.category)
