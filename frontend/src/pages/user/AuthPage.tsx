@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, AlertCircle } from 'lucide-react'
 import { authApi } from '@/lib/api'
 import { useUserStore } from '@/store'
 
-// @ts-ignore
 const API_BASE = 'https://panoramabo.onrender.com'
 
 function FafIcon() {
@@ -35,10 +34,7 @@ export default function AuthPage() {
     setError(''); setLoading(true)
     try {
       if (mode === 'forgot') {
-        try {
-          const api = authApi as any
-          if (api.forgotPassword) await api.forgotPassword(form.email)
-        } catch {}
+        await (authApi as any).forgotPassword?.(form.email)
         setSuccess('Link di recupero inviato! Controlla la tua email.')
         setLoading(false); return
       }
@@ -59,35 +55,32 @@ export default function AuthPage() {
   }
 
   const titles = { login: 'Bentornato', register: 'Crea account', forgot: 'Recupera accesso' }
-  const subtitles = {
-    login: 'Accedi per i tuoi coupon e preferiti',
-    register: 'Unisciti alla community faf',
-    forgot: 'Ti mandiamo un link via email',
-  }
+  const subtitles = { login: 'Accedi per i tuoi coupon e preferiti', register: 'Unisciti alla community faf', forgot: 'Ti mandiamo un link via email' }
 
   return (
     <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
 
-      {/* Ambient glow */}
+      {/* ── Ambient glow ── */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
         <div style={{ position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)', width: '140%', height: '60%', background: 'radial-gradient(ellipse, rgba(187,0,255,0.18) 0%, transparent 65%)', borderRadius: '50%' }} />
         <div style={{ position: 'absolute', bottom: '-10%', right: '-20%', width: '60%', height: '40%', background: 'radial-gradient(ellipse, rgba(144,0,204,0.1) 0%, transparent 65%)', borderRadius: '50%' }} />
       </div>
 
-      {/* Back */}
+      {/* ── Back button ── */}
       <div style={{ position: 'relative', zIndex: 1, padding: '16px 20px' }}>
         <button onClick={() => navigate(-1)} style={{ width: 38, height: 38, borderRadius: 11, background: 'var(--surface)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)' }}>
           <ArrowLeft size={16} />
         </button>
       </div>
 
-      {/* Content */}
+      {/* ── Main content ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8px 24px 40px', position: 'relative', zIndex: 1 }}>
         <div style={{ width: '100%', maxWidth: 360 }}>
 
-          {/* Logo */}
+          {/* ── Logo ── */}
           <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center', marginBottom: 32 }}>
             <div style={{ position: 'relative', display: 'inline-flex', marginBottom: 16 }}>
+              {/* Glow ring */}
               <div style={{ position: 'absolute', inset: -8, borderRadius: '50%', background: 'radial-gradient(circle, rgba(187,0,255,0.3), transparent 70%)', animation: 'pulse-ring 3s ease-in-out infinite' }} />
               <div style={{ width: 64, height: 64, borderRadius: 20, background: 'linear-gradient(135deg, #BB00FF 0%, #7700CC 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(187,0,255,0.5), inset 0 1px 0 rgba(255,255,255,0.15)', position: 'relative' }}>
                 <FafIcon />
@@ -103,7 +96,7 @@ export default function AuthPage() {
             </AnimatePresence>
           </motion.div>
 
-          {/* Tabs */}
+          {/* ── Mode Tabs (login/register only) ── */}
           {mode !== 'forgot' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 4, marginBottom: 24 }}>
               {(['login', 'register'] as const).map(m => (
@@ -120,19 +113,33 @@ export default function AuthPage() {
             </motion.div>
           )}
 
-          {/* Social */}
+          {/* ── Social buttons ── */}
           {mode !== 'forgot' && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-              <a href={API_BASE + '/api/v1/auth/user/google'} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '12px 0', borderRadius: 13, textDecoration: 'none', background: 'var(--surface)', border: '1px solid var(--border2)', color: 'var(--text)', fontSize: 14, fontWeight: 600 }}>
+              <a href={`${API_BASE}/api/v1/auth/user/google`} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                padding: '12px 0', borderRadius: 13, textDecoration: 'none',
+                background: 'var(--surface)', border: '1px solid var(--border2)',
+                color: 'var(--text)', fontSize: 14, fontWeight: 600, transition: 'all 0.2s',
+              }}
+                onMouseEnter={e => { (e.currentTarget as any).style.borderColor = 'rgba(187,0,255,0.3)'; (e.currentTarget as any).style.background = 'var(--surface2)' }}
+                onMouseLeave={e => { (e.currentTarget as any).style.borderColor = 'var(--border2)'; (e.currentTarget as any).style.background = 'var(--surface)' }}>
                 <GoogleIcon /> Continua con Google
               </a>
-              <a href={API_BASE + '/api/v1/auth/user/facebook'} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '12px 0', borderRadius: 13, textDecoration: 'none', background: 'rgba(24,119,242,0.08)', border: '1px solid rgba(24,119,242,0.2)', color: 'var(--text)', fontSize: 14, fontWeight: 600 }}>
+              <a href={`${API_BASE}/api/v1/auth/user/facebook`} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                padding: '12px 0', borderRadius: 13, textDecoration: 'none',
+                background: 'rgba(24,119,242,0.08)', border: '1px solid rgba(24,119,242,0.2)',
+                color: 'var(--text)', fontSize: 14, fontWeight: 600, transition: 'all 0.2s',
+              }}
+                onMouseEnter={e => { (e.currentTarget as any).style.borderColor = 'rgba(24,119,242,0.4)'; (e.currentTarget as any).style.background = 'rgba(24,119,242,0.14)' }}
+                onMouseLeave={e => { (e.currentTarget as any).style.borderColor = 'rgba(24,119,242,0.2)'; (e.currentTarget as any).style.background = 'rgba(24,119,242,0.08)' }}>
                 <FacebookIcon /> Continua con Facebook
               </a>
             </motion.div>
           )}
 
-          {/* Divider */}
+          {/* ── Divider ── */}
           {mode !== 'forgot' && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
               <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, var(--border2))' }} />
@@ -141,18 +148,22 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* Fields */}
+          {/* ── Form ── */}
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+            {/* Name (register only) */}
             <AnimatePresence>
               {mode === 'register' && (
-                <motion.div key="name" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+                <motion.div key="name-field" initial={{ opacity: 0, height: 0, marginBottom: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
                   <InputField icon={<User size={15} />} placeholder="Il tuo nome" value={form.name} onChange={v => set('name', v)} />
                 </motion.div>
               )}
             </AnimatePresence>
 
+            {/* Email */}
             <InputField icon={<Mail size={15} />} placeholder="Email" type="email" value={form.email} onChange={v => set('email', v)} />
 
+            {/* Password */}
             {mode !== 'forgot' && (
               <InputField
                 icon={<Lock size={15} />}
@@ -170,6 +181,7 @@ export default function AuthPage() {
               />
             )}
 
+            {/* Error */}
             <AnimatePresence>
               {error && (
                 <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -180,6 +192,7 @@ export default function AuthPage() {
               )}
             </AnimatePresence>
 
+            {/* Success */}
             <AnimatePresence>
               {success && (
                 <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
@@ -189,37 +202,46 @@ export default function AuthPage() {
               )}
             </AnimatePresence>
 
-            <motion.button whileTap={{ scale: 0.97 }} onClick={handleSubmit} disabled={loading}
-              style={{ width: '100%', padding: '14px 0', borderRadius: 14, border: 'none', background: loading ? 'rgba(187,0,255,0.3)' : 'linear-gradient(135deg, #BB00FF 0%, #9000CC 100%)', color: '#fff', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: loading ? 'none' : '0 4px 20px rgba(187,0,255,0.45)', transition: 'all 0.2s', marginTop: 4 }}>
-              {loading
-                ? <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <span style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
-                    {mode === 'forgot' ? 'Invio...' : mode === 'login' ? 'Accesso...' : 'Registrazione...'}
-                  </span>
-                : mode === 'forgot' ? 'Invia link' : mode === 'login' ? 'Accedi' : 'Crea account'
-              }
+            {/* Submit */}
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={handleSubmit}
+              disabled={loading}
+              style={{
+                width: '100%', padding: '14px 0', borderRadius: 14, border: 'none',
+                background: loading ? 'rgba(187,0,255,0.3)' : 'linear-gradient(135deg, #BB00FF 0%, #9000CC 100%)',
+                color: '#fff', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
+                boxShadow: loading ? 'none' : '0 4px 20px rgba(187,0,255,0.45)',
+                transition: 'all 0.2s', marginTop: 4,
+              }}
+            >
+              {loading ? (
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <span style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
+                  {mode === 'forgot' ? 'Invio...' : mode === 'login' ? 'Accesso...' : 'Registrazione...'}
+                </span>
+              ) : mode === 'forgot' ? 'Invia link' : mode === 'login' ? 'Accedi' : 'Crea account'}
             </motion.button>
           </motion.div>
 
-          {/* Footer */}
+          {/* ── Footer links ── */}
           <div style={{ textAlign: 'center', marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {mode === 'login' && (
-              <button onClick={() => { setMode('forgot'); setError(''); setSuccess('') }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', fontSize: 12 }}>
+              <button onClick={() => { setMode('forgot'); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', fontSize: 12, transition: 'color 0.2s' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-3)')}>
                 Password dimenticata?
               </button>
             )}
             {mode === 'forgot' && (
-              <button onClick={() => { setMode('login'); setError(''); setSuccess('') }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', fontSize: 12 }}>
+              <button onClick={() => { setMode('login'); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', fontSize: 12 }}>
                 ← Torna al login
               </button>
             )}
-            <div style={{ height: 1, background: 'var(--border)' }} />
+            <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />
             <p style={{ fontSize: 12, color: 'var(--text-3)' }}>
               Puoi esplorare Bologna senza account.{' '}
-              <button onClick={() => navigate('/')}
-                style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+              <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: 12, fontWeight: 600, textDecoration: 'underline' }}>
                 Continua come ospite
               </button>
             </p>
@@ -246,9 +268,24 @@ function InputField({ icon, placeholder, type = 'text', value, onChange, suffix,
       <div style={{ position: 'absolute', left: 14, color: focused ? 'var(--accent)' : 'var(--text-3)', display: 'flex', transition: 'color 0.2s', pointerEvents: 'none', zIndex: 1 }}>
         {icon}
       </div>
-      <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        onKeyDown={onKeyDown} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-        style={{ width: '100%', padding: '13px 42px', borderRadius: 13, background: focused ? 'rgba(187,0,255,0.06)' : 'var(--surface)', border: '1.5px solid ' + (focused ? 'rgba(187,0,255,0.5)' : 'var(--border)'), color: 'var(--text)', fontSize: 14, outline: 'none', fontFamily: 'DM Sans, sans-serif', boxShadow: focused ? '0 0 0 3px rgba(187,0,255,0.1)' : 'none', transition: 'all 0.2s', boxSizing: 'border-box' as const }} />
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        onKeyDown={onKeyDown}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        style={{
+          width: '100%', padding: '13px 42px', borderRadius: 13,
+          background: focused ? 'rgba(187,0,255,0.06)' : 'var(--surface)',
+          border: `1.5px solid ${focused ? 'rgba(187,0,255,0.5)' : 'var(--border)'}`,
+          color: 'var(--text)', fontSize: 14, outline: 'none',
+          fontFamily: 'DM Sans, sans-serif',
+          boxShadow: focused ? '0 0 0 3px rgba(187,0,255,0.1)' : 'none',
+          transition: 'all 0.2s', boxSizing: 'border-box',
+        }}
+      />
       {suffix && <div style={{ position: 'absolute', right: 14, zIndex: 1 }}>{suffix}</div>}
     </div>
   )
@@ -265,12 +302,4 @@ function GoogleIcon() {
   )
 }
 
-function FacebookIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2">
-      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-    </svg>
-  )
-}
 
-// v2
