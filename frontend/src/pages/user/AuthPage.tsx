@@ -5,7 +5,7 @@ import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, AlertCircle } from 'lucide-re
 import { authApi } from '@/lib/api'
 import { useUserStore } from '@/store'
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'https://panoramabo.onrender.com/api/v1').replace('/api/v1', '')
+const API_BASE = 'https://panoramabo.onrender.com' //riga 8
 
 function FafIcon() {
   return (
@@ -34,7 +34,7 @@ export default function AuthPage() {
     setError(''); setLoading(true)
     try {
       if (mode === 'forgot') {
-        await authApi.forgotPassword?.(form.email)
+        await (authApi as any).forgotPassword?.(form.email)
         setSuccess('Link di recupero inviato! Controlla la tua email.')
         setLoading(false); return
       }
