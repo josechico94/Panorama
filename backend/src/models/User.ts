@@ -3,11 +3,11 @@ import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
   email: string;
-  password?: string; // Opcional porque Google no envía contraseña
+  password?: string;
   name: string;
-  provider?: string; // 'local' o 'google'
-  providerId?: string; // ID único de Google
-  avatar?: string; // Foto de perfil
+  provider?: string;
+  providerId?: string;
+  avatar?: string;
   createdAt: Date;
   comparePassword(candidate: string): Promise<boolean>;
 }
@@ -21,14 +21,10 @@ const UserSchema = new Schema<IUser>({
     trim: true 
   },
   
-  // Contraseña condicional a prueba de TypeScript
+  // SOLUCIÓN DEFINITIVA: Apagamos el guardia de la base de datos
   password: { 
     type: String, 
-    minlength: 6,
-    required: function(this: any): boolean {
-      // Solo es obligatoria si el registro es manual ('local') o si no tiene provider
-      return this.provider === 'local' || !this.provider;
-    }
+    required: false 
   },
   
   name: { 
@@ -37,14 +33,15 @@ const UserSchema = new Schema<IUser>({
     trim: true 
   },
   
-  // Campos extra para manejar OAuth
   provider: { 
     type: String, 
     default: 'local' 
   },
+  
   providerId: { 
     type: String 
   },
+  
   avatar: { 
     type: String 
   },
@@ -55,9 +52,7 @@ const UserSchema = new Schema<IUser>({
   },
 });
 
-// Middleware para encriptar la contraseña antes de guardar
 UserSchema.pre('save', async function(next) {
-  // Si no hay contraseña (es de Google) o si no fue modificada, saltamos la encriptación
   if (!this.password || !this.isModified('password')) {
     return next();
   }
@@ -66,9 +61,7 @@ UserSchema.pre('save', async function(next) {
   next();
 });
 
-// Método para comparar contraseñas en el Login
 UserSchema.methods.comparePassword = async function(candidate: string) {
-  // Si intenta loguearse de forma tradicional pero es un usuario de Google sin password
   if (!this.password) {
     return false; 
   }
