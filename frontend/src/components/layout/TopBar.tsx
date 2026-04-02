@@ -5,12 +5,13 @@ import { useThemeStore } from '@/components/ui/ThemeToggle'
 
 function FafIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
-      <path
-        d="M18 10 L82 10 C82 10 82 27 65 32 L36 37 L36 47 L69 45 C69 45 69 59 57 64 L36 67 L36 90 L18 90 Z"
-        fill="white"
-      />
-    </svg>
+    <img
+      src="/icons/icon-192.png"
+      alt="faf"
+      width={size}
+      height={size}
+      style={{ borderRadius: 6, display: 'block' }}
+    />
   )
 }
 
@@ -34,14 +35,8 @@ export default function TopBar() {
       }}>
         {/* Brand */}
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: 10,
-            background: 'linear-gradient(135deg, #BB00FF 0%, #9000CC 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 2px 12px rgba(187,0,255,0.45)',
-            flexShrink: 0,
-          }}>
-            <FafIcon size={20} />
+          <div style={{ flexShrink: 0 }}>
+            <FafIcon size={34} />
           </div>
           <div>
             <span style={{
