@@ -3,50 +3,76 @@ import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
   email: string;
-  password?: string; // Ahora es opcional (Google no envía password)
+  password?: string; // Opcional porque Google no envía contraseña
   name: string;
-  provider?: string; // Agregamos provider ('local' o 'google')
-  providerId?: string; // El ID de Google
-  avatar?: string; // La foto de perfil
+  provider?: string; // 'local' o 'google'
+  providerId?: string; // ID único de Google
+  avatar?: string; // Foto de perfil
   createdAt: Date;
   comparePassword(candidate: string): Promise<boolean>;
 }
 
 const UserSchema = new Schema<IUser>({
-  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  email: { 
+    type: String, 
+    required: true, 
+    unique: true, 
+    lowercase: true, 
+    trim: true 
+  },
   
-  // 1. LA MAGIA: Contraseña condicional
+  // Contraseña condicional a prueba de TypeScript
   password: { 
     type: String, 
     minlength: 6,
-    required: function() {
-      // Solo es obligatoria si el provider es 'local' o no hay provider
+    required: function(this: any): boolean {
+      // Solo es obligatoria si el registro es manual ('local') o si no tiene provider
       return this.provider === 'local' || !this.provider;
     }
   },
   
-  name:  { type: String, required: true, trim: true },
+  name: { 
+    type: String, 
+    required: true, 
+    trim: true 
+  },
   
-  // 2. Agregamos los campos de Google que estabas mandando desde auth.ts
-  provider: { type: String, default: 'local' },
-  providerId: { type: String },
-  avatar: { type: String },
+  // Campos extra para manejar OAuth
+  provider: { 
+    type: String, 
+    default: 'local' 
+  },
+  providerId: { 
+    type: String 
+  },
+  avatar: { 
+    type: String 
+  },
   
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  },
 });
 
-// 3. Protegemos el encriptado
+// Middleware para encriptar la contraseña antes de guardar
 UserSchema.pre('save', async function(next) {
-  // Si no hay contraseña (es de Google) o no fue modificada, saltamos este paso
-  if (!this.password || !this.isModified('password')) return next();
+  // Si no hay contraseña (es de Google) o si no fue modificada, saltamos la encriptación
+  if (!this.password || !this.isModified('password')) {
+    return next();
+  }
   
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
-UserSchema.methods.comparePassword = async function(c: string) {
-  if (!this.password) return false; // Si intenta loguearse normal pero es user de Google
-  return bcrypt.compare(c, this.password);
+// Método para comparar contraseñas en el Login
+UserSchema.methods.comparePassword = async function(candidate: string) {
+  // Si intenta loguearse de forma tradicional pero es un usuario de Google sin password
+  if (!this.password) {
+    return false; 
+  }
+  return bcrypt.compare(candidate, this.password);
 };
 
 export const User = mongoose.model<IUser>('User', UserSchema);
