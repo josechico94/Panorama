@@ -126,16 +126,6 @@ export default function AuthPage() {
                 onMouseLeave={e => { (e.currentTarget as any).style.borderColor = 'var(--border2)'; (e.currentTarget as any).style.background = 'var(--surface)' }}>
                 <GoogleIcon /> Continua con Google
               </a>
-              <a href={`${API_BASE}/api/v1/auth/user/facebook`} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                padding: '12px 0', borderRadius: 13, textDecoration: 'none',
-                background: 'rgba(24,119,242,0.08)', border: '1px solid rgba(24,119,242,0.2)',
-                color: 'var(--text)', fontSize: 14, fontWeight: 600, transition: 'all 0.2s',
-              }}
-                onMouseEnter={e => { (e.currentTarget as any).style.borderColor = 'rgba(24,119,242,0.4)'; (e.currentTarget as any).style.background = 'rgba(24,119,242,0.14)' }}
-                onMouseLeave={e => { (e.currentTarget as any).style.borderColor = 'rgba(24,119,242,0.2)'; (e.currentTarget as any).style.background = 'rgba(24,119,242,0.08)' }}>
-                <FacebookIcon /> Continua con Facebook
-              </a>
             </motion.div>
           )}
 
