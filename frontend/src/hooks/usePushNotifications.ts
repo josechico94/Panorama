@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useUserStore } from '@/store'
 
-const VAPID_PUBLIC_KEY = 'BPRTx71eoeImwMk0fLFTnJM-A5ztQpVXilnpIyjGMqXvlpeqSX1Iq2xiJQl7yRSAB0EC_aKGnxANu1Y6_EY3oKQ'
+const VAPID_PUBLIC_KEY = 'BMz4JtmcGfKoSE_UXVKZl9TzQ3w9YxFmOjTcHpxjrWq86zWo1AIkHFpHCVB7FWdw_bj_CZxDKyiAgL2-w84aN1s'
 const API = 'https://panoramabo.onrender.com/api/v1'
 
 function urlBase64ToUint8Array(base64String: string) {
