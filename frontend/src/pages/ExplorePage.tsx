@@ -50,6 +50,7 @@ const userIcon = L.divIcon({
 
 export default function ExplorePage() {
   const [view, setView] = useState<'list' | 'map'>('list')
+  const [activeNeighborhood, setActiveNeighborhood] = useState<string>('')
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
   const [geoLoading, setGeoLoading] = useState(false)
   const [geoError, setGeoError] = useState('')
@@ -70,15 +71,25 @@ export default function ExplorePage() {
   })
 
   const allPlaces: Place[] = data?.data ?? []
+  
+  // Extract unique neighborhoods from loaded places
+  const neighborhoods = Array.from(new Set(
+    allPlaces.map(p => p.location?.neighborhood).filter(Boolean)
+  )).sort() as string[]
+
+  // ── Filter by neighborhood ──
+  const filteredByNeighborhood = activeNeighborhood
+    ? allPlaces.filter(p => p.location?.neighborhood === activeNeighborhood)
+    : allPlaces
 
   // ── Sort by distance when nearby mode ──
   const places = nearbyMode && userPos
-    ? [...allPlaces]
+    ? [...filteredByNeighborhood]
         .filter(p => p.location?.coordinates?.lat && p.location?.coordinates?.lng)
         .map(p => ({ ...p, _dist: distance(userPos.lat, userPos.lng, p.location.coordinates.lat, p.location.coordinates.lng) }))
         .sort((a: any, b: any) => a._dist - b._dist)
         .slice(0, 20) as Place[]
-    : allPlaces
+    : filteredByNeighborhood
 
   // ── Geolocation ──
   const handleNearby = () => {
@@ -172,6 +183,38 @@ export default function ExplorePage() {
         </motion.div>
 
         <CategoryFilter />
+
+        {/* ── Neighborhood filter ── */}
+        {neighborhoods.length > 0 && (
+          <div style={{ marginTop: 10, display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }} className="no-scrollbar">
+            <button
+              onClick={() => setActiveNeighborhood('')}
+              style={{
+                flexShrink: 0, padding: '5px 12px', borderRadius: 20,
+                border: `1px solid ${activeNeighborhood === '' ? '#BB00FF' : 'var(--border)'}`,
+                background: activeNeighborhood === '' ? 'rgba(187,0,255,0.12)' : 'transparent',
+                color: activeNeighborhood === '' ? '#BB00FF' : 'var(--text-3)',
+                fontSize: 11, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+              📍 Tutti i quartieri
+            </button>
+            {neighborhoods.map(n => (
+              <button key={n}
+                onClick={() => setActiveNeighborhood(n === activeNeighborhood ? '' : n)}
+                style={{
+                  flexShrink: 0, padding: '5px 12px', borderRadius: 20,
+                  border: `1px solid ${activeNeighborhood === n ? '#BB00FF' : 'var(--border)'}`,
+                  background: activeNeighborhood === n ? 'rgba(187,0,255,0.12)' : 'var(--surface)',
+                  color: activeNeighborhood === n ? '#BB00FF' : 'var(--text-3)',
+                  fontSize: 11, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+                  whiteSpace: 'nowrap',
+                }}>
+                {n}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Search overlay ── */}
@@ -234,6 +277,18 @@ export default function ExplorePage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Neighborhood active banner ── */}
+      {activeNeighborhood && (
+        <div style={{ margin: '0 16px 10px', padding: '8px 14px', background: 'rgba(187,0,255,0.08)', border: '1px solid rgba(187,0,255,0.2)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 12, color: '#BB00FF', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+            📍 {activeNeighborhood}
+          </span>
+          <button onClick={() => setActiveNeighborhood('')} style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', fontSize: 11 }}>
+            Rimuovi ✕
+          </button>
+        </div>
+      )}
 
       {/* ── Geo error ── */}
       <AnimatePresence>
