@@ -16,13 +16,13 @@ export default function AppLayout() {
       width: '100%',
       maxWidth: '100vw',
       overflowX: 'hidden',
-      // Safe area for iPhone notch/dynamic island
-      paddingTop: 'env(safe-area-inset-top)',
+      // ❌ RIMOSSO: paddingTop safe-area dal wrapper
     }}>
       <TopBar />
       <main style={{
         flex: 1,
-        paddingTop: '56px',
+        // ✅ Compensiamo TopBar (56px) + safe-area-inset-top
+        paddingTop: 'calc(56px + env(safe-area-inset-top))',
         paddingBottom: 'calc(148px + env(safe-area-inset-bottom))',
         width: '100%',
         overflowX: 'hidden',

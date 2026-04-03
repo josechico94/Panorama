@@ -17,15 +17,37 @@ export default function TopBar() {
   const { theme, toggle } = useThemeStore()
 
   return (
-    <header className="topbar" style={{ height: 56 }}>
-      {/* Accent line */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #BB00FF, #9000CC, #BB00FF00)' }} />
+    <header
+      className="topbar"
+      style={{
+        // ✅ position fixed così rimane sempre in cima
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        background: 'var(--bg)',
+        // ✅ Altezza = 56px contenuto + safe area inset top (Dynamic Island/notch)
+        paddingTop: 'env(safe-area-inset-top)',
+        height: 'calc(56px + env(safe-area-inset-top))',
+        boxSizing: 'border-box',
+      }}
+    >
+      {/* Accent line — sotto la safe area */}
+      <div style={{
+        position: 'absolute',
+        top: 'env(safe-area-inset-top)',
+        left: 0,
+        right: 0,
+        height: 2,
+        background: 'linear-gradient(90deg, #BB00FF, #9000CC, #BB00FF00)'
+      }} />
 
       <div style={{
         width: '100%',
         maxWidth: 672,
         margin: '0 auto',
-        height: '100%',
+        height: 56, // solo la parte visibile, senza safe area
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -45,15 +67,13 @@ export default function TopBar() {
           </div>
         </Link>
 
-        {/* Actions — fixed size, no overflow */}
+        {/* Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
           <NotificationBell />
-
           <button onClick={toggle}
             style={{ width: 32, height: 32, borderRadius: 9, background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-3)', flexShrink: 0 }}>
             {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
           </button>
-
           <button onClick={() => navigate('/esplora')}
             style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(187,0,255,0.1)', border: '1px solid rgba(187,0,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
             <Search size={14} color="#BB00FF" />
