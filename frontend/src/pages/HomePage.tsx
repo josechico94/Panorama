@@ -183,14 +183,14 @@ export default function HomePage() {
       <section className="px-4 pb-8">
         <div className="divider-label mb-4">{isFiltering ? places.length + ' risultati' : 'Tutti i posti'}</div>
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-3">{Array.from({ length: 4 }).map((_, i) => <PlaceCardSkeleton key={i} />)}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{Array.from({ length: 4 }).map((_, i) => <PlaceCardSkeleton key={i} />)}</div>
         ) : places.length === 0 ? (
           <div className="text-center py-14">
             <p className="text-4xl mb-3">🔍</p>
             <p style={{ color: 'var(--text-2)', fontWeight: 500, fontSize: 14 }}>Nessun posto trovato</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">{places.map((place, i) => <PlaceCard key={place._id} place={place} index={i} />)}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{places.map((place, i) => <PlaceCard key={place._id} place={place} index={i} />)}</div>
         )}
       </section>
     </div>
