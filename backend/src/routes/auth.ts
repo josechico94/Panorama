@@ -11,7 +11,7 @@ const sign = (payload: object, expiresIn = '7d') =>
 
 const GOOGLE_CLIENT_ID     = process.env.GOOGLE_CLIENT_ID || '';
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
-const FRONTEND_URL         = process.env.FRONTEND_URL || 'https://panorama-frontend.vercel.app';
+const FRONTEND_URL         = process.env.FRONTEND_URL || 'https://faf-app.com';
 const BACKEND_URL          = process.env.BACKEND_URL  || 'https://panoramabo.onrender.com';
 
 // ── Admin login ──
@@ -44,12 +44,12 @@ router.post('/user/register', async (req: Request, res: Response) => {
   try {
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) { res.status(400).json({ error: 'Email già registrata' }); return; }
-    const user = await User.create({ email, password, name, provider: 'local' });
+    const user = await User.create({ email: email.toLowerCase(), password, name, provider: 'local' });
     const token = sign({ id: user._id, role: 'user' });
     res.status(201).json({ token, user: { id: user._id, email: user.email, name: user.name } });
   } catch (err: any) {
     if (err.code === 11000) res.status(400).json({ error: 'Email già registrata' });
-    else res.status(500).json({ error: 'Registrazione fallita' });
+    else res.status(500).json({ error: 'Registrazione fallita: ' + err.message });
   }
 });
 
@@ -57,7 +57,11 @@ router.post('/user/register', async (req: Request, res: Response) => {
 router.post('/user/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email: email?.toLowerCase() });
-  if (!user || !(await user.comparePassword(password))) {
+  if (!user) { res.status(401).json({ error: 'Credenziali non valide' }); return; }
+  if ((user as any).provider === 'google') {
+    res.status(401).json({ error: 'Questo account usa Google. Accedi con Google.' }); return;
+  }
+  if (!(await user.comparePassword(password))) {
     res.status(401).json({ error: 'Credenziali non valide' }); return;
   }
   const token = sign({ id: user._id, role: 'user' });
@@ -87,7 +91,7 @@ router.post('/user/forgot-password', async (req: Request, res: Response) => {
     (user as any).resetPasswordToken = token;
     (user as any).resetPasswordExpires = new Date(Date.now() + 3600000);
     await user.save();
-    console.log(`[RESET] Link: ${FRONTEND_URL}/reset-password?token=${token}`);
+    console.log(`[RESET] ${FRONTEND_URL}/reset-password?token=${token}`);
     res.json({ message: 'Se l\'email esiste riceverai un link' });
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
@@ -111,10 +115,7 @@ router.post('/user/reset-password', async (req: Request, res: Response) => {
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
 
-// ─────────────────────────────────────────────
-// GOOGLE OAUTH
-// ─────────────────────────────────────────────
-
+// ── GOOGLE OAUTH ──
 router.get('/user/google', (_req: Request, res: Response) => {
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
@@ -133,6 +134,7 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
     res.redirect(`${FRONTEND_URL}/accedi?error=google_cancelled`); return;
   }
   try {
+    // Exchange code for token
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -145,25 +147,47 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
       }),
     });
     const tokenData = await tokenRes.json() as any;
-    if (!tokenData.access_token) throw new Error('No access token');
+    if (!tokenData.access_token) throw new Error('No access token from Google');
 
+    // Get user info
     const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
     const googleUser = await userRes.json() as any;
     const { id: googleId, email, name, picture } = googleUser;
 
-    let user = await User.findOne({ $or: [{ providerId: googleId, provider: 'google' }, { email }] } as any);
+    if (!email) throw new Error('No email from Google');
+
+    // Find or create user - use updateOne to avoid password validation
+    let user = await User.findOne({
+      $or: [
+        { providerId: googleId, provider: 'google' },
+        { email: email.toLowerCase() }
+      ]
+    } as any);
+
     if (!user) {
-      user = await User.create({ name, email, provider: 'google', providerId: googleId, avatar: picture });
+      // Create with a random password to satisfy schema validation
+      const randomPass = crypto.randomBytes(16).toString('hex');
+      user = await User.create({
+        name: name || email.split('@')[0],
+        email: email.toLowerCase(),
+        password: randomPass,
+        provider: 'google',
+        providerId: googleId,
+        avatar: picture,
+      });
     } else {
-      (user as any).providerId = googleId;
-      if (!(user as any).avatar) (user as any).avatar = picture;
-      await user.save();
+      // Update Google info without triggering password validation
+      await User.updateOne(
+        { _id: user._id },
+        { $set: { provider: 'google', providerId: googleId, avatar: picture } }
+      );
     }
 
     const jwtToken = sign({ id: user._id, role: 'user' });
-    res.redirect(`${FRONTEND_URL}/auth-callback?token=${jwtToken}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`);
+    const redirectUrl = `${FRONTEND_URL}/auth-callback?token=${jwtToken}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`;
+    res.redirect(redirectUrl);
   } catch (e: any) {
     console.error('Google OAuth error:', e.message);
     res.redirect(`${FRONTEND_URL}/accedi?error=google_failed`);
@@ -178,7 +202,7 @@ router.post('/venue/login', async (req: Request, res: Response) => {
   const bcrypt = await import('bcryptjs');
   const valid = await bcrypt.compare(password, owner.password);
   if (!valid) { res.status(401).json({ error: 'Credenziali non valide' }); return; }
-  if (!owner.placeId) { res.status(400).json({ error: 'Account non associato a nessun locale. Contatta il Super Admin.' }); return; }
+  if (!owner.placeId) { res.status(400).json({ error: 'Account non associato a nessun locale.' }); return; }
   const token = sign({ id: owner._id, role: 'venue_owner', placeId: owner.placeId.toString() });
   res.json({ token, owner: { id: owner._id, email: owner.email, name: owner.name, placeId: owner.placeId } });
 });

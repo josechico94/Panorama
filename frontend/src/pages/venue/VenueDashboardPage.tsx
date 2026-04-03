@@ -94,13 +94,13 @@ export default function VenueDashboardPage() {
         {tab === 'attivi' && (
           <motion.div key="attivi" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <button onClick={openNew} style={{
-              width: '100%', padding: '13px', borderRadius: 14, border: '2px dashed rgba(232,98,42,0.35)',
-              background: 'rgba(232,98,42,0.06)', color: '#BB00FF', cursor: 'pointer',
+              width: '100%', padding: '13px', borderRadius: 14, border: '2px dashed rgba(187,0,255,0.35)',
+              background: 'rgba(187,0,255,0.06)', color: '#BB00FF', cursor: 'pointer',
               fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               marginBottom: 14, transition: 'all 0.2s',
             }}
-              onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(232,98,42,0.6)')}
-              onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(232,98,42,0.35)')}>
+              onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(187,0,255,0.6)')}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(187,0,255,0.35)')}>
               <Plus size={16} /> Crea nuovo coupon
             </button>
 
@@ -158,7 +158,7 @@ function CouponCard({ coupon, onEdit, onDelete }: { coupon: any; onEdit: () => v
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#BB00FF', fontFamily: 'DM Mono,monospace', background: 'rgba(232,98,42,0.12)', border: '1px solid rgba(187,0,255,0.25)', borderRadius: 7, padding: '2px 8px' }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#BB00FF', fontFamily: 'DM Mono,monospace', background: 'rgba(187,0,255,0.12)', border: '1px solid rgba(187,0,255,0.25)', borderRadius: 7, padding: '2px 8px' }}>
               {coupon.discountType === 'percentage' ? `-${coupon.discountValue}%` : coupon.discountType === 'fixed' ? `-€${coupon.discountValue}` : 'OMAGGIO'}
             </span>
             {daysLeft <= 3 && <span style={{ fontSize: 9, color: '#fbbf24', fontWeight: 700, background: 'rgba(251,191,36,0.1)', borderRadius: 100, padding: '1px 6px' }}>⚠ {daysLeft}g rimasti</span>}

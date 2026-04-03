@@ -9,16 +9,21 @@ export default function AppLayout() {
   return (
     <div style={{
       minHeight: '100dvh',
+      minHeight: '100svh',
       display: 'flex',
       flexDirection: 'column',
       background: 'var(--bg)',
       transition: 'background 0.3s ease',
+      maxWidth: '100vw',
+      overflowX: 'hidden',
     }}>
       <TopBar />
       <main style={{
         flex: 1,
-        paddingTop: '56px',    /* TopBar height */
-        paddingBottom: '136px', /* BottomNav + CouponSlider */
+        paddingTop: '56px',
+        paddingBottom: '148px',
+        width: '100%',
+        overflowX: 'hidden',
       }}>
         <Outlet />
       </main>
