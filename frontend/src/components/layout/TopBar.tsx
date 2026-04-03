@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Search, Sun, Moon } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { useThemeStore } from '@/components/ui/ThemeToggle'
+import NotificationBell from '@/components/ui/NotificationBell'
 
 function FafIcon({ size = 18 }: { size?: number }) {
   return (
@@ -44,7 +45,7 @@ export default function TopBar() {
               color: '#BB00FF', letterSpacing: '-0.03em',
               display: 'block', lineHeight: 1.1,
             }}>
-              FAF
+              faf
             </span>
             <span style={{
               fontSize: 8, color: 'var(--text-3)',
@@ -59,6 +60,9 @@ export default function TopBar() {
 
         {/* Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Notification bell */}
+          <NotificationBell />
+
           {/* Theme toggle */}
           <button
             onClick={toggle}

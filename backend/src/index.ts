@@ -14,7 +14,7 @@ import reviewsRouter    from './routes/reviews';
 import superadminRouter from './routes/superadmin';
 import experiencesRouter  from './routes/experiences';
 import pushRouter from './routes/push';
-
+import { startCronJobs } from './utils/cronJobs';
 
 dotenv.config();
 
@@ -30,7 +30,6 @@ app.use('/api/v1/push', pushRouter);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-// DEV ONLY — remove before production
 app.post('/dev/setup-venue', async (req, res) => {
   try {
     const { Place } = await import('./models/Place');
@@ -44,7 +43,7 @@ app.post('/dev/setup-venue', async (req, res) => {
     }
     await (VenueOwner as any).deleteOne({ email });
     await (VenueOwner as any).create({ email, password, name, placeId: place._id });
-    res.json({ ok: true, credentials: { email, password }, place: place.name, loginUrl: 'http://localhost:5173/locale/login' });
+    res.json({ ok: true, credentials: { email, password }, place: place.name });
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
 
@@ -65,7 +64,10 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 });
 
 connectDB().then(() => {
-  app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`)
+    startCronJobs()
+  });
 });
 
 export default app;
