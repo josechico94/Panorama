@@ -265,7 +265,7 @@ function CouponCard({ userCoupon, index, used = false }: { userCoupon: any; inde
       transition={{ delay: index * 0.06 }}
     >
       <Link
-        to={used ? '#' : `/coupon/${userCoupon._id}`}
+        to={used ? '#' : `/coupon/${coupon?._id}`}
         style={{ textDecoration: 'none', display: 'block' }}
         onClick={e => used && e.preventDefault()}
       >
