@@ -8,7 +8,6 @@ import PWAInstallPrompt from '@/components/ui/PWAInstallPrompt'
 export default function AppLayout() {
   return (
     <div style={{
-      minHeight: '100dvh',
       minHeight: '100svh',
       display: 'flex',
       flexDirection: 'column',
