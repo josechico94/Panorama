@@ -31,8 +31,9 @@ function Root() {
   const handleOnboardingDone = () => {
     localStorage.setItem('faf-onboarding', '1')
     setShowOnboarding(false)
-    // Always go to home after onboarding
     window.history.replaceState({}, '', '/')
+    // Force full reload to reset all state
+    window.location.href = '/'
   }
 
   return (

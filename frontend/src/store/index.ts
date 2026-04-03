@@ -44,7 +44,15 @@ export const useAppStore = create<AppState>()(
       isSavedExperience: (id) => get().savedExperiences.includes(id),
       setSearchQuery: (q) => set({ searchQuery: q }),
     }),
-    { name: 'cityapp-store' }
+    { 
+      name: 'cityapp-store',
+      partialize: (state) => ({
+        city: state.city,
+        savedPlaces: state.savedPlaces,
+        savedExperiences: state.savedExperiences,
+        // searchQuery and activeCategory are NOT persisted - reset on page load
+      }),
+    }
   )
 )
 
