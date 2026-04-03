@@ -124,18 +124,19 @@ export default function HomePage() {
               const days = Math.ceil((new Date(c.validUntil).getTime() - Date.now()) / (1000*60*60*24))
               return (
                 <Link key={c._id} to={'/coupon/' + c._id} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                  <div style={{ width: 158, background: '#fff', border: '1px solid rgba(187,0,255,0.12)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 12px rgba(187,0,255,0.08)' }}>
-                    <div style={{ height: 80, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ width: 158, background: 'var(--bg2)', border: '1px solid rgba(187,0,255,0.2)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
+                    <div style={{ height: 90, overflow: 'hidden', position: 'relative' }}>
                       <img src={c.placeId?.media?.coverImage || 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=300&q=70'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      <span style={{ position: 'absolute', top: 6, right: 6, background: 'linear-gradient(135deg,#BB00FF,#9000CC)', color: '#fff', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6, fontFamily: 'DM Mono' }}>
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(7,7,15,0.7) 0%, transparent 60%)' }} />
+                      <span style={{ position: 'absolute', top: 7, right: 7, background: 'linear-gradient(135deg,#BB00FF,#9000CC)', color: '#fff', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 7, fontFamily: 'DM Mono', boxShadow: '0 2px 8px rgba(187,0,255,0.5)' }}>
                         {c.discountType === 'percentage' ? '-' + c.discountValue + '%' : c.discountType === 'fixed' ? '-€' + c.discountValue : 'OMAGGIO'}
                       </span>
                     </div>
-                    <div style={{ padding: '8px 10px' }}>
-                      <p style={{ color: 'var(--text-3)', fontSize: 9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.placeId?.name}</p>
-                      <p style={{ color: 'var(--text)', fontSize: 11, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{c.title}</p>
-                      <p style={{ color: days <= 2 ? '#ef4444' : 'var(--text-3)', fontSize: 9, marginTop: 3 }}>
-                        {days === 0 ? 'Scade oggi!' : days === 1 ? 'Scade domani' : (days + 'g rimasti')}
+                    <div style={{ padding: '9px 11px' }}>
+                      <p style={{ color: 'var(--text-3)', fontSize: 9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: 600 }}>{c.placeId?.name}</p>
+                      <p style={{ color: '#BB00FF', fontSize: 12, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 3 }}>{c.title}</p>
+                      <p style={{ color: days <= 2 ? '#ef4444' : 'var(--text-3)', fontSize: 9, marginTop: 4, display: 'flex', alignItems: 'center', gap: 3 }}>
+                        {days === 0 ? '⚡ Scade oggi!' : days === 1 ? '⚡ Scade domani' : ('📅 ' + days + 'g rimasti')}
                       </p>
                     </div>
                   </div>
