@@ -12,6 +12,7 @@ import PlaceDetailPage from '@/pages/PlaceDetailPage'
 import SavedPage from '@/pages/SavedPage'
 import CouponDetailPage from '@/pages/CouponDetailPage'
 import AuthPage from '@/pages/user/AuthPage'
+import AuthCallbackPage from '@/pages/user/AuthCallbackPage'
 import ProfilePage from '@/pages/user/ProfilePage'
 
 import AdminLoginPage from '@/pages/admin/AdminLoginPage'
@@ -53,6 +54,9 @@ export default function App() {
 
       {/* Auth */}
       <Route path="/accedi" element={<AuthPage />} />
+
+      {/* OAuth callback */}
+      <Route path="/auth-callback" element={<AuthCallbackPage />} />
 
       {/* Venue portal */}
       <Route path="/locale/login" element={<VenueLoginPage />} />
