@@ -4,6 +4,7 @@ import TopBar from './TopBar'
 import CouponSlider from '@/components/coupons/CouponSlider'
 import CouponNotifications from '@/components/coupons/CouponNotifications'
 import PWAInstallPrompt from '@/components/ui/PWAInstallPrompt'
+import SearchOverlay from '@/components/search/SearchOverlay'
 
 export default function AppLayout() {
   return (
@@ -16,12 +17,13 @@ export default function AppLayout() {
       width: '100%',
       maxWidth: '100vw',
       overflowX: 'hidden',
-      // ❌ RIMOSSO: paddingTop safe-area dal wrapper
+      // ✅ Nessun paddingTop qui — la TopBar è fixed e gestisce da sola la safe area
     }}>
       <TopBar />
+
       <main style={{
         flex: 1,
-        // ✅ Compensiamo TopBar (56px) + safe-area-inset-top
+        // ✅ Compensa: altezza TopBar (56px) + safe-area-inset-top (Dynamic Island / notch)
         paddingTop: 'calc(56px + env(safe-area-inset-top))',
         paddingBottom: 'calc(148px + env(safe-area-inset-bottom))',
         width: '100%',
@@ -30,8 +32,13 @@ export default function AppLayout() {
       }}>
         <Outlet />
       </main>
+
       <CouponNotifications />
       <CouponSlider />
+
+      {/* ✅ SearchOverlay globale — accessibile da TopBar in qualsiasi pagina */}
+      <SearchOverlay />
+
       <PWAInstallPrompt />
       <BottomNav />
     </div>
