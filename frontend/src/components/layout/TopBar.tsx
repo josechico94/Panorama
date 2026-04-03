@@ -1,21 +1,9 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Search, Sun, Moon } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { useThemeStore } from '@/components/ui/ThemeToggle'
 import NotificationBell from '@/components/ui/NotificationBell'
 import { useSearchUI } from '@/components/search/SearchOverlay'
-
-function FafIcon({ size = 18 }: { size?: number }) {
-  return (
-    <img
-      src="/icons/icon-192.png"
-      alt="faf"
-      width={size}
-      height={size}
-      style={{ borderRadius: 6, display: 'block', flexShrink: 0 }}
-    />
-  )
-}
 
 export default function TopBar() {
   const { city } = useAppStore()
@@ -32,13 +20,12 @@ export default function TopBar() {
         right: 0,
         zIndex: 100,
         background: 'var(--bg)',
-        // ✅ Altezza = 56px contenuto + safe area (Dynamic Island / notch iPhone)
         paddingTop: 'env(safe-area-inset-top)',
         height: 'calc(56px + env(safe-area-inset-top))',
         boxSizing: 'border-box',
       }}
     >
-      {/* Accent line — posizionata sotto la safe area */}
+      {/* Accent line */}
       <div style={{
         position: 'absolute',
         top: 'env(safe-area-inset-top)',
@@ -60,24 +47,36 @@ export default function TopBar() {
         boxSizing: 'border-box',
       }}>
 
-        {/* ── Brand ── */}
+        {/* ── Brand: icona tonda + scritta viola ── */}
         <Link
           to="/"
           style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}
         >
-          <FafIcon size={30} />
-          <div>
-            <span style={{
-              fontFamily: 'DM Sans',
-              fontWeight: 800,
-              fontSize: 17,
-              color: '#BB00FF',
-              letterSpacing: '-0.03em',
+          {/* Icona tonda */}
+          <img
+            src="/icons/icon-192.png"
+            alt="faf icon"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
               display: 'block',
-              lineHeight: 1.1,
-            }}>
-              faf
-            </span>
+              flexShrink: 0,
+            }}
+          />
+
+          {/* ✅ Scritta "Faf" viola + città sotto */}
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <img
+              src="/icons/Faf_Scritta.png"
+              alt="faf"
+              style={{
+                height: 20,
+                width: 'auto',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
             <span style={{
               fontSize: 7,
               color: 'var(--text-3)',
@@ -86,7 +85,7 @@ export default function TopBar() {
               fontFamily: 'DM Mono',
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
-              marginTop: 1,
+              marginTop: 2,
             }}>
               {city}
             </span>
@@ -117,7 +116,7 @@ export default function TopBar() {
             {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
           </button>
 
-          {/* ✅ Lente unica — apre SearchOverlay globale */}
+          {/* Lente — apre SearchOverlay globale */}
           <button
             onClick={openSearch}
             style={{
