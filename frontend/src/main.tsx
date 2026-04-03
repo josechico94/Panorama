@@ -7,6 +7,7 @@ import { ThemeProvider } from './components/ui/ThemeToggle'
 import SplashScreen from './components/ui/SplashScreen'
 import Onboarding from './components/ui/Onboarding'
 import './index.css'
+import 'leaflet/dist/leaflet.css'
 
 const queryClient = new QueryClient({
   defaultOptions: {
