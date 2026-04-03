@@ -62,7 +62,7 @@ export async function sendPushToUser(userId: string, payload: { title: string; b
       webpush.sendNotification(
         { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
         payloadStr
-      ).catch(async (err) => {
+      ).catch(async (err: any) => {
         // Remove invalid subscriptions
         if (err.statusCode === 410 || err.statusCode === 404) {
           await PushSubscription.deleteOne({ _id: sub._id })
