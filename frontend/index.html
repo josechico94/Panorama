@@ -32,6 +32,21 @@
     <meta name="twitter:image" content="https://faf-app.com/og-image.png" />
 
     <link rel="manifest" href="/manifest.json?v=3" />
+
+    <style>
+      /* iPhone safe area global fix */
+      :root {
+        --sat: env(safe-area-inset-top);
+        --sab: env(safe-area-inset-bottom);
+        --sal: env(safe-area-inset-left);
+        --sar: env(safe-area-inset-right);
+      }
+      * { -webkit-tap-highlight-color: transparent; }
+      body {
+        overscroll-behavior: none;
+        -webkit-overflow-scrolling: touch;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

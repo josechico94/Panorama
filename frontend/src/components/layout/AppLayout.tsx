@@ -1,4 +1,4 @@
-﻿import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import BottomNav from './BottomNav'
 import TopBar from './TopBar'
 import CouponSlider from '@/components/coupons/CouponSlider'
@@ -13,16 +13,20 @@ export default function AppLayout() {
       flexDirection: 'column',
       background: 'var(--bg)',
       transition: 'background 0.3s ease',
+      width: '100%',
       maxWidth: '100vw',
       overflowX: 'hidden',
+      // Safe area for iPhone notch/dynamic island
+      paddingTop: 'env(safe-area-inset-top)',
     }}>
       <TopBar />
       <main style={{
         flex: 1,
         paddingTop: '56px',
-        paddingBottom: '148px',
+        paddingBottom: 'calc(148px + env(safe-area-inset-bottom))',
         width: '100%',
         overflowX: 'hidden',
+        WebkitOverflowScrolling: 'touch' as any,
       }}>
         <Outlet />
       </main>
