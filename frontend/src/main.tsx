@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, useNavigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import { ThemeProvider } from './components/ui/ThemeToggle'
@@ -31,6 +31,8 @@ function Root() {
   const handleOnboardingDone = () => {
     localStorage.setItem('faf-onboarding', '1')
     setShowOnboarding(false)
+    // Always go to home after onboarding
+    window.history.replaceState({}, '', '/')
   }
 
   return (
