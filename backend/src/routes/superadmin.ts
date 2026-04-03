@@ -42,18 +42,23 @@ router.get('/places', async (req: Request, res: Response) => {
   try {
     const { city, category, search, active, page = '1', limit = '100' } = req.query;
     const filter: Record<string, any> = {};
-    if (city) filter.city = city;
-    if (category) filter.category = category;
-    if (search) filter.name = new RegExp(String(search), 'i');
+    if (city) filter['city'] = String(city);
+    if (category) filter['category'] = String(category);
+    if (search) filter['name'] = { $regex: String(search), $options: 'i' };
     if (active === 'true') filter['meta.active'] = true;
     if (active === 'false') filter['meta.active'] = { $ne: true };
-    const skip = (parseInt(String(page)) - 1) * parseInt(String(limit));
+    const pageNum = Math.max(1, parseInt(String(page)) || 1);
+    const limitNum = Math.min(200, parseInt(String(limit)) || 100);
+    const skip = (pageNum - 1) * limitNum;
     const [places, total] = await Promise.all([
-      Place.find(filter).sort({ _id: -1 }).skip(skip).limit(parseInt(String(limit))),
+      Place.find(filter).sort({ _id: -1 }).skip(skip).limit(limitNum).lean(),
       Place.countDocuments(filter),
     ]);
     res.json({ data: places, total });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) {
+    console.error('[SA places error]', e.message, e.stack);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 router.post('/places', async (req: Request, res: Response) => {

@@ -269,11 +269,11 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
             disabled={uploading}
             style={{
               width: '100%', padding: '12px', borderRadius: 10, border: '2px dashed rgba(187,0,255,0.3)',
-              background: 'rgba(232,98,42,0.05)', color: uploading ? '#BB00FF' : 'rgba(240,237,232,0.5)',
+              background: 'rgba(187,0,255,0.05)', color: uploading ? '#BB00FF' : 'rgba(240,237,232,0.5)',
               cursor: uploading ? 'default' : 'pointer', fontSize: 13,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s',
             }}
-            onMouseEnter={e => !uploading && ((e.currentTarget as HTMLElement).style.borderColor = 'rgba(232,98,42,0.6)')}
+            onMouseEnter={e => !uploading && ((e.currentTarget as HTMLElement).style.borderColor = 'rgba(187,0,255,0.6)')}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(187,0,255,0.3)'}
           >
             {uploading ? (
