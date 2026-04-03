@@ -13,6 +13,8 @@ import venueRouter      from './routes/venue';
 import reviewsRouter    from './routes/reviews';
 import superadminRouter from './routes/superadmin';
 import experiencesRouter  from './routes/experiences';
+import pushRouter from './routes/push';
+
 
 dotenv.config();
 
@@ -24,6 +26,7 @@ app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173', cred
 app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use('/api/v1/push', pushRouter);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 

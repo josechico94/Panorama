@@ -3,6 +3,7 @@ import { Coupon } from '../models/Coupon';
 import { UserCoupon } from '../models/UserCoupon';
 import { requireUser } from '../middleware/auth';
 import type { AuthRequest } from '../middleware/auth';
+import { sendPushToUser } from './push';
 
 const router = Router();
 
@@ -10,13 +11,8 @@ const router = Router();
 router.get('/active', async (_req: Request, res: Response) => {
   try {
     const now = new Date();
-
-    // Use start of today and end of today to avoid timezone issues
-    // A coupon is active if: active=true AND validUntil >= start of today AND validFrom <= end of today
-    // Compare only dates, not times — avoids timezone issues
     const startOfToday = new Date(now);
     startOfToday.setUTCHours(0, 0, 0, 0);
-
     const endOfDay = new Date(now);
     endOfDay.setUTCHours(23, 59, 59, 999);
 
@@ -24,20 +20,15 @@ router.get('/active', async (_req: Request, res: Response) => {
       active: true,
       validUntil: { $gte: startOfToday },
       validFrom:  { $lte: endOfDay },
-      $or: [
-        { maxUses: null },
-        { $expr: { $lt: ['$usesCount', '$maxUses'] } }
-      ],
+      $or: [{ maxUses: null }, { $expr: { $lt: ['$usesCount', '$maxUses'] } }],
     })
     .populate('placeId', 'name slug location media category')
     .sort({ createdAt: -1 })
     .limit(20)
     .lean();
 
-    console.log(`[coupons/active] found ${coupons.length} active coupons, now=${now.toISOString()}, startOfToday=${startOfToday.toISOString()}`);
     res.json({ data: coupons });
   } catch (e: any) {
-    console.error('coupons/active error:', e.message);
     res.status(500).json({ error: 'Failed' });
   }
 });
@@ -52,7 +43,6 @@ router.get('/my/list', requireUser, async (req: AuthRequest, res: Response) => {
       .lean();
     res.json({ data: userCoupons });
   } catch (e: any) {
-    console.error('my/list error:', e.message);
     res.status(500).json({ error: 'Failed' });
   }
 });
@@ -78,7 +68,6 @@ router.get('/validate/:uniqueCode', async (req: Request, res: Response) => {
     }
     res.json({ valid: true, userCoupon: uc });
   } catch (e: any) {
-    console.error('validate error:', e.message);
     res.status(500).json({ error: 'Errore validazione' });
   }
 });
@@ -90,9 +79,18 @@ router.post('/use/:uniqueCode', async (req: Request, res: Response) => {
     if (!uc) { res.status(404).json({ error: 'Non trovato' }); return; }
     if (uc.status !== 'active') { res.status(400).json({ error: 'Non utilizzabile' }); return; }
     await UserCoupon.findByIdAndUpdate(uc._id, { status: 'used', usedAt: new Date() });
+
+    // Push notification: coupon used confirmation
+    try {
+      await sendPushToUser(String(uc.userId), {
+        title: '✅ Coupon utilizzato!',
+        body: 'Il tuo sconto è stato applicato con successo. Grazie!',
+        url: '/profilo',
+      })
+    } catch {}
+
     res.json({ success: true });
   } catch (e: any) {
-    console.error('use error:', e.message);
     res.status(500).json({ error: 'Errore' });
   }
 });
@@ -104,10 +102,8 @@ router.get('/place/:placeId', async (req: Request, res: Response) => {
     const startOfToday = new Date(now); startOfToday.setUTCHours(0, 0, 0, 0);
     const endOfToday = new Date(now); endOfToday.setUTCHours(23, 59, 59, 999);
     const coupons = await Coupon.find({
-      placeId: req.params.placeId,
-      active: true,
-      validUntil: { $gte: startOfToday },
-      validFrom:  { $lte: endOfToday },
+      placeId: req.params.placeId, active: true,
+      validUntil: { $gte: startOfToday }, validFrom: { $lte: endOfToday },
     }).lean();
     res.json({ data: coupons });
   } catch (e: any) {
@@ -118,7 +114,8 @@ router.get('/place/:placeId', async (req: Request, res: Response) => {
 // POST /api/v1/coupons/:id/claim
 router.post('/:id/claim', requireUser, async (req: AuthRequest, res: Response) => {
   try {
-    const theCoupon = await Coupon.findById(req.params.id);
+    const theCoupon = await Coupon.findById(req.params.id)
+      .populate('placeId', 'name')
     if (!theCoupon) { res.status(404).json({ error: 'Coupon non trovato' }); return; }
 
     const now = new Date();
@@ -129,9 +126,7 @@ router.post('/:id/claim', requireUser, async (req: AuthRequest, res: Response) =
       && theCoupon.validUntil >= startOfToday
       && theCoupon.validFrom <= endOfToday;
 
-    if (!isActive) {
-      res.status(400).json({ error: 'Coupon non più valido' }); return;
-    }
+    if (!isActive) { res.status(400).json({ error: 'Coupon non più valido' }); return; }
     if (theCoupon.maxUses !== null && theCoupon.usesCount >= theCoupon.maxUses) {
       res.status(400).json({ error: 'Coupon esaurito' }); return;
     }
@@ -149,12 +144,22 @@ router.post('/:id/claim', requireUser, async (req: AuthRequest, res: Response) =
     });
 
     await Coupon.findByIdAndUpdate(theCoupon._id, { $inc: { usesCount: 1 } });
+
+    // Push notification: coupon claimed
+    const placeName = (theCoupon.placeId as any)?.name || 'il locale'
+    try {
+      await sendPushToUser(String(req.userId), {
+        title: '🎫 Coupon scaricato!',
+        body: `Hai ottenuto "${theCoupon.title}" da ${placeName}. Mostralo per riscattare lo sconto!`,
+        url: `/coupon/${theCoupon._id}`,
+      })
+    } catch {}
+
     res.status(201).json({ data: userCoupon });
   } catch (err: any) {
     if (err.code === 11000) {
       res.status(400).json({ error: 'Hai già scaricato questo coupon' });
     } else {
-      console.error('claim error:', err.message);
       res.status(500).json({ error: 'Errore nel riscatto' });
     }
   }
