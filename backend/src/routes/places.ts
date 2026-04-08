@@ -57,26 +57,8 @@ router.get('/featured', async (_req: Request, res: Response) => {
   }
 });
 
-// GET /api/v1/places/:slug
-router.get('/:slug', async (req: Request, res: Response) => {
-  try {
-    const place = await Place.findOneAndUpdate(
-      { slug: req.params.slug, 'meta.active': true },
-      { $inc: { 'meta.views': 1 } },
-      { new: true }
-    ).lean({ virtuals: true });
-
-    if (!place) {
-      res.status(404).json({ error: 'Place not found' });
-      return;
-    }
-    res.json({ data: place });
-  } catch {
-    res.status(500).json({ error: 'Failed to fetch place' });
-  }
-});
-
 // GET /api/v1/places/nearby?lat=&lng=&radius=&exclude=
+// ✅ PRIMA di /:slug — altrimenti Express cattura 'nearby' come slug
 router.get('/nearby', async (req: Request, res: Response) => {
   try {
     const { lat, lng, radius = '1000', limit = '6', exclude } = req.query;
@@ -111,6 +93,25 @@ router.get('/nearby', async (req: Request, res: Response) => {
     
     res.json({ data: withDist });
   } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// GET /api/v1/places/:slug
+router.get('/:slug', async (req: Request, res: Response) => {
+  try {
+    const place = await Place.findOneAndUpdate(
+      { slug: req.params.slug, 'meta.active': true },
+      { $inc: { 'meta.views': 1 } },
+      { new: true }
+    ).lean({ virtuals: true });
+
+    if (!place) {
+      res.status(404).json({ error: 'Place not found' });
+      return;
+    }
+    res.json({ data: place });
+  } catch {
+    res.status(500).json({ error: 'Failed to fetch place' });
+  }
 });
 
 export default router;

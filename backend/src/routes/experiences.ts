@@ -50,16 +50,28 @@ function makeSlug(title: string) {
 function sanitizeBody(body: any) {
   const b = { ...body };
   if (!b.slug && b.title) b.slug = makeSlug(b.title);
-  // Ensure stops have valid structure
+
+  // ✅ Fix stops: accetta ObjectId sia come stringa 24 char che come oggetto MongoDB
   if (Array.isArray(b.stops)) {
     b.stops = b.stops
-      .filter((s: any) => s.placeId && String(s.placeId).length === 24)
+      .map((s: any) => {
+        // placeId può arrivare come stringa "abc123..." o come oggetto { _id: "..." }
+        const pid = s.placeId?._id ?? s.placeId
+        return { ...s, placeId: String(pid) }
+      })
+      .filter((s: any) => {
+        const valid = s.placeId && /^[a-f0-9]{24}$/i.test(s.placeId)
+        if (!valid) console.warn('[experience] stop scartato — placeId non valido:', s.placeId)
+        return valid
+      })
       .map((s: any, i: number) => ({
         placeId: s.placeId,
         order: s.order ?? i + 1,
         note: s.note || '',
         duration: parseInt(s.duration) || 60,
       }));
+
+    console.log(`[experience] stops salvati: ${b.stops.length}`)
   }
   return b;
 }
