@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { Admin } from '../models/Admin';
 import { User } from '../models/User';
 import { VenueOwner } from '../models/VenueOwner';
+import { sendWelcomeEmail } from '../services/email';
 
 const router = Router();
 const sign = (payload: object, expiresIn = '7d') =>
@@ -46,6 +47,8 @@ router.post('/user/register', async (req: Request, res: Response) => {
     if (existing) { res.status(400).json({ error: 'Email già registrata' }); return; }
     const user = await User.create({ email: email.toLowerCase(), password, name, provider: 'local' });
     const token = sign({ id: user._id, role: 'user' });
+    // ✅ Mail di benvenuto per registrazione locale
+    sendWelcomeEmail(user.email, user.name).catch(() => {});
     res.status(201).json({ token, user: { id: user._id, email: user.email, name: user.name } });
   } catch (err: any) {
     if (err.code === 11000) res.status(400).json({ error: 'Email già registrata' });
@@ -177,6 +180,8 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
         providerId: googleId,
         avatar: picture,
       });
+      // ✅ Mail di benvenuto solo per nuovi utenti Google
+      sendWelcomeEmail(email.toLowerCase(), name || email.split(`@`)[0]).catch(() => {});
     } else {
       // Update Google info without triggering password validation
       await User.updateOne(
