@@ -32,6 +32,7 @@ export default function BottomNav() {
         pointerEvents: 'all',
         maxWidth: 420,
         margin: '0 auto',
+        marginBottom: 12,
         background: 'var(--nav-bg)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',

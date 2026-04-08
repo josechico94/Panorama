@@ -25,7 +25,7 @@ export default function AppLayout() {
         flex: 1,
         // ✅ Compensa: altezza TopBar (56px) + safe-area-inset-top (Dynamic Island / notch)
         paddingTop: 'calc(56px + env(safe-area-inset-top))',
-        paddingBottom: 'calc(100px + env(safe-area-inset-bottom))',
+        paddingBottom: 'calc(112px + env(safe-area-inset-bottom))',
         width: '100%',
         overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch' as any,
