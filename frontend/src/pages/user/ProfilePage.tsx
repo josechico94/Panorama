@@ -298,6 +298,47 @@ export default function ProfilePage() {
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* ── Impostazioni ── */}
+      <div style={{ padding: '20px 16px 8px' }}>
+        <p style={{ fontFamily: 'DM Mono', fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 12 }}>
+          Impostazioni
+        </p>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18, overflow: 'hidden' }}>
+
+          {/* Theme toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(187,0,255,0.1)', border: '1px solid rgba(187,0,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {theme === 'dark' ? <Moon size={16} color="#BB00FF" /> : <Sun size={16} color="#BB00FF" />}
+              </div>
+              <div>
+                <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>
+                  {theme === 'dark' ? 'Modalità scura' : 'Modalità chiara'}
+                </p>
+                <p style={{ color: 'var(--text-3)', fontSize: 11, marginTop: 1 }}>Cambia il tema dell'app</p>
+              </div>
+            </div>
+            <button onClick={toggle} style={{ width: 48, height: 28, borderRadius: 14, border: 'none', cursor: 'pointer', background: theme === 'dark' ? '#BB00FF' : 'var(--border)', position: 'relative', transition: 'background 0.3s', flexShrink: 0 }}>
+              <div style={{ position: 'absolute', top: 4, left: theme === 'dark' ? 24 : 4, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.3s', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }} />
+            </button>
+          </div>
+
+          {/* Version */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Settings size={16} color="var(--text-3)" />
+              </div>
+              <div>
+                <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>FafApp</p>
+                <p style={{ color: 'var(--text-3)', fontSize: 11, marginTop: 1 }}>Versione 1.0.0 · Bologna</p>
+              </div>
+            </div>
+            <span style={{ fontSize: 10, fontWeight: 700, fontFamily: 'DM Mono', color: '#BB00FF', background: 'rgba(187,0,255,0.1)', border: '1px solid rgba(187,0,255,0.2)', padding: '3px 8px', borderRadius: 8 }}>PWA</span>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -386,50 +427,6 @@ function CouponCard({ userCoupon, index, used = false }: { userCoupon: any; inde
         </div>
       </Link>
     </motion.div>
-  )
-}
-
-      {/* ── Impostazioni ── */}
-      <div style={{ padding: '20px 16px 8px' }}>
-        <p style={{ fontFamily: 'DM Mono', fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 12 }}>
-          Impostazioni
-        </p>
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18, overflow: 'hidden' }}>
-
-          {/* Theme toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(187,0,255,0.1)', border: '1px solid rgba(187,0,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {theme === 'dark' ? <Moon size={16} color="#BB00FF" /> : <Sun size={16} color="#BB00FF" />}
-              </div>
-              <div>
-                <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>
-                  {theme === 'dark' ? 'Modalità scura' : 'Modalità chiara'}
-                </p>
-                <p style={{ color: 'var(--text-3)', fontSize: 11, marginTop: 1 }}>Cambia il tema dell'app</p>
-              </div>
-            </div>
-            <button onClick={toggle} style={{ width: 48, height: 28, borderRadius: 14, border: 'none', cursor: 'pointer', background: theme === 'dark' ? '#BB00FF' : 'var(--border)', position: 'relative', transition: 'background 0.3s', flexShrink: 0 }}>
-              <div style={{ position: 'absolute', top: 4, left: theme === 'dark' ? 24 : 4, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.3s', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }} />
-            </button>
-          </div>
-
-          {/* Version */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Settings size={16} color="var(--text-3)" />
-              </div>
-              <div>
-                <p style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>FafApp</p>
-                <p style={{ color: 'var(--text-3)', fontSize: 11, marginTop: 1 }}>Versione 1.0.0 · Bologna</p>
-              </div>
-            </div>
-            <span style={{ fontSize: 10, fontWeight: 700, fontFamily: 'DM Mono', color: '#BB00FF', background: 'rgba(187,0,255,0.1)', border: '1px solid rgba(187,0,255,0.2)', padding: '3px 8px', borderRadius: 8 }}>PWA</span>
-          </div>
-        </div>
-      </div>
-    </div>
   )
 }
 
