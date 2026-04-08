@@ -27,12 +27,33 @@ export const useThemeStore = create<ThemeState>()(
   )
 )
 
-// ── Apply theme on mount ──
+// ── Apply theme on mount — solo per app pubblica ──
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { theme } = useThemeStore()
 
   useEffect(() => {
+    const path = window.location.pathname
+    // Admin e venue usano sempre dark — ignora il toggle utente
+    const isAdminOrVenue = path.startsWith('/admin') || path.startsWith('/locale') || path.startsWith('/superadmin')
+    if (isAdminOrVenue) {
+      document.documentElement.setAttribute('data-theme', 'dark')
+      return
+    }
     document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
+
+  // Reset a dark quando si entra in admin/venue
+  useEffect(() => {
+    const handleNav = () => {
+      const path = window.location.pathname
+      if (path.startsWith('/admin') || path.startsWith('/locale') || path.startsWith('/superadmin')) {
+        document.documentElement.setAttribute('data-theme', 'dark')
+      } else {
+        document.documentElement.setAttribute('data-theme', theme)
+      }
+    }
+    window.addEventListener('popstate', handleNav)
+    return () => window.removeEventListener('popstate', handleNav)
   }, [theme])
 
   return <>{children}</>

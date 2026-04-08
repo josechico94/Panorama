@@ -122,7 +122,7 @@ export default function ExperiencesPage() {
         <p style={{ fontFamily: 'DM Mono', fontSize: 9, color: 'var(--meta-color)', letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 10 }}>
           Budget
         </p>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }} className="no-scrollbar">
           {BUDGETS.map(b => {
             const isActive = activeBudget === b.value
             return (
@@ -131,12 +131,13 @@ export default function ExperiencesPage() {
                 whileTap={{ scale: 0.92 }}
                 onClick={() => setActiveBudget(b.value)}
                 style={{
-                  padding: '8px 18px',
+                  flexShrink: 0,
+                  padding: '7px 14px',
                   borderRadius: 100,
                   border: `1.5px solid ${isActive ? b.color : 'var(--border)'}`,
-                  background: isActive ? b.bg : 'transparent',
-                  color: isActive ? b.color : 'var(--text-3)',
-                  fontSize: 13,
+                  background: isActive ? b.bg : 'var(--surface)',
+                  color: isActive ? b.color : 'var(--text-2)',
+                  fontSize: 12,
                   fontWeight: 700,
                   fontFamily: 'DM Sans',
                   cursor: 'pointer',
@@ -144,7 +145,8 @@ export default function ExperiencesPage() {
                   boxShadow: isActive ? `0 0 12px ${b.bg}` : 'none',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
+                  gap: 5,
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {/* Dot colorato */}
@@ -220,7 +222,7 @@ function ExperienceCard({ exp, index }: { exp: any; index: number }) {
             e.currentTarget.style.boxShadow = '0 4px 24px rgba(187,0,255,0.12)'
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+            e.currentTarget.style.borderColor = 'var(--border)'
             e.currentTarget.style.boxShadow = 'none'
           }}
         >
@@ -260,16 +262,16 @@ function ExperienceCard({ exp, index }: { exp: any; index: number }) {
           {/* Body */}
           <div style={{ padding: '14px 16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'rgba(240,237,232,0.45)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--text-3)' }}>
                 <Clock size={11} color="#BB00FF" />
                 {hours > 0 ? `${hours}h` : ''}{mins > 0 ? ` ${mins}min` : ''}
               </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'rgba(240,237,232,0.45)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--text-3)' }}>
                 <MapPin size={11} color="#BB00FF" />
                 {stops.length} {stops.length === 1 ? 'tappa' : 'tappe'}
               </span>
               {exp.tags?.slice(0,3).map((tag: string) => (
-                <span key={tag} style={{ fontSize: 9, color: 'rgba(240,237,232,0.3)', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: 100 }}>#{tag}</span>
+                <span key={tag} style={{ fontSize: 9, color: 'var(--text-3)', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: 100 }}>#{tag}</span>
               ))}
             </div>
 
@@ -284,14 +286,14 @@ function ExperienceCard({ exp, index }: { exp: any; index: number }) {
                         : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>📍</div>
                       }
                     </div>
-                    <span style={{ fontSize: 11, color: 'rgba(240,237,232,0.55)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 80 }}>
+                    <span style={{ fontSize: 11, color: 'var(--text-2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 80 }}>
                       {stop.placeId?.name}
                     </span>
                   </div>
                 </div>
               ))}
               {stops.length > 3 && (
-                <span style={{ fontSize: 11, color: 'rgba(240,237,232,0.3)', marginLeft: 4 }}>+{stops.length - 3} altri</span>
+                <span style={{ fontSize: 11, color: 'var(--text-3)', marginLeft: 4 }}>+{stops.length - 3} altri</span>
               )}
               <ChevronRight size={14} style={{ marginLeft: 'auto', color: '#BB00FF', flexShrink: 0 }} />
             </div>

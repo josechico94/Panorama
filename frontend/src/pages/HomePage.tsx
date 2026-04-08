@@ -84,9 +84,9 @@ export default function HomePage() {
                   <Link to={'/place/' + featured[0].slug} className="block group relative rounded-[22px] overflow-hidden place-card" style={{ aspectRatio: '16/9' }}>
                     <img src={featured[0].media.coverImage || 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=900&q=80'} alt={featured[0].name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     <div className="absolute inset-0 hero-overlay" />
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 4 }}>{featured[0].location.neighborhood}</p>
-                      <h2 style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: 28, fontStyle: 'italic', fontWeight: 700, color: '#fff', lineHeight: 1.1 }}>{featured[0].name}</h2>
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px 20px 18px', background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)' }}>
+                      <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6, fontFamily: 'DM Mono' }}>{featured[0].location.neighborhood}</p>
+                      <h2 style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: 28, fontStyle: 'italic', fontWeight: 700, color: '#fff', lineHeight: 1.1, textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>{featured[0].name}</h2>
                     </div>
                     {featured[0].isOpenNow && (
                       <div className="absolute top-4 right-4">

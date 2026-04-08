@@ -6,6 +6,7 @@ import L from 'leaflet'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { placesApi } from '@/lib/api'
+import { useThemeStore } from '@/components/ui/ThemeToggle'
 import { useAppStore } from '@/store'
 import CategoryFilter from '@/components/places/CategoryFilter'
 import PlaceCard from '@/components/places/PlaceCard'
@@ -56,6 +57,7 @@ export default function ExplorePage() {
   const [geoError, setGeoError] = useState('')
   const [nearbyMode, setNearbyMode] = useState(false)
   const { activeCategory, city, searchQuery } = useAppStore()
+  const { theme } = useThemeStore()
 
   const params: Record<string, string> = { city, limit: '50' }
   if (activeCategory) params.category = activeCategory
@@ -288,7 +290,10 @@ export default function ExplorePage() {
           <div style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)', height: '62vh', boxShadow: 'var(--shadow-md)' }}>
             <MapContainer center={[44.4949, 11.3426]} zoom={14} style={{ height: '100%', width: '100%' }}>
               <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                url={theme === 'dark'
+                  ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                }
                 attribution='© OpenStreetMap © CARTO'
               />
               {nearbyMode && userPos && <MapRecenter lat={userPos.lat} lng={userPos.lng} zoom={15} />}
