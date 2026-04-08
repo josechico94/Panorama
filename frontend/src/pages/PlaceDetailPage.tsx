@@ -211,45 +211,99 @@ export default function PlaceDetailPage() {
           </div>
         )}
 
-        {/* ── Hours ── */}
+        {/* ── Hours — card stile categorie ── */}
         {place.hours && (
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(187,0,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Clock size={13} color="var(--accent)" />
+          <div>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 30, height: 30, borderRadius: 9, background: 'rgba(187,0,255,0.1)', border: '1px solid rgba(187,0,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Clock size={14} color="var(--accent)" />
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Orari</span>
               </div>
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Orari</span>
               {place.isOpenNow && (
-                <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: '#4ade80', fontWeight: 700 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#4ade80', fontWeight: 700, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 20, padding: '3px 10px' }}>
                   <span className="open-dot" style={{ width: 5, height: 5 }} /> Aperto ora
                 </span>
               )}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 4 }}>
+
+            {/* Day cards — scroll orizzontale su mobile */}
+            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }} className="no-scrollbar">
               {DAYS_ORDER.map(day => {
                 const s = place.hours[day]
                 const isToday = day === TODAY
                 const closed = !s || s.closed
                 return (
-                  <div key={day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                    <span style={{ fontSize: 9, fontWeight: 700, color: isToday ? 'var(--accent)' : 'var(--meta-color)' }}>
+                  <div
+                    key={day}
+                    style={{
+                      flexShrink: 0,
+                      width: 72,
+                      borderRadius: 16,
+                      padding: '12px 8px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 8,
+                      // ✅ Oggi: gradiente viola + glow
+                      background: isToday
+                        ? 'linear-gradient(135deg, rgba(187,0,255,0.2), rgba(144,0,204,0.12))'
+                        : 'var(--surface)',
+                      border: isToday
+                        ? '1.5px solid rgba(187,0,255,0.5)'
+                        : '1px solid var(--border)',
+                      boxShadow: isToday
+                        ? '0 4px 16px rgba(187,0,255,0.2)'
+                        : 'none',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {/* Giorno */}
+                    <span style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      fontFamily: 'DM Sans',
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: isToday ? '#BB00FF' : 'var(--text-3)',
+                    }}>
                       {DAYS_IT[day]}
                     </span>
-                    <div style={{
-                      width: '100%', borderRadius: 8, padding: '5px 0',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center',
-                      background: isToday ? 'rgba(187,0,255,0.12)' : 'rgba(255,255,255,0.03)',
-                      border: isToday ? '1px solid rgba(187,0,255,0.3)' : '1px solid transparent',
-                    }}>
-                      {closed ? (
-                        <span style={{ fontSize: 9, color: 'var(--meta-color)', fontFamily: 'DM Mono' }}>—</span>
-                      ) : (
-                        <>
-                          <span style={{ fontSize: 8, fontFamily: 'DM Mono', color: isToday ? 'var(--accent)' : 'var(--text-2)', fontWeight: 600 }}>{s.open}</span>
-                          <span style={{ fontSize: 7, fontFamily: 'DM Mono', color: 'var(--meta-color)' }}>{s.close}</span>
-                        </>
-                      )}
-                    </div>
+
+                    {/* Divisore */}
+                    <div style={{ width: 24, height: 1, background: isToday ? 'rgba(187,0,255,0.4)' : 'var(--border)' }} />
+
+                    {/* Orari */}
+                    {closed ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                        <span style={{ fontSize: 16, lineHeight: 1 }}>🔒</span>
+                        <span style={{ fontSize: 9, color: 'var(--text-3)', fontFamily: 'DM Mono', fontWeight: 600 }}>
+                          Chiuso
+                        </span>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                        <span style={{
+                          fontSize: 13,
+                          fontFamily: 'DM Mono',
+                          fontWeight: 700,
+                          color: isToday ? '#BB00FF' : 'var(--text)',
+                          letterSpacing: '-0.02em',
+                        }}>
+                          {s.open}
+                        </span>
+                        <span style={{
+                          fontSize: 10,
+                          fontFamily: 'DM Mono',
+                          color: isToday ? 'rgba(187,0,255,0.7)' : 'var(--text-3)',
+                          letterSpacing: '-0.02em',
+                        }}>
+                          {s.close}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )
               })}
