@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { ArrowRight, Zap, Tag, Sparkles } from 'lucide-react'
+import { ArrowRight, Zap, Tag, Sparkles, Clock, Moon, Coffee, Sunset } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { placesApi, couponsApi, experiencesApi } from '@/lib/api'
 import { useAppStore } from '@/store'
@@ -107,6 +107,9 @@ export default function HomePage() {
       {/* ── Open Now ── */}
       {!isFiltering && <OpenNowStrip city={city} />}
 
+      {/* ── Cosa fare stasera ── */}
+      {!isFiltering && <CosaFareStasera city={city} />}
+
       {/* ── Offerte attive ── */}
       {!isFiltering && offersData?.data?.length > 0 && (
         <section className="mb-8 px-4">
@@ -181,19 +184,154 @@ export default function HomePage() {
 
       {/* ── Results ── */}
       <section className="px-4 pb-8">
-        <div className="divider-label mb-4">{isFiltering ? places.length + ' risultati' : 'Tutti i posti'}</div>
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{Array.from({ length: 4 }).map((_, i) => <PlaceCardSkeleton key={i} />)}</div>
-        ) : places.length === 0 ? (
-          <div className="text-center py-14">
-            <p className="text-4xl mb-3">🔍</p>
-            <p style={{ color: 'var(--text-2)', fontWeight: 500, fontSize: 14 }}>Nessun posto trovato</p>
-          </div>
+        {isFiltering ? (
+          <>
+            <div className="divider-label mb-4">{places.length} risultati</div>
+            {isLoading ? (
+              <div className="grid grid-cols-2 gap-3">{Array.from({ length: 4 }).map((_, i) => <PlaceCardSkeleton key={i} />)}</div>
+            ) : places.length === 0 ? (
+              <div className="text-center py-14">
+                <p className="text-4xl mb-3">🔍</p>
+                <p style={{ color: 'var(--text-2)', fontWeight: 500, fontSize: 14 }}>Nessun posto trovato</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">{places.map((place, i) => <PlaceCard key={place._id} place={place} index={i} />)}</div>
+            )}
+          </>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{places.map((place, i) => <PlaceCard key={place._id} place={place} index={i} />)}</div>
+          <Link to="/esplora" style={{ textDecoration: 'none', display: 'block' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '16px 20px', borderRadius: 18,
+              background: 'linear-gradient(135deg, rgba(187,0,255,0.1), rgba(144,0,204,0.05))',
+              border: '1px solid rgba(187,0,255,0.2)',
+            }}>
+              <div>
+                <p style={{ color: 'var(--text)', fontWeight: 700, fontSize: 15, marginBottom: 3 }}>
+                  Scopri tutti i posti
+                </p>
+                <p style={{ color: 'var(--text-3)', fontSize: 12 }}>
+                  Mappa, filtri per categoria e quartiere
+                </p>
+              </div>
+              <div style={{
+                width: 38, height: 38, borderRadius: 12, flexShrink: 0,
+                background: 'linear-gradient(135deg,#BB00FF,#9000CC)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <ArrowRight size={16} color="#fff" />
+              </div>
+            </div>
+          </Link>
         )}
       </section>
     </div>
+  )
+}
+
+function CosaFareStasera({ city }: { city: string }) {
+  const hour = new Date().getHours()
+
+  // Determina il momento della giornata
+  const moment = hour < 11 ? 'mattina' : hour < 14 ? 'pranzo' : hour < 18 ? 'pomeriggio' : hour < 22 ? 'sera' : 'notte'
+
+  const config = {
+    mattina:    { emoji: '☕', label: 'Colazione & Brunch',  category: 'colazione', color: '#F4A261', bg: 'rgba(244,162,97,0.1)',  border: 'rgba(244,162,97,0.25)',  msg: 'Inizia bene la giornata' },
+    pranzo:     { emoji: '🍝', label: 'Pranzo a Bologna',    category: 'ristorante', color: '#E9C46A', bg: 'rgba(233,196,106,0.1)', border: 'rgba(233,196,106,0.25)', msg: 'Dove mangiare oggi' },
+    pomeriggio: { emoji: '🏛️', label: 'Cultura & Shopping',  category: 'cultura',   color: '#48CAE4', bg: 'rgba(72,202,228,0.1)',  border: 'rgba(72,202,228,0.25)',  msg: 'Cosa fare nel pomeriggio' },
+    sera:       { emoji: '🍹', label: 'Aperitivo & Cena',    category: 'bar',       color: '#BB00FF', bg: 'rgba(187,0,255,0.1)',   border: 'rgba(187,0,255,0.25)',   msg: 'La serata bolognese' },
+    notte:      { emoji: '🌙', label: 'Vita Notturna',       category: 'nightlife', color: '#5E60CE', bg: 'rgba(94,96,206,0.1)',   border: 'rgba(94,96,206,0.25)',   msg: 'Bologna di notte' },
+  }[moment]
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['stasera', city, moment],
+    queryFn: () => placesApi.list({ city, limit: '6', open_now: 'true' }),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const places: Place[] = data?.data ?? []
+  if (!isLoading && places.length === 0) return null
+
+  return (
+    <section className="mb-8">
+      <div className="px-4 mb-3">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+              background: config.bg, border: `1px solid ${config.border}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
+            }}>
+              {config.emoji}
+            </div>
+            <div>
+              <p style={{ fontFamily: 'DM Mono', fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
+                {config.msg}
+              </p>
+              <p style={{ color: 'var(--text)', fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>
+                {config.label}
+              </p>
+            </div>
+          </div>
+          <div style={{
+            fontSize: 10, fontWeight: 700, fontFamily: 'DM Mono',
+            color: config.color, background: config.bg,
+            border: `1px solid ${config.border}`,
+            padding: '3px 8px', borderRadius: 8,
+          }}>
+            {new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-3 overflow-x-auto no-scrollbar px-4">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="skeleton rounded-2xl shrink-0" style={{ width: 140, height: 180 }} />
+          ))
+        ) : (
+          places.map((place: any, i: number) => (
+            <motion.div
+              key={place._id}
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.06 }}
+              className="shrink-0"
+              style={{ width: 140 }}
+            >
+              <Link to={'/place/' + place.slug} className="block group relative rounded-2xl overflow-hidden place-card" style={{ height: 180 }}>
+                <img
+                  src={place.media?.coverImage || 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=400&q=80'}
+                  alt={place.name}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 card-overlay" />
+                {/* Aperto ora badge */}
+                <div style={{ position: 'absolute', top: 8, left: 8 }}>
+                  <span style={{
+                    fontSize: 8, fontWeight: 700, color: '#4ade80',
+                    background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)',
+                    padding: '2px 6px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 3,
+                  }}>
+                    <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#4ade80', display: 'inline-block' }} />
+                    Aperto
+                  </span>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-3">
+                  <p style={{ fontFamily: 'Cormorant Garamond,serif', color: '#fff', fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>
+                    {place.name}
+                  </p>
+                  <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 10, marginTop: 2 }}>
+                    {place.location?.neighborhood}
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
+          ))
+        )}
+      </div>
+    </section>
   )
 }
 

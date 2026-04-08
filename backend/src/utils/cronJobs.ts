@@ -60,9 +60,22 @@ export function startCronJobs() {
       }).populate('placeId', 'name').lean()
 
       if (newCoupons.length > 0) {
-        // For new coupons, we'd notify all subscribers
-        // For now just log
-        console.log(`[CRON] ${newCoupons.length} new coupons today`)
+        console.log(`[CRON] ${newCoupons.length} new coupons — sending push to all subscribers`)
+        const { PushSubscription } = await import('../models/PushSubscription')
+        const allSubs = await PushSubscription.distinct('userId')
+        for (const userId of allSubs) {
+          for (const coupon of newCoupons) {
+            const placeName = (coupon.placeId as any)?.name || 'un locale'
+            try {
+              await sendPushToUser(String(userId), {
+                title: '🎫 Nuova offerta disponibile!',
+                body: `${placeName} ha appena aggiunto un nuovo coupon. Scaricalo prima che finisca!`,
+                url: '/offerte',
+              })
+            } catch {}
+          }
+        }
+        console.log(`[CRON] Push inviati a ${allSubs.length} utenti`)
       }
     } catch (e: any) {
       console.error('[CRON] Error:', e.message)

@@ -1,13 +1,11 @@
 import { Link } from 'react-router-dom'
-import { Search, Sun, Moon } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useAppStore } from '@/store'
-import { useThemeStore } from '@/components/ui/ThemeToggle'
 import NotificationBell from '@/components/ui/NotificationBell'
 import { useSearchUI } from '@/components/search/SearchOverlay'
 
 export default function TopBar() {
   const { city } = useAppStore()
-  const { theme, toggle } = useThemeStore()
   const { open: openSearch } = useSearchUI()
 
   return (
@@ -95,26 +93,6 @@ export default function TopBar() {
         {/* ── Actions ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
           <NotificationBell />
-
-          {/* Theme toggle */}
-          <button
-            onClick={toggle}
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 9,
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: 'var(--text-3)',
-              flexShrink: 0,
-            }}
-          >
-            {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
-          </button>
 
           {/* Lente — apre SearchOverlay globale */}
           <button
