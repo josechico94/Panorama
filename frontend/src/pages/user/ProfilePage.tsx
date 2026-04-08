@@ -5,7 +5,7 @@ import { LogOut, CheckCircle, Bookmark, QrCode, Clock, TrendingUp, ChevronRight,
 import { useState } from 'react'
 import { useUserStore, useAppStore } from '@/store'
 import { useThemeStore } from '@/components/ui/ThemeToggle'
-import { couponsApi } from '@/lib/api'
+import { couponsApi, placesApi } from '@/lib/api'
 import { getCategoryConfig } from '@/types'
 
 type Tab = 'coupon' | 'usati' | 'salvati'
@@ -431,15 +431,20 @@ function CouponCard({ userCoupon, index, used = false }: { userCoupon: any; inde
 }
 
 function SavedPlaceRow({ placeId, index }: { placeId: string; index: number }) {
+  // ✅ Una sola query per tutti i posti — cerca per _id nella lista
+  const { city } = useAppStore()
   const { data } = useQuery({
-    queryKey: ['place-mini', placeId],
-    queryFn: () => fetch(`https://panoramabo.onrender.com/api/v1/places/${placeId}`).then(r => r.json()),
+    queryKey: ['all-places-saved-list', city],
+    queryFn: () => placesApi.list({ city, limit: '100' }),
     staleTime: 10 * 60 * 1000,
   })
-  const place = data?.data
+
+  const place = (data?.data ?? []).find((p: any) => p._id === placeId)
+
   if (!place) return (
-    <div style={{ height: 56, borderRadius: 12, background: 'var(--surface)', animation: 'pulse 1.5s infinite' }} />
+    <div style={{ height: 56, borderRadius: 12, background: 'var(--surface)', opacity: 0.4 }} />
   )
+
   return (
     <Link to={`/place/${place.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
       <motion.div

@@ -105,7 +105,7 @@ export default function SavedPage() {
             </p>
           </div>
 
-          <div style={{ padding: '0 16px 32px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+          <div style={{ padding: '0 16px 32px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gridAutoRows: '1fr', gap: 12 }}>
             {saved.map((place, i) => (
               <motion.div
                 key={place._id}
