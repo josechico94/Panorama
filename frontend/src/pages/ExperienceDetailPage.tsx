@@ -168,9 +168,13 @@ export default function ExperienceDetailPage() {
   return (
     <div className="max-w-2xl mx-auto pb-10">
       {/* Hero */}
-      <div className="relative overflow-hidden" style={{ aspectRatio: '16/8' }}>
+      <div className="relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
         <img src={exp.coverImage || PLACEHOLDER} alt={exp.title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(7,7,15,0.3) 0%, rgba(7,7,15,0.85) 100%)' }} />
+
+        {/* Gradiente migliorato */}
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(to bottom, rgba(7,7,15,0.55) 0%, rgba(7,7,15,0.1) 40%, rgba(7,7,15,0.75) 70%, rgba(7,7,15,0.97) 100%)'
+        }} />
 
         <button onClick={() => navigate(-1)} className="absolute top-4 left-4 w-9 h-9 rounded-xl glass flex items-center justify-center">
           <ArrowLeft size={16} className="text-white" />
@@ -186,22 +190,52 @@ export default function ExperienceDetailPage() {
         </div>
 
         <div className="absolute top-4" style={{ right: '50%', transform: 'translateX(50%)' }}>
-          <span style={{ background: 'rgba(7,7,15,0.8)', backdropFilter: 'blur(8px)', color: '#f0ede8', fontSize: 14, fontWeight: 800, padding: '5px 12px', borderRadius: 12, fontFamily: 'DM Mono,monospace', border: '1px solid rgba(255,255,255,0.15)' }}>
+          <span style={{ background: 'rgba(7,7,15,0.75)', backdropFilter: 'blur(10px)', color: '#f0ede8', fontSize: 14, fontWeight: 800, padding: '5px 14px', borderRadius: 12, fontFamily: 'DM Mono,monospace', border: '1px solid rgba(255,255,255,0.15)' }}>
             ~€{exp.estimatedCost}
           </span>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-5">
+        {/* Titolo + sottotitolo */}
+        <div className="absolute bottom-0 left-0 right-0" style={{ padding: '0 20px 22px' }}>
           {stats && stats.total > 0 && (
-            <div className="flex items-center gap-2 mb-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
               <StarsDisplay rating={Math.round(stats.avg)} />
-              <span style={{ color: 'rgba(240,237,232,0.6)', fontSize: 11 }}>{stats.avg} ({stats.total})</span>
+              <span style={{ color: 'rgba(240,237,232,0.7)', fontSize: 11 }}>{stats.avg} ({stats.total})</span>
             </div>
           )}
-          <h1 style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 'clamp(24px,6vw,34px)', fontWeight: 700, color: '#f0ede8', lineHeight: 1.1, marginBottom: 4 }}>
-            {exp.emoji} {exp.title}
+
+          {/* Emoji grande sopra il titolo */}
+          <div style={{ fontSize: 32, marginBottom: 6, lineHeight: 1, filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.8))' }}>
+            {exp.emoji}
+          </div>
+
+          {/* Titolo con text-shadow per leggibilità */}
+          <h1 style={{
+            fontFamily: 'Cormorant Garamond,serif',
+            fontStyle: 'italic',
+            fontSize: 'clamp(26px,7vw,38px)',
+            fontWeight: 700,
+            color: '#ffffff',
+            lineHeight: 1.1,
+            marginBottom: 10,
+            textShadow: '0 2px 12px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,0.8)',
+            letterSpacing: '-0.01em',
+          }}>
+            {exp.title}
           </h1>
-          <p style={{ color: 'rgba(240,237,232,0.65)', fontSize: 13 }}>{exp.tagline}</p>
+
+          {/* Sottotitolo con pillola semitrasparente */}
+          <div style={{
+            display: 'inline-block',
+            background: 'rgba(7,7,15,0.6)',
+            backdropFilter: 'blur(8px)',
+            borderRadius: 8,
+            padding: '4px 10px',
+          }}>
+            <p style={{ color: 'rgba(240,237,232,0.9)', fontSize: 13, fontWeight: 500 }}>
+              {exp.tagline}
+            </p>
+          </div>
         </div>
       </div>
 
