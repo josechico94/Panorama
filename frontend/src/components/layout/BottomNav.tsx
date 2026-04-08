@@ -71,44 +71,33 @@ export default function BottomNav() {
                 width: '100%',
               }}>
 
-                {/* ✅ Active pill: solo sotto l'icona, non full-width — più elegante */}
-                {isActive && (
-                  <motion.div
-                    layoutId="nav-active-pill"
-                    style={{
-                      position: 'absolute',
-                      // Pill centrata attorno all'icona
-                      top: 6,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      width: 44,
-                      height: 32,
-                      borderRadius: 12,
-                      // ✅ Gradiente viola invece di semplice rgba
-                      background: 'linear-gradient(135deg, rgba(187,0,255,0.18), rgba(144,0,204,0.12))',
-                      border: '1px solid rgba(187,0,255,0.3)',
-                    }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                  />
-                )}
-
-                {/* Icona */}
-                <div style={{
-                  width: 44,
-                  height: 32,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  zIndex: 1,
-                }}>
+                {/* ✅ Background direttamente sul container icona — si adatta a qualsiasi icona */}
+                <motion.div
+                  style={{
+                    width: 44,
+                    height: 32,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    zIndex: 1,
+                    borderRadius: 12,
+                    background: isActive
+                      ? 'linear-gradient(135deg, rgba(187,0,255,0.18), rgba(144,0,204,0.12))'
+                      : 'transparent',
+                    border: isActive
+                      ? '1px solid rgba(187,0,255,0.3)'
+                      : '1px solid transparent',
+                    transition: 'background 0.25s, border 0.25s',
+                  }}
+                >
                   <Icon
                     size={isActive ? 22 : 20}
                     strokeWidth={isActive ? 2.5 : 1.7}
                     color={isActive ? '#BB00FF' : 'var(--text-3)'}
                     style={{ transition: 'all 0.25s' }}
                   />
-                </div>
+                </motion.div>
 
                 {/* Label */}
                 <span style={{
