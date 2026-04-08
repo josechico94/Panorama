@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { Admin } from '../models/Admin';
 import { User } from '../models/User';
 import { VenueOwner } from '../models/VenueOwner';
-import { sendWelcomeEmail } from '../services/email';
+import { sendWelcomeEmail } from '../utils/email';
 
 const router = Router();
 const sign = (payload: object, expiresIn = '7d') =>
