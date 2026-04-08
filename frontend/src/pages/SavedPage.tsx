@@ -105,7 +105,7 @@ export default function SavedPage() {
             </p>
           </div>
 
-          <div style={{ padding: '0 16px 32px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gridAutoRows: '1fr', gap: 12 }}>
+          <div style={{ padding: '0 16px 32px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, alignItems: 'start' }}>
             {saved.map((place, i) => (
               <motion.div
                 key={place._id}
@@ -113,7 +113,7 @@ export default function SavedPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
               >
-                <PlaceCard place={place} index={i} />
+                <PlaceCard place={place} index={i} variant="hero" />
               </motion.div>
             ))}
           </div>
