@@ -321,7 +321,7 @@ export default function ExplorePage() {
                     <Popup>
                       <Link to={`/place/${place.slug}`} style={{ textDecoration: 'none', display: 'block', minWidth: 160 }}>
                         <div style={{ padding: '6px 2px' }}>
-                          <p style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 15, fontWeight: 700, color: '#fdfdfd', marginBottom: 3 }}>
+                          <p style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 15, fontWeight: 700, color: '#06fa2f', marginBottom: 3 }}>
                             {place.name}
                           </p>
                           <p style={{ fontSize: 10, color: '#8B5BA0', display: 'flex', alignItems: 'center', gap: 4 }}>
