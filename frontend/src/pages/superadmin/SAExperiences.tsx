@@ -11,17 +11,35 @@ const C = {
   label: { display: 'block' as const, fontSize: 10, fontWeight: 700 as const, color: 'var(--meta-color)', marginBottom: 6, textTransform: 'uppercase' as const, letterSpacing: '0.12em' },
 }
 
-const EXP_CATEGORIES = [
-  { id: 'romantica', label: 'Romantica', emoji: '🕯️' },
-  { id: 'colazione', label: 'Colazione', emoji: '☕' },
-  { id: 'pasta', label: 'Pasta & Tradizione', emoji: '🍝' },
-  { id: 'aperitivo', label: 'Aperitivo + Cena', emoji: '🍹' },
-  { id: 'budget', label: 'Budget', emoji: '💶' },
-  { id: 'serata', label: 'Serata', emoji: '🌙' },
-  { id: 'cultura', label: 'Cultura', emoji: '🏛️' },
-  { id: 'sport', label: 'Sport & Natura', emoji: '⚽' },
-  { id: 'famiglia', label: 'Famiglia', emoji: '👨‍👩‍👧' },
+// ✅ Select con sfondo scuro — niente più dropdown bianco
+const selectStyle = { ...C.field, cursor: 'pointer', colorScheme: 'dark' as const, backgroundColor: '#1a1a2e', color: '#f0ede8' }
+
+// ✅ Categorie sincronizzate con SACategories (localStorage)
+const EXP_CATEGORIES_DEFAULT = [
+  { id: 'romantica', label: 'Romantica',        emoji: '🕯️' },
+  { id: 'colazione', label: 'Colazione',         emoji: '☕' },
+  { id: 'pasta',     label: 'Pasta & Tradizione',emoji: '🍝' },
+  { id: 'aperitivo', label: 'Aperitivo + Cena',  emoji: '🍹' },
+  { id: 'budget',    label: 'Budget',             emoji: '💶' },
+  { id: 'serata',    label: 'Serata',             emoji: '🌙' },
+  { id: 'cultura',   label: 'Cultura',            emoji: '🏛️' },
+  { id: 'sport',     label: 'Sport & Natura',     emoji: '⚽' },
+  { id: 'famiglia',  label: 'Famiglia',           emoji: '👨‍👩‍👧' },
 ]
+
+function useExpCategories() {
+  try {
+    const stored = localStorage.getItem('faf-custom-categories')
+    if (stored) {
+      const cats = JSON.parse(stored)
+      // Merge: usa categorie custom come base, aggiungi quelle exp-specific se mancano
+      return cats
+    }
+    return EXP_CATEGORIES_DEFAULT
+  } catch { return EXP_CATEGORIES_DEFAULT }
+}
+
+
 
 export default function SAExperiences() {
   const [search, setSearch] = useState('')
@@ -182,6 +200,7 @@ function ExperienceFormModal({ exp, onClose }: { exp: any; onClose: () => void }
     tags: '', stops: [],
   })
 
+  const expCategories = useExpCategories()
   const [error, setError] = useState('')
   const [stopSearch, setStopSearch] = useState('')
   const set = (k: string, v: any) => setForm((f: any) => ({ ...f, [k]: v }))
@@ -332,8 +351,8 @@ function ExperienceFormModal({ exp, onClose }: { exp: any; onClose: () => void }
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
             <div>
               <label style={C.label}>Categoria *</label>
-              <select value={form.category} onChange={e => set('category', e.target.value)} style={{ ...C.field, cursor: 'pointer' }}>
-                {EXP_CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>)}
+              <select value={form.category} onChange={e => set('category', e.target.value)} style={selectStyle}>
+                {expCategories.map((cat: any) => <option key={cat.id} value={cat.id}>{cat.emoji} {cat.label}</option>)}
               </select>
             </div>
             <div>
