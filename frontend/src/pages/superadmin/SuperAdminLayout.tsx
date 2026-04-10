@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Tag, useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAdminStore } from '@/store'
 import {
@@ -11,6 +11,7 @@ const NAV = [
   { to: '/superadmin/places',  icon: MapPin,           label: 'Luoghi' },
   { to: '/superadmin/venues',      icon: Store,         label: 'Locali & Gestori' },
   { to: '/superadmin/experiences', icon: Sparkles,      label: 'Esperienze' },
+  { to: '/superadmin/categories',  icon: Tag,           label: 'Categorie'  },
   { to: '/superadmin/users',   icon: Users,            label: 'Utenti' },
   { to: '/superadmin/coupons', icon: Tag,              label: 'Coupon' },
   { to: '/superadmin/reviews', icon: Star,             label: 'Recensioni' },
