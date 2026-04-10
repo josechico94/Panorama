@@ -1,12 +1,13 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export type Category = 'eat' | 'drink' | 'shop' | 'walk' | 'culture' | 'sport' | 'night';
+// ✅ Category è ora una stringa libera — supporta categorie custom create dal SuperAdmin
+export type Category = string;
 
 export interface IPlace extends Document {
   name: string;
   slug: string;
   city: string;
-  category: Category;
+  category: string;
   tags: string[];
   description: string;
   shortDescription: string;
@@ -51,7 +52,7 @@ const PlaceSchema = new Schema<IPlace>({
   category: {
     type: String,
     required: true,
-    enum: ['eat', 'drink', 'shop', 'walk', 'culture', 'sport', 'night'],
+    // ✅ Nessun enum — accetta qualsiasi categoria custom dal SuperAdmin
     index: true,
   },
   tags: [{ type: String, trim: true, lowercase: true }],
