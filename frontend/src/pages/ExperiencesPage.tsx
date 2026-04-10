@@ -157,7 +157,7 @@ export default function ExperiencesPage() {
                   flexShrink: 0,
                   transition: 'background 0.18s',
                 }} />
-                {b.value ? `\u20AC${b.label}` : b.label}
+                {b.value ? `€${b.label}` : b.label}
               </motion.button>
             )
           })}
@@ -247,15 +247,15 @@ function ExperienceCard({ exp, index }: { exp: any; index: number }) {
 
             <div style={{ position: 'absolute', top: 12, right: 12 }}>
               <span style={{ background: 'rgba(7,7,15,0.75)', backdropFilter: 'blur(8px)', color: '#f0ede8', fontSize: 12, fontWeight: 800, padding: '4px 10px', borderRadius: 10, fontFamily: 'DM Mono,monospace', border: '1px solid rgba(255,255,255,0.1)' }}>
-                ~\u20AC{exp.estimatedCost}
+                ~€{exp.estimatedCost}
               </span>
             </div>
 
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px 16px 12px' }}>
-              <h2 style={{ color: '#f0ede8', fontSize: 22, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', lineHeight: 1.1, marginBottom: 4 }}>
+              <h2 style={{ color: 'var(--text)', fontSize: 22, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', lineHeight: 1.1, marginBottom: 4, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
                 {exp.emoji} {exp.title}
               </h2>
-              <p style={{ color: 'rgba(240,237,232,0.6)', fontSize: 12 }}>{exp.tagline}</p>
+              <p style={{ color: 'var(--text-2)', fontSize: 12 }}>{exp.tagline}</p>
             </div>
           </div>
 
