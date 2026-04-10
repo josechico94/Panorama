@@ -1,12 +1,21 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { superAdminApi } from '@/lib/api'
-import { getCategoryConfig, CATEGORIES } from '@/types'
+import { getCategoryConfig, CATEGORIES as DEFAULT_CATS } from '@/types'
+
+// ✅ Carica categorie custom da localStorage (sincronizzato con SACategories)
+function useCategories() {
+  try {
+    const stored = localStorage.getItem('faf-custom-categories')
+    return stored ? JSON.parse(stored) : DEFAULT_CATS
+  } catch { return DEFAULT_CATS }
+}
 import { Plus, Pencil, Trash2, Eye, EyeOff, Star, X, Search, Upload, Link, Loader, MapPin, Check, Store, ChevronRight, LayoutGrid, List } from 'lucide-react'
 import { geocodeAddress } from '@/lib/geocode'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const field = { width: '100%', padding: '10px 14px', borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'DM Sans,sans-serif' }
+const selectStyle = { ...field as any, cursor: 'pointer', colorScheme: 'dark', backgroundColor: '#1a1a2e', color: '#f0ede8' }
 const EMPTY = { name: '', city: 'bologna', category: 'eat', shortDescription: '', description: '', tags: '', 'location.address': '', 'location.neighborhood': '', 'location.coordinates.lat': '44.4949', 'location.coordinates.lng': '11.3426', 'contact.phone': '', 'contact.website': '', 'contact.instagram': '', priceRange: '2', coverImage: '' }
 
 export default function SAPlaces() {
@@ -18,6 +27,7 @@ export default function SAPlaces() {
   const [selectedPlace, setSelectedPlace] = useState<any>(null)
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card')
   const qc = useQueryClient()
+  const categories = useCategories()
 
   const params: Record<string, any> = { limit: '100' }
   if (search) params.search = search
@@ -98,7 +108,7 @@ export default function SAPlaces() {
           background: activeCategory === '' ? '#f0ede8' : 'rgba(255,255,255,0.05)',
           color: activeCategory === '' ? '#07070f' : 'rgba(240,237,232,0.5)',
         }}>Tutti</button>
-        {CATEGORIES.map(cat => (
+        {categories.map((cat: any) => (
           <button key={cat.id} onClick={() => setActiveCategory(activeCategory === cat.id ? '' : cat.id)} style={{
             padding: '5px 12px', borderRadius: 100, cursor: 'pointer', fontSize: 11, fontWeight: 700,
             border: `1px solid ${activeCategory === cat.id ? cat.color : 'transparent'}`,
@@ -606,6 +616,7 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
     coverImage: place.media?.coverImage || '',
   } : { ...EMPTY })
 
+  const categories = useCategories()
   const [error, setError] = useState('')
   const set = (k: string, v: string) => setForm((f: any) => ({ ...f, [k]: v }))
 
@@ -661,13 +672,13 @@ function PlaceFormModal({ place, onClose }: { place: any; onClose: () => void })
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
               <label style={{ display: 'block', fontSize: 10, color: 'var(--meta-color)', marginBottom: 5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Categoria</label>
-              <select value={form.category} onChange={e => set('category', e.target.value)} style={{ ...field, cursor: 'pointer' }}>
-                {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>)}
+              <select value={form.category} onChange={e => set('category', e.target.value)} style={selectStyle}>
+                {categories.map((c: any) => <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>)}
               </select>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 10, color: 'var(--meta-color)', marginBottom: 5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Prezzo</label>
-              <select value={form.priceRange} onChange={e => set('priceRange', e.target.value)} style={{ ...field, cursor: 'pointer' }}>
+              <select value={form.priceRange} onChange={e => set('priceRange', e.target.value)} style={selectStyle}>
                 <option value="1">€ Economico</option>
                 <option value="2">€€ Medio</option>
                 <option value="3">€€€ Alto</option>
