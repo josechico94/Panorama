@@ -103,7 +103,7 @@ export default function SAExperiences() {
             </thead>
             <tbody>
               {experiences.map((exp: any) => {
-                const cat = EXP_CATEGORIES.find(c => c.id === exp.category)
+                const cat = EXP_CATEGORIES_DEFAULT.find(c => c.id === exp.category)
                 return (
                   <tr key={exp._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                     <td style={{ padding: '8px 16px' }}>
