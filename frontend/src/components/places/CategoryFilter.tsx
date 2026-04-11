@@ -68,7 +68,7 @@ export default function CategoryFilter() {
       </motion.button>
 
       {/* ── Categorie ── */}
-      {CATEGORIES.map((cat) => {
+      {getAllCategories().map((cat) => {
         const isActive = activeCategory === cat.id
         return (
           <motion.button
