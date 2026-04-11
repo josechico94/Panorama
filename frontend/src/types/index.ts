@@ -1,11 +1,11 @@
-export type Category = 'eat' | 'drink' | 'shop' | 'walk' | 'culture' | 'sport' | 'night'
+export type Category = string
 
 export interface Place {
   _id: string
   name: string
   slug: string
   city: string
-  category: Category
+  category: string
   tags: string[]
   description: string
   shortDescription: string
@@ -49,7 +49,7 @@ export interface PaginatedResponse<T> {
 }
 
 export interface CategoryConfig {
-  id: Category
+  id: string
   label: string
   emoji: string
   color: string
@@ -66,8 +66,40 @@ export const CATEGORIES: CategoryConfig[] = [
   { id: 'night',   label: 'Notte',     emoji: '🌙', color: '#6366f1', bgColor: 'rgba(99,102,241,0.15)' },
 ]
 
-export const getCategoryConfig = (id: Category): CategoryConfig =>
-  CATEGORIES.find(c => c.id === id) ?? CATEGORIES[0]
+// ✅ Carica categorie custom dal localStorage (create in SACategories)
+function getCustomCategories(): CategoryConfig[] {
+  try {
+    const stored = localStorage.getItem('faf-custom-categories')
+    if (!stored) return []
+    return JSON.parse(stored).map((c: any) => ({
+      id: c.id,
+      label: c.label,
+      emoji: c.emoji,
+      color: c.color,
+      bgColor: c.color + '26', // ~15% opacity
+    }))
+  } catch { return [] }
+}
+
+// ✅ Lista completa: default + custom (le custom sovrascrivono le default se stesso id)
+export function getAllCategories(): CategoryConfig[] {
+  const custom = getCustomCategories()
+  const customIds = custom.map(c => c.id)
+  const base = CATEGORIES.filter(c => !customIds.includes(c.id))
+  return [...base, ...custom]
+}
+
+// ✅ getCategoryConfig cerca prima nelle custom, poi nelle default
+export const getCategoryConfig = (id: string): CategoryConfig => {
+  const all = getAllCategories()
+  return all.find(c => c.id === id) ?? {
+    id,
+    label: id.charAt(0).toUpperCase() + id.slice(1),
+    emoji: '📍',
+    color: '#BB00FF',
+    bgColor: 'rgba(187,0,255,0.15)',
+  }
+}
 
 export const PRICE_LABELS: Record<number, string> = {
   1: '€',

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CATEGORIES } from '@/types'
+import { getAllCategories } from '@/types'
 import type { Category } from '@/types'
 import { useAppStore } from '@/store'
 
