@@ -1,99 +1,75 @@
-export type Category = string
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import dotenv from 'dotenv';
+import { connectDB } from './config/database';
+import placesRouter     from './routes/places';
+import adminRouter      from './routes/admin';
+import authRouter       from './routes/auth';
+import citiesRouter     from './routes/cities';
+import couponsRouter    from './routes/coupons';
+import venueRouter      from './routes/venue';
+import reviewsRouter    from './routes/reviews';
+import superadminRouter from './routes/superadmin';
+import experiencesRouter  from './routes/experiences';
+import pushRouter from './routes/push';
+import categoriesRouter from './routes/categories';
+import { startCronJobs } from './utils/cronJobs';
 
-export interface Place {
-  _id: string
-  name: string
-  slug: string
-  city: string
-  category: string
-  tags: string[]
-  description: string
-  shortDescription: string
-  media: {
-    coverImage: string
-    gallery: string[]
-  }
-  location: {
-    address: string
-    neighborhood: string
-    coordinates: { lat: number; lng: number }
-  }
-  hours: {
-    [key: string]: { open: string; close: string; closed: boolean } | null
-  }
-  priceRange: 1 | 2 | 3 | 4
-  contact: {
-    phone?: string
-    website?: string
-    instagram?: string
-    email?: string
-  }
-  meta: {
-    featured: boolean
-    active: boolean
-    createdAt: string
-    updatedAt: string
-    views: number
-  }
-  isOpenNow?: boolean
-}
+dotenv.config();
 
-export interface PaginatedResponse<T> {
-  data: T[]
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    pages: number
-  }
-}
+const app = express();
+const PORT = process.env.PORT || 3001;
 
-export interface CategoryConfig {
-  id: string
-  label: string
-  emoji: string
-  color: string
-  bgColor: string
-}
+app.use(helmet());
+app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173', credentials: true }));
+app.use(morgan('dev'));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+app.use('/api/v1/push', pushRouter);
 
-export const CATEGORIES: CategoryConfig[] = [
-  { id: 'eat',     label: 'Mangiare',  emoji: '🍽️', color: '#f97316', bgColor: 'rgba(249,115,22,0.15)' },
-  { id: 'drink',   label: 'Bere',      emoji: '🍹', color: '#a855f7', bgColor: 'rgba(168,85,247,0.15)' },
-  { id: 'shop',    label: 'Shopping',  emoji: '🛍️', color: '#ec4899', bgColor: 'rgba(236,72,153,0.15)' },
-  { id: 'walk',    label: 'Passeggio', emoji: '🚶', color: '#22c55e', bgColor: 'rgba(34,197,94,0.15)'  },
-  { id: 'culture', label: 'Cultura',   emoji: '🏛️', color: '#3b82f6', bgColor: 'rgba(59,130,246,0.15)' },
-  { id: 'sport',   label: 'Sport',     emoji: '⚡',  color: '#84cc16', bgColor: 'rgba(132,204,22,0.15)' },
-  { id: 'night',   label: 'Notte',     emoji: '🌙', color: '#6366f1', bgColor: 'rgba(99,102,241,0.15)' },
-]
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-// ✅ Cache in memoria delle categorie dal backend (aggiornata da useCategoriesStore)
-let _categoriesCache: CategoryConfig[] = []
+app.post('/dev/setup-venue', async (req, res) => {
+  try {
+    const { Place } = await import('./models/Place');
+    const { VenueOwner } = await import('./models/VenueOwner');
+    const { email = 'osteria@test.com', password = 'test123', name = "Osteria dell'Orsa", placeName = 'Osteria' } = req.body;
+    const place = await (Place as any).findOne({ name: new RegExp(placeName, 'i') });
+    if (!place) {
+      const all = await (Place as any).find().select('name');
+      res.status(404).json({ error: 'Posto non trovato', available: all.map((p: any) => p.name) });
+      return;
+    }
+    await (VenueOwner as any).deleteOne({ email });
+    await (VenueOwner as any).create({ email, password, name, placeId: place._id });
+    res.json({ ok: true, credentials: { email, password }, place: place.name });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
 
-export function setCategoriesCache(cats: CategoryConfig[]) {
-  _categoriesCache = cats
-}
+app.use('/api/v1/places',     placesRouter);
+app.use('/api/v1/cities',     citiesRouter);
+app.use('/api/v1/admin',      adminRouter);
+app.use('/api/v1/auth',       authRouter);
+app.use('/api/v1/coupons',    couponsRouter);
+app.use('/api/v1/venue',      venueRouter);
+app.use('/api/v1/reviews',    reviewsRouter);
+app.use('/api/v1/superadmin', superadminRouter);
+app.use('/api/v1/experiences', experiencesRouter);
+app.use('/api/v1/categories',  categoriesRouter);
 
-// ✅ Lista completa: cache backend + default come fallback
-export function getAllCategories(): CategoryConfig[] {
-  if (_categoriesCache.length > 0) return _categoriesCache
-  return CATEGORIES
-}
+app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
-// ✅ getCategoryConfig cerca nella cache backend, poi default, poi genera fallback
-export const getCategoryConfig = (id: string): CategoryConfig => {
-  const all = getAllCategories()
-  return all.find(c => c.id === id) ?? {
-    id,
-    label: id.charAt(0).toUpperCase() + id.slice(1),
-    emoji: '📍',
-    color: '#BB00FF',
-    bgColor: 'rgba(187,0,255,0.15)',
-  }
-}
+connectDB().then(() => {
+  app.listen(Number(PORT), '0.0.0.0', () => {
+    console.log(`🚀 Server running on http://0.0.0.0:${PORT}`)
+    startCronJobs()
+  });
+});
 
-export const PRICE_LABELS: Record<number, string> = {
-  1: '€',
-  2: '€€',
-  3: '€€€',
-  4: '€€€€',
-}
+export default app;
