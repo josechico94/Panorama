@@ -73,7 +73,7 @@ function StarsInput({ rating, onRate }: { rating: number; onRate: (r: number) =>
       {[1,2,3,4,5].map(i => (
         <button key={i} onClick={() => onRate(i)} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(0)}
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, lineHeight: 0 }}>
-          <Star size={24} fill={(hover || rating) >= i ? '#f59e0b' : 'transparent'} color={(hover || rating) >= i ? '#f59e0b' : 'rgba(240,237,232,0.2)'} style={{ transition: 'all 0.1s' }} />
+          <Star size={24} fill={(hover || rating) >= i ? '#f59e0b' : 'transparent'} color={(hover || rating) >= i ? '#f59e0b' : 'var(--border)'} style={{ transition: 'all 0.1s' }} />
         </button>
       ))}
     </div>
@@ -83,7 +83,7 @@ function StarsInput({ rating, onRate }: { rating: number; onRate: (r: number) =>
 function StarsDisplay({ rating }: { rating: number }) {
   return (
     <div style={{ display: 'flex', gap: 2 }}>
-      {[1,2,3,4,5].map(i => <Star key={i} size={11} fill={i <= rating ? '#f59e0b' : 'transparent'} color={i <= rating ? '#f59e0b' : 'rgba(240,237,232,0.2)'} />)}
+      {[1,2,3,4,5].map(i => <Star key={i} size={11} fill={i <= rating ? '#f59e0b' : 'transparent'} color={i <= rating ? '#f59e0b' : 'var(--border)'} />)}
     </div>
   )
 }
@@ -200,7 +200,7 @@ export default function ExperienceDetailPage() {
           {stats && stats.total > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
               <StarsDisplay rating={Math.round(stats.avg)} />
-              <span style={{ color: 'rgba(240,237,232,0.7)', fontSize: 11 }}>{stats.avg} ({stats.total})</span>
+              <span style={{ color: 'var(--text-3)', fontSize: 11 }}>{stats.avg} ({stats.total})</span>
             </div>
           )}
 
@@ -232,7 +232,7 @@ export default function ExperienceDetailPage() {
             borderRadius: 8,
             padding: '4px 10px',
           }}>
-            <p style={{ color: 'rgba(240,237,232,0.9)', fontSize: 13, fontWeight: 500 }}>
+            <p style={{ color: 'var(--text-2)', fontSize: 13, fontWeight: 500 }}>
               {exp.tagline}
             </p>
           </div>
@@ -262,8 +262,8 @@ export default function ExperienceDetailPage() {
         <div>
           <p className="divider-label mb-4">Itinerario</p>
           {stops.length === 0 ? (
-            <div style={{ padding: '24px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 16 }}>
-              <p style={{ color: 'rgba(240,237,232,0.3)', fontSize: 13 }}>Nessuna tappa ancora</p>
+            <div style={{ padding: '24px', textAlign: 'center', background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 16 }}>
+              <p style={{ color: 'var(--text-3)', fontSize: 13 }}>Nessuna tappa ancora</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -273,7 +273,7 @@ export default function ExperienceDetailPage() {
                 const cat = getCategoryConfig(place.category)
                 return (
                   <motion.div key={i} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}>
-                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, overflow: 'hidden' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18, overflow: 'hidden' }}>
                       <div style={{ display: 'flex', gap: 12, padding: '14px 16px' }}>
                         <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           <span style={{ color: '#fff', fontSize: 13, fontWeight: 800 }}>{i + 1}</span>
@@ -281,14 +281,14 @@ export default function ExperienceDetailPage() {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
                             <Link to={'/place/' + place.slug} style={{ textDecoration: 'none' }}>
-                              <h3 style={{ color: '#f0ede8', fontSize: 15, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic' }}>{place.name}</h3>
+                              <h3 style={{ color: 'var(--text)', fontSize: 15, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic' }}>{place.name}</h3>
                             </Link>
                             <span style={{ fontSize: 9, fontWeight: 700, color: cat.color, background: cat.color + '18', border: '1px solid ' + cat.color + '30', borderRadius: 100, padding: '1px 6px' }}>{cat.emoji} {cat.label}</span>
                           </div>
-                          <p style={{ color: 'rgba(240,237,232,0.4)', fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <p style={{ color: 'var(--text-3)', fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}>
                             <MapPin size={9} color="var(--accent)" /> {place.location?.neighborhood || place.location?.address}
                           </p>
-                          {stop.duration > 0 && <p style={{ color: 'rgba(240,237,232,0.3)', fontSize: 10, marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={9} /> ~{stop.duration} min</p>}
+                          {stop.duration > 0 && <p style={{ color: 'var(--text-3)', fontSize: 10, marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={9} /> ~{stop.duration} min</p>}
                         </div>
                         <div style={{ width: 56, height: 56, borderRadius: 12, overflow: 'hidden', flexShrink: 0 }}>
                           <img src={place.media?.coverImage || PLACEHOLDER} alt={place.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -296,7 +296,7 @@ export default function ExperienceDetailPage() {
                       </div>
                       {stop.note && (
                         <div style={{ padding: '0 16px 12px 60px' }}>
-                          <p style={{ fontSize: 12, color: 'rgba(240,237,232,0.55)', lineHeight: 1.5, background: 'rgba(232,98,42,0.06)', border: '1px solid rgba(232,98,42,0.15)', borderRadius: 10, padding: '8px 12px', fontStyle: 'italic' }}>
+                          <p style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.5, background: 'rgba(187,0,255,0.06)', border: '1px solid rgba(187,0,255,0.15)', borderRadius: 10, padding: '8px 12px', fontStyle: 'italic' }}>
                             💡 {stop.note}
                           </p>
                         </div>
@@ -306,7 +306,7 @@ export default function ExperienceDetailPage() {
                           Vedi dettagli <ExternalLink size={10} />
                         </Link>
                         {place.contact?.phone && (
-                          <a href={'tel:' + place.contact.phone} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'rgba(240,237,232,0.4)' }}>
+                          <a href={'tel:' + place.contact.phone} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--text-3)' }}>
                             <Phone size={10} /> Chiama
                           </a>
                         )}
@@ -336,13 +336,13 @@ export default function ExperienceDetailPage() {
         {nearby.length > 0 && (
           <div>
             <p className="divider-label mb-3">Nella zona</p>
-            <p style={{ color: 'rgba(240,237,232,0.4)', fontSize: 12, marginBottom: 12 }}>Altri posti interessanti vicino all'itinerario</p>
+            <p style={{ color: 'var(--text-3)', fontSize: 12, marginBottom: 12 }}>Altri posti interessanti vicino all'itinerario</p>
             <div className="flex gap-3 overflow-x-auto no-scrollbar">
               {nearby.map((place: any) => {
                 const cat = getCategoryConfig(place.category)
                 return (
                   <Link key={place._id} to={'/place/' + place.slug} style={{ textDecoration: 'none', flexShrink: 0, width: 140 }}>
-                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, overflow: 'hidden' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
                       <div style={{ height: 80, position: 'relative' }}>
                         <img src={place.media?.coverImage || PLACEHOLDER} alt={place.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(7,7,15,0.7) 0%, transparent 60%)' }} />
@@ -350,7 +350,7 @@ export default function ExperienceDetailPage() {
                         {place.distance && <span style={{ position: 'absolute', top: 5, right: 5, fontSize: 8, color: 'rgba(240,237,232,0.7)', background: 'rgba(0,0,0,0.5)', padding: '1px 5px', borderRadius: 4 }}>{place.distance}m</span>}
                       </div>
                       <div style={{ padding: '7px 8px' }}>
-                        <p style={{ color: '#f0ede8', fontSize: 11, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{place.name}</p>
+                        <p style={{ color: 'var(--text)', fontSize: 11, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{place.name}</p>
                       </div>
                     </div>
                   </Link>
@@ -370,16 +370,16 @@ export default function ExperienceDetailPage() {
               <div style={{ textAlign: 'center' }}>
                 <p style={{ fontSize: 32, fontWeight: 800, color: '#f59e0b', lineHeight: 1 }}>{stats.avg}</p>
                 <StarsDisplay rating={Math.round(stats.avg)} />
-                <p style={{ fontSize: 10, color: 'rgba(240,237,232,0.4)', marginTop: 3 }}>{stats.total} recens.</p>
+                <p style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 3 }}>{stats.total} recens.</p>
               </div>
               <div style={{ flex: 1 }}>
                 {[5,4,3,2,1].map(n => (
                   <div key={n} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                    <span style={{ fontSize: 10, color: 'rgba(240,237,232,0.4)', width: 8 }}>{n}</span>
-                    <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+                    <span style={{ fontSize: 10, color: 'var(--text-3)', width: 8 }}>{n}</span>
+                    <div style={{ flex: 1, height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
                       <div style={{ height: '100%', background: '#f59e0b', borderRadius: 2, width: (stats.total > 0 ? (stats.distribution[n] / stats.total) * 100 : 0) + '%' }} />
                     </div>
-                    <span style={{ fontSize: 10, color: 'rgba(240,237,232,0.35)', width: 16, textAlign: 'right' }}>{stats.distribution[n]}</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-3)', width: 16, textAlign: 'right' }}>{stats.distribution[n]}</span>
                   </div>
                 ))}
               </div>
@@ -389,7 +389,7 @@ export default function ExperienceDetailPage() {
           {/* Write review CTA */}
           {!showReviewForm && (
             <button onClick={() => isLoggedIn() ? setShowReviewForm(true) : navigate('/accedi')}
-              style={{ width: '100%', padding: '12px', borderRadius: 14, border: '1px dashed rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.05)', color: 'rgba(240,237,232,0.5)', cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16, transition: 'all 0.2s' }}>
+              style={{ width: '100%', padding: '12px', borderRadius: 14, border: '1px dashed rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.05)', color: 'var(--text-3)', cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16, transition: 'all 0.2s' }}>
               <Star size={14} color="#f59e0b" /> Scrivi una recensione
             </button>
           )}
@@ -399,15 +399,15 @@ export default function ExperienceDetailPage() {
             {showReviewForm && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                 style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 16, padding: 16, marginBottom: 16, overflow: 'hidden' }}>
-                <p style={{ color: 'rgba(240,237,232,0.5)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 10 }}>La tua recensione</p>
+                <p style={{ color: 'var(--text-2)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 10 }}>La tua recensione</p>
                 <div style={{ marginBottom: 12 }}><StarsInput rating={rating} onRate={setRating} /></div>
                 <textarea value={comment} onChange={e => setComment(e.target.value)} placeholder="Racconta la tua esperienza... (opzionale)" rows={3}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0ede8', fontSize: 13, outline: 'none', resize: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box', marginBottom: 10 }}
-                  onFocus={e => (e.target.style.borderColor = '#f59e0b')} onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 13, outline: 'none', resize: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box', marginBottom: 10 }}
+                  onFocus={e => (e.target.style.borderColor = '#f59e0b')} onBlur={e => (e.target.style.borderColor = 'var(--border)')} />
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => setShowReviewForm(false)} style={{ flex: 1, padding: '9px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(240,237,232,0.4)', cursor: 'pointer', fontSize: 12 }}>Annulla</button>
+                  <button onClick={() => setShowReviewForm(false)} style={{ flex: 1, padding: '9px', borderRadius: 10, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-3)', cursor: 'pointer', fontSize: 12 }}>Annulla</button>
                   <button onClick={() => createReview.mutate()} disabled={rating === 0 || createReview.isPending}
-                    style={{ flex: 2, padding: '9px', borderRadius: 10, border: 'none', background: rating > 0 ? '#f59e0b' : 'rgba(255,255,255,0.08)', color: rating > 0 ? '#000' : 'rgba(240,237,232,0.3)', cursor: rating > 0 ? 'pointer' : 'not-allowed', fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    style={{ flex: 2, padding: '9px', borderRadius: 10, border: 'none', background: rating > 0 ? '#f59e0b' : 'rgba(255,255,255,0.08)', color: rating > 0 ? '#000' : 'var(--text-3)', cursor: rating > 0 ? 'pointer' : 'not-allowed', fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                     <Send size={12} /> {createReview.isPending ? 'Invio...' : 'Pubblica'}
                   </button>
                 </div>
@@ -418,31 +418,31 @@ export default function ExperienceDetailPage() {
           {/* Reviews list */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {reviews.length === 0 && !showReviewForm && (
-              <p style={{ color: 'rgba(240,237,232,0.3)', fontSize: 13, textAlign: 'center', padding: '16px 0' }}>Ancora nessuna recensione. Sii il primo!</p>
+              <p style={{ color: 'var(--text-3)', fontSize: 13, textAlign: 'center', padding: '16px 0' }}>Ancora nessuna recensione. Sii il primo!</p>
             )}
             {reviews.map((r: any) => {
               const isOwn = user && (r.userId as any)?._id === user.id
               return (
-                <div key={r._id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '12px 14px' }}>
+                <div key={r._id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '12px 14px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <div style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(245,158,11,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <span style={{ color: '#f59e0b', fontSize: 10, fontWeight: 700 }}>{(r.userId as any)?.name?.charAt(0).toUpperCase()}</span>
                       </div>
-                      <span style={{ color: '#f0ede8', fontSize: 12, fontWeight: 600 }}>{(r.userId as any)?.name}</span>
+                      <span style={{ color: 'var(--text)', fontSize: 12, fontWeight: 600 }}>{(r.userId as any)?.name}</span>
                       <StarsDisplay rating={r.rating} />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ color: 'rgba(240,237,232,0.25)', fontSize: 10, fontFamily: 'DM Mono,monospace' }}>{new Date(r.createdAt).toLocaleDateString('it-IT')}</span>
+                      <span style={{ color: 'var(--text-3)', fontSize: 10, fontFamily: 'DM Mono,monospace' }}>{new Date(r.createdAt).toLocaleDateString('it-IT')}</span>
                       {isOwn && (
-                        <button onClick={() => deleteReview.mutate(r._id)} style={{ padding: 4, borderRadius: 6, border: 'none', cursor: 'pointer', background: 'transparent', color: 'rgba(240,237,232,0.2)' }}
-                          onMouseEnter={e => (e.currentTarget.style.color = '#f87171')} onMouseLeave={e => (e.currentTarget.style.color = 'rgba(240,237,232,0.2)')}>
+                        <button onClick={() => deleteReview.mutate(r._id)} style={{ padding: 4, borderRadius: 6, border: 'none', cursor: 'pointer', background: 'transparent', color: 'var(--text-3)' }}
+                          onMouseEnter={e => (e.currentTarget.style.color = '#f87171')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-3)')}>
                           <Trash2 size={11} />
                         </button>
                       )}
                     </div>
                   </div>
-                  {r.comment && <p style={{ color: 'rgba(240,237,232,0.6)', fontSize: 12, lineHeight: 1.5 }}>{r.comment}</p>}
+                  {r.comment && <p style={{ color: 'var(--text-2)', fontSize: 12, lineHeight: 1.5 }}>{r.comment}</p>}
                 </div>
               )
             })}
