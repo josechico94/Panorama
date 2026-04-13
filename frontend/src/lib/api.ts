@@ -137,6 +137,11 @@ export const reviewsApi = {
   delete:         (id: string) => apiUser.delete(`/reviews/${id}`).then(r => r.data),
 }
 
+// ── Auto refresh token ──
+export const authUserApi = {
+  refresh: () => apiUser.post('/auth/user/refresh').then(r => r.data),
+}
+
 export const categoriesApi = {
   list:   () => apiPublic.get('/categories').then(r => r.data),
   create: (data: any) => apiAdmin.post('/categories', data).then(r => r.data),

@@ -94,6 +94,24 @@ export const useUserStore = create<UserState>()(
       setAuth: (token, user) => set({ token, user }),
       logout: () => set({ token: null, user: null }),
       isLoggedIn: () => !!get().token,
+      // ✅ Rinnova token se mancano meno di 7 giorni alla scadenza
+      refreshIfNeeded: async () => {
+        const { token } = get()
+        if (!token) return
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]))
+          const expiresIn = payload.exp * 1000 - Date.now()
+          // Rinnova se scade entro 7 giorni
+          if (expiresIn < 7 * 24 * 60 * 60 * 1000) {
+            const { authUserApi } = await import('@/lib/api')
+            const data = await authUserApi.refresh()
+            if (data?.token) set({ token: data.token, user: data.user })
+          }
+        } catch {
+          // Token scaduto — logout
+          set({ token: null, user: null })
+        }
+      },
     }),
     { name: 'cityapp-user' }
   )

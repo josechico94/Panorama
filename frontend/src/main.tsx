@@ -19,6 +19,9 @@ const hasSeenSplash = sessionStorage.getItem('faf-splash')
 const hasSeenOnboarding = localStorage.getItem('faf-onboarding')
 
 function Root() {
+  // ✅ Rinnova token automaticamente all'avvio se necessario
+  const { refreshIfNeeded } = useUserStore()
+  useState(() => { refreshIfNeeded() })
   const [showSplash, setShowSplash] = useState(!hasSeenSplash)
   const [showOnboarding, setShowOnboarding] = useState(!hasSeenOnboarding && !!hasSeenSplash)
 

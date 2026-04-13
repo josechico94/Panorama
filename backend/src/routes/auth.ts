@@ -7,7 +7,7 @@ import { VenueOwner } from '../models/VenueOwner';
 import { sendWelcomeEmail } from '../utils/email';
 
 const router = Router();
-const sign = (payload: object, expiresIn = '7d') =>
+const sign = (payload: object, expiresIn = '30d') =>
   jwt.sign(payload, process.env.JWT_SECRET || 'secret', { expiresIn } as any);
 
 const GOOGLE_CLIENT_ID     = process.env.GOOGLE_CLIENT_ID || '';
@@ -81,6 +81,20 @@ router.get('/user/me', async (req: Request, res: Response) => {
     if (!user) { res.status(401).json({ error: 'Not found' }); return; }
     res.json({ user });
   } catch { res.status(401).json({ error: 'Invalid token' }); }
+});
+
+// ── Refresh token — rinnova automaticamente il token ──
+router.post('/user/refresh', async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) { res.status(401).json({ error: 'No token' }); return; }
+  try {
+    const p = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
+    const user = await User.findById(p.id).select('-password');
+    if (!user) { res.status(401).json({ error: 'Not found' }); return; }
+    // Emetti nuovo token fresco
+    const newToken = sign({ id: user._id, role: 'user' });
+    res.json({ token: newToken, user: { id: user._id, email: user.email, name: user.name } });
+  } catch { res.status(401).json({ error: 'Token non valido' }); }
 });
 
 // ── Forgot password ──

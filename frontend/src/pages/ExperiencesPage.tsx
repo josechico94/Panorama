@@ -3,18 +3,11 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Clock, MapPin, ChevronRight, Sparkles } from 'lucide-react'
-import { experiencesApi } from '@/lib/api'
+import { experiencesApi, categoriesApi } from '@/lib/api'
+import { getAllCategories } from '@/types'
 
-// ── Categorie con gradiente Disney-style ──
-const CATEGORIES = [
-  { id: '',          label: 'Tutte',     emoji: '\u2728', gradient: 'linear-gradient(135deg,#BB00FF,#9000CC)',  glow: 'rgba(187,0,255,0.4)'  },
-  { id: 'romantica', label: 'Romantica', emoji: '\uD83D\uDD6F\uFE0F', gradient: 'linear-gradient(135deg,#FF4D6D,#C9184A)',  glow: 'rgba(255,77,109,0.4)' },
-  { id: 'colazione', label: 'Colazione', emoji: '\u2615',  gradient: 'linear-gradient(135deg,#F4A261,#E76F51)',  glow: 'rgba(244,162,97,0.4)' },
-  { id: 'pasta',     label: 'Pasta',     emoji: '\uD83C\uDF5D', gradient: 'linear-gradient(135deg,#E9C46A,#F4A261)',  glow: 'rgba(233,196,106,0.4)'},
-  { id: 'aperitivo', label: 'Aperitivo', emoji: '\uD83C\uDF79', gradient: 'linear-gradient(135deg,#48CAE4,#0096C7)',  glow: 'rgba(72,202,228,0.4)' },
-  { id: 'budget',    label: 'Budget',    emoji: '\uD83D\uDCB6', gradient: 'linear-gradient(135deg,#52B788,#2D6A4F)',  glow: 'rgba(82,183,136,0.4)' },
-  { id: 'serata',    label: 'Serata',    emoji: '\uD83C\uDF19', gradient: 'linear-gradient(135deg,#5E60CE,#3A0CA3)',  glow: 'rgba(94,96,206,0.4)'  },
-]
+// ── Categoria "Tutte" sempre presente ──
+const ALL_CAT = { id: '', label: 'Tutte', emoji: '\u2728', gradient: 'linear-gradient(135deg,#BB00FF,#9000CC)', glow: 'rgba(187,0,255,0.4)' }
 
 // ── Budget con colore progressivo ──
 const BUDGETS = [
@@ -28,6 +21,26 @@ const BUDGETS = [
 export default function ExperiencesPage() {
   const [activeCategory, setActiveCategory] = useState('')
   const [activeBudget, setActiveBudget]     = useState('')
+
+  // ✅ Categorie dal backend
+  const { data: catsData } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => categoriesApi.list(),
+    staleTime: 5 * 60 * 1000,
+  })
+  const dbCats = catsData?.data ?? []
+  // Mappa le categorie DB in formato con gradiente
+  const GRAD_COLORS = ['#BB00FF','#FF4D6D','#F4A261','#E9C46A','#48CAE4','#52B788','#5E60CE','#f59e0b','#ef4444','#10b981']
+  const CATEGORIES = [
+    ALL_CAT,
+    ...dbCats.map((cat: any, i: number) => ({
+      id: cat.id,
+      label: cat.label,
+      emoji: cat.emoji,
+      gradient: `linear-gradient(135deg,${cat.color},${cat.color}99)`,
+      glow: cat.color + '66',
+    }))
+  ]
 
   const { data, isLoading } = useQuery({
     queryKey: ['experiences', activeCategory, activeBudget],
@@ -252,10 +265,10 @@ function ExperienceCard({ exp, index }: { exp: any; index: number }) {
             </div>
 
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px 16px 12px' }}>
-              <h2 style={{ color: '#ffffff', fontSize: 22, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', lineHeight: 1.1, marginBottom: 4, textShadow: '0 1px 4px rgba(248, 6, 248, 0.93)' }}>
+              <h2 style={{ color: 'var(--text)', fontSize: 22, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', lineHeight: 1.1, marginBottom: 4, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
                 {exp.emoji} {exp.title}
               </h2>
-              <p style={{ color: '#ffffff', fontSize: 12 }}>{exp.tagline}</p>
+              <p style={{ color: 'var(--text-2)', fontSize: 12 }}>{exp.tagline}</p>
             </div>
           </div>
 
