@@ -252,7 +252,7 @@ function ExperienceCard({ exp, index }: { exp: any; index: number }) {
             </div>
 
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px 16px 12px' }}>
-              <h2 style={{ color: '#ffffff', fontSize: 22, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', lineHeight: 1.1, marginBottom: 4, textShadow: '0 1px 4px rgba(248, 6, 248, 0.5)' }}>
+              <h2 style={{ color: '#ffffff', fontSize: 22, fontWeight: 700, fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', lineHeight: 1.1, marginBottom: 4, textShadow: '0 1px 4px rgba(248, 6, 248, 0.93)' }}>
                 {exp.emoji} {exp.title}
               </h2>
               <p style={{ color: '#ffffff', fontSize: 12 }}>{exp.tagline}</p>
