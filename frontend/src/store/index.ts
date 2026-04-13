@@ -84,6 +84,7 @@ interface UserState {
   setAuth: (token: string, user: UserState['user']) => void
   logout: () => void
   isLoggedIn: () => boolean
+  refreshIfNeeded: () => Promise<void>
 }
 
 export const useUserStore = create<UserState>()(
