@@ -66,30 +66,20 @@ export const CATEGORIES: CategoryConfig[] = [
   { id: 'night',   label: 'Notte',     emoji: '🌙', color: '#6366f1', bgColor: 'rgba(99,102,241,0.15)' },
 ]
 
-// ✅ Carica categorie custom dal localStorage (create in SACategories)
-function getCustomCategories(): CategoryConfig[] {
-  try {
-    const stored = localStorage.getItem('faf-custom-categories')
-    if (!stored) return []
-    return JSON.parse(stored).map((c: any) => ({
-      id: c.id,
-      label: c.label,
-      emoji: c.emoji,
-      color: c.color,
-      bgColor: c.color + '26', // ~15% opacity
-    }))
-  } catch { return [] }
+// ✅ Cache in memoria delle categorie dal backend (aggiornata da useCategoriesStore)
+let _categoriesCache: CategoryConfig[] = []
+
+export function setCategoriesCache(cats: CategoryConfig[]) {
+  _categoriesCache = cats
 }
 
-// ✅ Lista completa: default + custom (le custom sovrascrivono le default se stesso id)
+// ✅ Lista completa: cache backend + default come fallback
 export function getAllCategories(): CategoryConfig[] {
-  const custom = getCustomCategories()
-  const customIds = custom.map(c => c.id)
-  const base = CATEGORIES.filter(c => !customIds.includes(c.id))
-  return [...base, ...custom]
+  if (_categoriesCache.length > 0) return _categoriesCache
+  return CATEGORIES
 }
 
-// ✅ getCategoryConfig cerca prima nelle custom, poi nelle default
+// ✅ getCategoryConfig cerca nella cache backend, poi default, poi genera fallback
 export const getCategoryConfig = (id: string): CategoryConfig => {
   const all = getAllCategories()
   return all.find(c => c.id === id) ?? {
