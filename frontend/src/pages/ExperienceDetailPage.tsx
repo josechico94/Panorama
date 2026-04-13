@@ -227,7 +227,7 @@ export default function ExperienceDetailPage() {
           {/* Sottotitolo con pillola semitrasparente */}
           <div style={{
             display: 'inline-block',
-            background: 'rgba(7,7,15,0.6)',
+            background: 'rgb(240, 240, 245)',
             backdropFilter: 'blur(8px)',
             borderRadius: 8,
             padding: '4px 10px',
