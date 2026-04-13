@@ -6,6 +6,7 @@ import App from './App'
 import { ThemeProvider } from './components/ui/ThemeToggle'
 import SplashScreen from './components/ui/SplashScreen'
 import Onboarding from './components/ui/Onboarding'
+import { useUserStore } from './store'
 import './index.css'
 import 'leaflet/dist/leaflet.css'
 
