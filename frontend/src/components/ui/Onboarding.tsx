@@ -109,7 +109,7 @@ const STEPS = [
         </div>
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontFamily: 'DM Sans', fontSize: 36, fontWeight: 800, color: '#BB00FF', letterSpacing: '-0.04em', lineHeight: 1 }}>faf</p>
-          <p style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 14, color: 'var(--text-3)', marginTop: 4 }}>Find and Fun Bologna</p>
+          <p style={{ fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: 14, color: 'var(--text-3)', marginTop: 4 }}>Fast and Fun Bologna</p>
         </div>
       </motion.div>
     ),

@@ -5,7 +5,7 @@ import NotificationBell from '@/components/ui/NotificationBell'
 import { useSearchUI } from '@/components/search/SearchOverlay'
 
 export default function TopBar() {
-  const { city } = useAppStore()
+  const { slogan } = useAppStore()
   const { open: openSearch } = useSearchUI()
 
   return (
@@ -85,7 +85,7 @@ export default function TopBar() {
               textTransform: 'uppercase',
               marginTop: 2,
             }}>
-              {city}
+              {slogan}
             </span>
           </div>
         </Link>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const TAGLINE = 'Find and Fun Bologna'
+const TAGLINE = 'Fast and Fun Bologna'
 
 export default function SplashScreen({ onDone }: { onDone: () => void }) {
   const [phase, setPhase] = useState<'logo' | 'text' | 'out'>('logo')

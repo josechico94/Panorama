@@ -5,6 +5,7 @@ import type { Category } from '@/types'
 // ── App store ──//
 interface AppState {
   city: string
+  slogan: string
   activeCategory: Category | null
   savedPlaces: string[]
   savedExperiences: string[]
@@ -22,6 +23,7 @@ export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       city: 'bologna',
+      slogan: 'Fast and Fun',
       activeCategory: null,
       savedPlaces: [],
       savedExperiences: [],
