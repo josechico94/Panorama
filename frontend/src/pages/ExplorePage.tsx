@@ -70,10 +70,18 @@ export default function ExplorePage() {
 
   const allPlaces: Place[] = data?.data ?? []
 
-  // Extract unique neighborhoods from loaded places
-  const neighborhoods = Array.from(new Set(
-    allPlaces.map(p => p.location?.neighborhood).filter(Boolean)
-  )).sort() as string[]
+  // ✅ Deduplicazione case-insensitive dei quartieri
+  const neighborhoods = Array.from(
+    allPlaces
+      .map(p => p.location?.neighborhood?.trim())
+      .filter(Boolean)
+      .reduce((map, n) => {
+        const key = n!.toLowerCase()
+        if (!map.has(key)) map.set(key, n!)
+        return map
+      }, new Map<string, string>())
+      .values()
+  ).sort() as string[]
 
   // ── Filter by neighborhood ──
   const filteredByNeighborhood = activeNeighborhood
