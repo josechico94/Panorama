@@ -85,7 +85,7 @@ export default function ExplorePage() {
 
   // ── Filter by neighborhood ──
   const filteredByNeighborhood = activeNeighborhood
-    ? allPlaces.filter(p => p.location?.neighborhood === activeNeighborhood)
+    ? allPlaces.filter(p => p.location?.neighborhood?.toLowerCase() === activeNeighborhood.toLowerCase())
     : allPlaces
 
   // ── Sort by distance when nearby mode ──
