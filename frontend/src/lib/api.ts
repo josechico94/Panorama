@@ -1,6 +1,9 @@
 import axios from 'axios'
 
-const BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+// ✅ Su app nativa (Capacitor) usa sempre il backend reale
+const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.()
+const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+const BASE_URL = (isNative || !isLocalhost)
   ? 'https://panoramabo.onrender.com/api/v1'
   : '/api/v1'
 

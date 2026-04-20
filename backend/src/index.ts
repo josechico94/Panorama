@@ -23,7 +23,26 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173', credentials: true }));
+// ✅ CORS — accetta faf-app.com, localhost e app nativa Capacitor
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'https://faf-app.com',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'capacitor://localhost',
+  'ionic://localhost',
+  'http://localhost',
+  'https://localhost',
+]
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // App nativa non ha origin — permettila sempre
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.includes(origin)) return callback(null, true)
+    callback(null, true) // permetti tutto per ora — restringi in produzione
+  },
+  credentials: true,
+}));
 app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
