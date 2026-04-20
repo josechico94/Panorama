@@ -16,7 +16,7 @@ const queryClient = new QueryClient({
   },
 })
 
-const hasSeenSplash = sessionStorage.getItem('faf-splash')
+const hasSeenSplash = localStorage.getItem('faf-splash')
 const hasSeenOnboarding = localStorage.getItem('faf-onboarding')
 
 function Root() {
@@ -27,7 +27,7 @@ function Root() {
   const [showOnboarding, setShowOnboarding] = useState(!hasSeenOnboarding && !!hasSeenSplash)
 
   const handleSplashDone = () => {
-    sessionStorage.setItem('faf-splash', '1')
+    localStorage.setItem('faf-splash', '1')
     setShowSplash(false)
     // Show onboarding only first time ever
     if (!hasSeenOnboarding) setShowOnboarding(true)
@@ -36,9 +36,6 @@ function Root() {
   const handleOnboardingDone = () => {
     localStorage.setItem('faf-onboarding', '1')
     setShowOnboarding(false)
-    window.history.replaceState({}, '', '/')
-    // Force full reload to reset all state
-    window.location.href = '/'
   }
 
   return (
