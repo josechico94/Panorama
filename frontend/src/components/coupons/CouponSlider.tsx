@@ -26,7 +26,7 @@ export default function CouponSlider() {
         transition={{ type: 'spring', stiffness: 300, damping: 28 }}
         style={{
           position: 'fixed',
-          bottom: 'calc(60px + env(safe-area-inset-bottom, 0px))',
+          bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))',
           left: 0, right: 0, zIndex: 38,
           background: 'var(--bg2)',
           borderTop: '1px solid rgba(187,0,255,0.25)',
