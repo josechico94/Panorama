@@ -51,7 +51,7 @@ export default function WeeklyOffersPage() {
     <div style={{ maxWidth: 672, margin: '0 auto' }}>
       {/* ── Hero ── */}
       <div style={{ padding: '24px 16px 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
           <span className="accent-line" />
           <span style={{ fontFamily: 'DM Mono', fontSize: 9, color: 'var(--meta-color)', letterSpacing: '0.28em', textTransform: 'uppercase' }}>Questa settimana</span>
         </div>

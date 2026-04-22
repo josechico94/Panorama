@@ -294,8 +294,8 @@ export default function ExplorePage() {
 
       {/* ── MAP VIEW ── */}
       {view === 'map' && (
-        <div style={{ padding: '0 16px 16px', paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
-          <div style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)', height: 'calc(100vh - 280px)', maxHeight: '60vh', boxShadow: 'var(--shadow-md)' }}>
+        <div style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 0, paddingBottom: 'calc(90px + env(safe-area-inset-bottom))' }}>
+          <div style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)', height: 'calc(100vh - 320px)', maxHeight: '55vh', boxShadow: 'var(--shadow-md)' }}>
             <MapContainer center={[44.4949, 11.3426]} zoom={14} style={{ height: '100%', width: '100%' }}>
               <TileLayer
                 url={theme === 'dark'
