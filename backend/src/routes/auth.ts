@@ -192,30 +192,9 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
 
     const jwtToken = sign({ id: user._id, role: 'user' });
     const params = `token=${jwtToken}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`;
-    // ✅ Pagina HTML che prova prima il deep link app, poi fallback web
-    res.send(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Accesso in corso...</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="background:#07070f;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px">
-  <div style="width:48px;height:48px;border-radius:50%;border:3px solid rgba(187,0,255,0.2);border-top-color:#BB00FF;animation:spin 0.8s linear infinite"></div>
-  <p style="color:rgba(240,237,232,0.5);font-size:13px">Accesso in corso...</p>
-  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-  <script>
-    var appUrl = 'com.fafapp.bologna://auth-callback?${params}';
-    var webUrl = '${FRONTEND_URL}/auth-callback?${params}';
-    // Prova ad aprire l'app
-    window.location.href = appUrl;
-    // Fallback al web dopo 1.5s
-    setTimeout(function() {
-      window.location.href = webUrl;
-    }, 1500);
-  </script>
-</body>
-</html>`);
+    // ✅ Redirect diretto al deep link app — Android lo intercetta e apre l'app
+    // Fallback automatico al web se l'app non è installata
+    res.redirect(`com.fafapp.bologna://auth-callback?${params}`);
   } catch (e: any) {
     console.error('Google OAuth error:', e.message);
     res.redirect(`${FRONTEND_URL}/accedi?error=google_failed`);
