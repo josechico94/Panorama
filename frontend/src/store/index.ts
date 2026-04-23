@@ -5,7 +5,6 @@ import type { Category } from '@/types'
 // ── App store ──//
 interface AppState {
   city: string
-  slogan: string
   activeCategory: Category | null
   savedPlaces: string[]
   savedExperiences: string[]
@@ -23,7 +22,6 @@ export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       city: 'bologna',
-      slogan: 'Fast and Fun',
       activeCategory: null,
       savedPlaces: [],
       savedExperiences: [],
@@ -104,14 +102,24 @@ export const useUserStore = create<UserState>()(
         try {
           const payload = JSON.parse(atob(token.split('.')[1]))
           const expiresIn = payload.exp * 1000 - Date.now()
-          // Rinnova se scade entro 7 giorni
+          // ✅ Token completamente scaduto — logout
+          if (expiresIn <= 0) {
+            set({ token: null, user: null })
+            return
+          }
+          // ✅ Rinnova solo se scade entro 7 giorni
           if (expiresIn < 7 * 24 * 60 * 60 * 1000) {
-            const { authUserApi } = await import('@/lib/api')
-            const data = await authUserApi.refresh()
-            if (data?.token) set({ token: data.token, user: data.user })
+            try {
+              const { authUserApi } = await import('@/lib/api')
+              const data = await authUserApi.refresh()
+              if (data?.token) set({ token: data.token, user: data.user })
+            } catch {
+              // ✅ Errore di rete — NON fare logout, il token è ancora valido
+              console.log('[Auth] Refresh failed due to network, keeping existing token')
+            }
           }
         } catch {
-          // Token scaduto — logout
+          // ✅ Token malformato — logout
           set({ token: null, user: null })
         }
       },

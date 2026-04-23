@@ -8,10 +8,21 @@ export default function AuthCallbackPage() {
   const { setAuth } = useUserStore()
 
   useEffect(() => {
-    const token = params.get('token')
-    const name = params.get('name')
-    const email = params.get('email')
-    const error = params.get('error')
+    // ✅ Leggi params dall'URL normale O dal deep link Capacitor
+    const getParam = (key: string): string | null => {
+      // Prima prova i search params normali
+      const val = params.get(key)
+      if (val) return val
+      // Poi prova a leggere dall'hash o dal path (deep link)
+      const href = window.location.href
+      const match = href.match(new RegExp(`[?&]${key}=([^&]+)`))
+      return match ? decodeURIComponent(match[1]) : null
+    }
+
+    const token = getParam('token')
+    const name = getParam('name')
+    const email = getParam('email')
+    const error = getParam('error')
 
     if (error) {
       navigate('/accedi?error=' + error, { replace: true })
@@ -20,18 +31,15 @@ export default function AuthCallbackPage() {
 
     if (token && name && email) {
       try {
-        // 1. EL TRUCO: Decodificamos el JWT para sacar el ID real
         const payload = JSON.parse(atob(token.split('.')[1]))
         const realUserId = payload.id
 
-        // 2. Guardamos el usuario COMPLETO
         setAuth(token, {
-          id: realUserId, // <--- ¡Problema resuelto!
+          id: realUserId,
           name: decodeURIComponent(name),
           email: decodeURIComponent(email),
         })
-        
-        // 3. Entramos a la app
+
         navigate('/', { replace: true })
       } catch (err) {
         console.error('Error procesando el token:', err)
@@ -40,7 +48,7 @@ export default function AuthCallbackPage() {
     } else {
       navigate('/accedi', { replace: true })
     }
-  }, [navigate, params, setAuth]) // Buenas prácticas de React
+  }, [navigate, params, setAuth])
 
   return (
     <div style={{

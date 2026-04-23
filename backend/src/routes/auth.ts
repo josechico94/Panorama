@@ -7,7 +7,7 @@ import { VenueOwner } from '../models/VenueOwner';
 import { sendWelcomeEmail } from '../utils/email';
 
 const router = Router();
-const sign = (payload: object, expiresIn = '30d') =>
+const sign = (payload: object, expiresIn = '7d') =>
   jwt.sign(payload, process.env.JWT_SECRET || 'secret', { expiresIn } as any);
 
 const GOOGLE_CLIENT_ID     = process.env.GOOGLE_CLIENT_ID || '';
@@ -81,20 +81,6 @@ router.get('/user/me', async (req: Request, res: Response) => {
     if (!user) { res.status(401).json({ error: 'Not found' }); return; }
     res.json({ user });
   } catch { res.status(401).json({ error: 'Invalid token' }); }
-});
-
-// ── Refresh token — rinnova automaticamente il token ──
-router.post('/user/refresh', async (req: Request, res: Response) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) { res.status(401).json({ error: 'No token' }); return; }
-  try {
-    const p = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
-    const user = await User.findById(p.id).select('-password');
-    if (!user) { res.status(401).json({ error: 'Not found' }); return; }
-    // Emetti nuovo token fresco
-    const newToken = sign({ id: user._id, role: 'user' });
-    res.json({ token: newToken, user: { id: user._id, email: user.email, name: user.name } });
-  } catch { res.status(401).json({ error: 'Token non valido' }); }
 });
 
 // ── Forgot password ──
@@ -205,8 +191,31 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
     }
 
     const jwtToken = sign({ id: user._id, role: 'user' });
-    const redirectUrl = `${FRONTEND_URL}/auth-callback?token=${jwtToken}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`;
-    res.redirect(redirectUrl);
+    const params = `token=${jwtToken}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`;
+    // ✅ Pagina HTML che prova prima il deep link app, poi fallback web
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Accesso in corso...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="background:#07070f;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px">
+  <div style="width:48px;height:48px;border-radius:50%;border:3px solid rgba(187,0,255,0.2);border-top-color:#BB00FF;animation:spin 0.8s linear infinite"></div>
+  <p style="color:rgba(240,237,232,0.5);font-size:13px">Accesso in corso...</p>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+  <script>
+    var appUrl = 'com.fafapp.bologna://auth-callback?${params}';
+    var webUrl = '${FRONTEND_URL}/auth-callback?${params}';
+    // Prova ad aprire l'app
+    window.location.href = appUrl;
+    // Fallback al web dopo 1.5s
+    setTimeout(function() {
+      window.location.href = webUrl;
+    }, 1500);
+  </script>
+</body>
+</html>`);
   } catch (e: any) {
     console.error('Google OAuth error:', e.message);
     res.redirect(`${FRONTEND_URL}/accedi?error=google_failed`);
