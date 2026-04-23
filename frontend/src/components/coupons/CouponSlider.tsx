@@ -27,7 +27,7 @@ export default function CouponSlider() {
         style={{
           position: 'fixed',
           bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))',
-          left: 0, right: 0, zIndex: 38,
+          left: 0, right: 0, zIndex: 1000, //cambio 38 por 1000 asi el mapa no se sobreponga al cupon de descuento
           background: 'var(--bg2)',
           borderTop: '1px solid rgba(187,0,255,0.25)',
           boxShadow: '0 -4px 24px rgba(187,0,255,0.15)',
