@@ -192,9 +192,8 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
 
     const jwtToken = sign({ id: user._id, role: 'user' });
     const params = `token=${jwtToken}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`;
-    // ✅ Redirect diretto al deep link app — Android lo intercetta e apre l'app
-    // Fallback automatico al web se l'app non è installata
-    res.redirect(`com.fafapp.bologna://auth-callback?${params}`);
+    // ✅ Redirect al frontend web — AuthCallbackPage salva il token
+    res.redirect(`${FRONTEND_URL}/auth-callback?${params}`);
   } catch (e: any) {
     console.error('Google OAuth error:', e.message);
     res.redirect(`${FRONTEND_URL}/accedi?error=google_failed`);

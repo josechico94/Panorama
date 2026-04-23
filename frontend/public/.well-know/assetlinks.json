@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.fafapp.bologna",
+    "sha256_cert_fingerprints": ["DC:80:C1:95:70:E8:B1:44:6E:5F:32:24:7C:B4:0E:AD:E0:80:38:E5:77:04:37:F4:E1:CC:E3:4B:C8:25:75:A0"]
+  }
+}]
