@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import { useNavigate, useLocation, Link } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, AlertCircle } from 'lucide-react'
+import { Capacitor } from '@capacitor/core'
+import { Browser } from '@capacitor/browser'
 import { authApi } from '@/lib/api'
 import { useUserStore } from '@/store'
 
 const API_BASE = 'https://panoramabo.onrender.com'
-
-
 
 export default function AuthPage() {
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login')
@@ -23,12 +23,24 @@ export default function AuthPage() {
 
   const set = (k: string, v: string) => { setForm(f => ({ ...f, [k]: v })); setError('') }
 
+  // ✅ Google login con Capacitor Browser (Custom Tab) invece del browser esterno
+  const handleGoogleLogin = async () => {
+    const googleUrl = `${API_BASE}/api/v1/auth/user/google`
+    if (Capacitor.isNativePlatform()) {
+      // Apre Chrome Custom Tab (rimane dentro l'app)
+      await Browser.open({ url: googleUrl, windowName: '_self' })
+    } else {
+      // Web: redirect normale
+      window.location.href = googleUrl
+    }
+  }
+
   const handleSubmit = async () => {
     if (!form.email) { setError('Inserisci la tua email'); return }
     setError(''); setLoading(true)
     try {
       if (mode === 'forgot') {
-        await (authApi as any).forgotPassword?.(form.email)
+        await authApi.forgotPassword(form.email)
         setSuccess('Link di recupero inviato! Controlla la tua email.')
         setLoading(false); return
       }
@@ -74,7 +86,6 @@ export default function AuthPage() {
           {/* ── Logo ── */}
           <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center', marginBottom: 32 }}>
             <div style={{ position: 'relative', display: 'inline-flex', marginBottom: 16 }}>
-              {/* Glow ring */}
               <div style={{ position: 'absolute', inset: -8, borderRadius: '50%', background: 'radial-gradient(circle, rgba(187,0,255,0.3), transparent 70%)', animation: 'pulse-ring 3s ease-in-out infinite' }} />
               <img src="/icons/icon-192.png" alt="faf" style={{ width: 64, height: 64, borderRadius: 20, boxShadow: '0 8px 32px rgba(187,0,255,0.5)', display: 'block' }} />
             </div>
@@ -88,7 +99,7 @@ export default function AuthPage() {
             </AnimatePresence>
           </motion.div>
 
-          {/* ── Mode Tabs (login/register only) ── */}
+          {/* ── Mode Tabs ── */}
           {mode !== 'forgot' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 4, marginBottom: 24 }}>
               {(['login', 'register'] as const).map(m => (
@@ -105,19 +116,27 @@ export default function AuthPage() {
             </motion.div>
           )}
 
-          {/* ── Social buttons ── */}
+          {/* ── Google button ── */}
           {mode !== 'forgot' && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-              <a href={`${API_BASE}/api/v1/auth/user/google`} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                padding: '12px 0', borderRadius: 13, textDecoration: 'none',
-                background: 'var(--surface)', border: '1px solid var(--border2)',
-                color: 'var(--text)', fontSize: 14, fontWeight: 600, transition: 'all 0.2s',
-              }}
-                onMouseEnter={e => { (e.currentTarget as any).style.borderColor = 'rgba(187,0,255,0.3)'; (e.currentTarget as any).style.background = 'var(--surface2)' }}
-                onMouseLeave={e => { (e.currentTarget as any).style.borderColor = 'var(--border2)'; (e.currentTarget as any).style.background = 'var(--surface)' }}>
-                <GoogleIcon /> Continua con Google
-              </a>
+              <button
+              onClick={async () => {
+    if (Capacitor.isNativePlatform()) {
+      await Browser.open({ url: `${API_BASE}/api/v1/auth/user/google?source=app` })
+    } else {
+      window.location.href = `${API_BASE}/api/v1/auth/user/google`
+    }
+  }}
+  style={{
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+    padding: '12px 0', borderRadius: 13, cursor: 'pointer',
+    background: 'var(--surface)', border: '1px solid var(--border2)',
+    color: 'var(--text)', fontSize: 14, fontWeight: 600, transition: 'all 0.2s',
+  }}
+  onMouseEnter={e => { (e.currentTarget as any).style.borderColor = 'rgba(187,0,255,0.3)'; (e.currentTarget as any).style.background = 'var(--surface2)' }}
+  onMouseLeave={e => { (e.currentTarget as any).style.borderColor = 'var(--border2)'; (e.currentTarget as any).style.background = 'var(--surface)' }}>
+  <GoogleIcon /> Continua con Google
+</button>
             </motion.div>
           )}
 
@@ -132,20 +151,14 @@ export default function AuthPage() {
 
           {/* ── Form ── */}
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-
-            {/* Name (register only) */}
             <AnimatePresence>
               {mode === 'register' && (
-                <motion.div key="name-field" initial={{ opacity: 0, height: 0, marginBottom: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+                <motion.div key="name-field" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
                   <InputField icon={<User size={15} />} placeholder="Il tuo nome" value={form.name} onChange={v => set('name', v)} />
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* Email */}
             <InputField icon={<Mail size={15} />} placeholder="Email" type="email" value={form.email} onChange={v => set('email', v)} />
-
-            {/* Password */}
             {mode !== 'forgot' && (
               <InputField
                 icon={<Lock size={15} />}
@@ -162,8 +175,6 @@ export default function AuthPage() {
                 }
               />
             )}
-
-            {/* Error */}
             <AnimatePresence>
               {error && (
                 <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -173,8 +184,6 @@ export default function AuthPage() {
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* Success */}
             <AnimatePresence>
               {success && (
                 <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
@@ -183,8 +192,6 @@ export default function AuthPage() {
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* Submit */}
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={handleSubmit}
@@ -283,5 +290,3 @@ function GoogleIcon() {
     </svg>
   )
 }
-
-

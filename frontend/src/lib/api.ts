@@ -67,12 +67,14 @@ export const placesApi = {
 }
 
 export const authApi = {
-  adminLogin:   (email: string, password: string) => apiPublic.post('/auth/login', { email, password }).then(r => r.data),
-  adminMe:      () => apiAdmin.get('/auth/me').then(r => r.data),
-  userRegister: (name: string, email: string, password: string) => apiPublic.post('/auth/user/register', { name, email, password }).then(r => r.data),
-  userLogin:    (email: string, password: string) => apiPublic.post('/auth/user/login', { email, password }).then(r => r.data),
-  userMe:       () => apiUser.get('/auth/user/me').then(r => r.data),
-  venueLogin:   (email: string, password: string) => apiPublic.post('/auth/venue/login', { email, password }).then(r => r.data),
+  adminLogin:      (email: string, password: string) => apiPublic.post('/auth/login', { email, password }).then(r => r.data),
+  adminMe:         () => apiAdmin.get('/auth/me').then(r => r.data),
+  userRegister:    (name: string, email: string, password: string) => apiPublic.post('/auth/user/register', { name, email, password }).then(r => r.data),
+  userLogin:       (email: string, password: string) => apiPublic.post('/auth/user/login', { email, password }).then(r => r.data),
+  userMe:          () => apiUser.get('/auth/user/me').then(r => r.data),
+  forgotPassword:  (email: string) => apiPublic.post('/auth/user/forgot-password', { email }).then(r => r.data),
+  resetPassword:   (token: string, password: string) => apiPublic.post('/auth/user/reset-password', { token, password }).then(r => r.data),
+  venueLogin:      (email: string, password: string) => apiPublic.post('/auth/venue/login', { email, password }).then(r => r.data),
 }
 
 export const couponsApi = {

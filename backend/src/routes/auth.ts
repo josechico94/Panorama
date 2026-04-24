@@ -47,7 +47,6 @@ router.post('/user/register', async (req: Request, res: Response) => {
     if (existing) { res.status(400).json({ error: 'Email già registrata' }); return; }
     const user = await User.create({ email: email.toLowerCase(), password, name, provider: 'local' });
     const token = sign({ id: user._id, role: 'user' });
-    // ✅ Mail di benvenuto per registrazione locale
     sendWelcomeEmail(user.email, user.name).catch(() => {});
     res.status(201).json({ token, user: { id: user._id, email: user.email, name: user.name } });
   } catch (err: any) {
@@ -94,7 +93,7 @@ router.post('/user/forgot-password', async (req: Request, res: Response) => {
     (user as any).resetPasswordToken = token;
     (user as any).resetPasswordExpires = new Date(Date.now() + 3600000);
     await user.save();
-    console.log(`[RESET] ${FRONTEND_URL}/reset-password?token=${token}`);
+    await sendPasswordResetEmail(user.email, token);
     res.json({ message: 'Se l\'email esiste riceverai un link' });
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
@@ -119,7 +118,9 @@ router.post('/user/reset-password', async (req: Request, res: Response) => {
 });
 
 // ── GOOGLE OAUTH ──
-router.get('/user/google', (_req: Request, res: Response) => {
+router.get('/user/google', (req: Request, res: Response) => {
+  const source = (req.query.source as string) || 'web';
+  const state = Buffer.from(JSON.stringify({ source })).toString('base64');
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
     redirect_uri: `${BACKEND_URL}/api/v1/auth/user/google/callback`,
@@ -127,17 +128,31 @@ router.get('/user/google', (_req: Request, res: Response) => {
     scope: 'openid email profile',
     access_type: 'offline',
     prompt: 'select_account',
+    state,
   });
   res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
 });
 
 router.get('/user/google/callback', async (req: Request, res: Response) => {
-  const { code, error } = req.query;
+  const { code, error, state: stateStr } = req.query;
+
+  let source = 'web';
+  if (stateStr) {
+    try {
+      const decoded = JSON.parse(Buffer.from(String(stateStr), 'base64').toString());
+      source = decoded.source || 'web';
+    } catch {}
+  }
+
+  const isApp = source === 'app';
+  const errorRedirect = isApp
+    ? 'com.fafapp.bologna://auth-callback?error=google_cancelled'
+    : `${FRONTEND_URL}/accedi?error=google_cancelled`;
+
   if (error || !code) {
-    res.redirect(`${FRONTEND_URL}/accedi?error=google_cancelled`); return;
+    res.redirect(errorRedirect); return;
   }
   try {
-    // Exchange code for token
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -152,7 +167,6 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
     const tokenData = await tokenRes.json() as any;
     if (!tokenData.access_token) throw new Error('No access token from Google');
 
-    // Get user info
     const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
@@ -161,7 +175,6 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
 
     if (!email) throw new Error('No email from Google');
 
-    // Find or create user - use updateOne to avoid password validation
     let user = await User.findOne({
       $or: [
         { providerId: googleId, provider: 'google' },
@@ -170,7 +183,6 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
     } as any);
 
     if (!user) {
-      // Create with a random password to satisfy schema validation
       const randomPass = crypto.randomBytes(16).toString('hex');
       user = await User.create({
         name: name || email.split('@')[0],
@@ -180,10 +192,8 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
         providerId: googleId,
         avatar: picture,
       });
-      // ✅ Mail di benvenuto solo per nuovi utenti Google
       sendWelcomeEmail(email.toLowerCase(), name || email.split(`@`)[0]).catch(() => {});
     } else {
-      // Update Google info without triggering password validation
       await User.updateOne(
         { _id: user._id },
         { $set: { provider: 'google', providerId: googleId, avatar: picture } }
@@ -191,11 +201,15 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
     }
 
     const jwtToken = sign({ id: user._id, role: 'user' });
-    const redirectUrl = `${FRONTEND_URL}/auth-callback?token=${jwtToken}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`;
+    const redirectBase = isApp ? 'com.fafapp.bologna://auth-callback' : `${FRONTEND_URL}/auth-callback`;
+    const redirectUrl = `${redirectBase}?token=${jwtToken}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`;
     res.redirect(redirectUrl);
   } catch (e: any) {
     console.error('Google OAuth error:', e.message);
-    res.redirect(`${FRONTEND_URL}/accedi?error=google_failed`);
+    const failRedirect = isApp
+      ? 'com.fafapp.bologna://auth-callback?error=google_failed'
+      : `${FRONTEND_URL}/accedi?error=google_failed`;
+    res.redirect(failRedirect);
   }
 });
 
