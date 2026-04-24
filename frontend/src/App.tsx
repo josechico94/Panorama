@@ -3,6 +3,10 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { Capacitor } from '@capacitor/core'
 import { App as CapApp } from '@capacitor/app'
 import { useUserStore } from '@/store'
+import AppLayout from '@/components/layout/AppLayout'
+import AdminLayout from '@/components/layout/AdminLayout'
+import VenueLayout from '@/components/layout/VenueLayout'
+import RequireAdmin from '@/components/layout/RequireAdmin'
 import RequireVenue from '@/components/layout/RequireVenue'
 import SuperAdminLayout from '@/pages/superadmin/SuperAdminLayout'
 
@@ -39,29 +43,30 @@ import WeeklyOffersPage from '@/pages/WeeklyOffersPage'
 
 export default function App() {
   const navigate = useNavigate()
-const { setAuth } = useUserStore()
+  const { setAuth } = useUserStore()
 
-useEffect(() => {
-  if (!Capacitor.isNativePlatform()) return
-  let handle: any
-  CapApp.addListener('appUrlOpen', (event) => {
-    try {
-      const url = new URL(event.url)
-      if (url.host !== 'auth-callback') return
-      const token = url.searchParams.get('token')
-      const name = url.searchParams.get('name')
-      const email = url.searchParams.get('email')
-      const error = url.searchParams.get('error')
-      if (error) { navigate('/accedi?error=' + error, { replace: true }); return }
-      if (token && name && email) {
-        const payload = JSON.parse(atob(token.split('.')[1]))
-        setAuth(token, { id: payload.id, name: decodeURIComponent(name), email: decodeURIComponent(email) })
-        navigate('/', { replace: true })
-      }
-    } catch { navigate('/accedi', { replace: true }) }
-  }).then(h => { handle = h })
-  return () => { handle?.remove() }
-}, [navigate, setAuth])
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return
+    let handle: any
+    CapApp.addListener('appUrlOpen', (event) => {
+      try {
+        const url = new URL(event.url)
+        if (url.host !== 'auth-callback') return
+        const token = url.searchParams.get('token')
+        const name = url.searchParams.get('name')
+        const email = url.searchParams.get('email')
+        const error = url.searchParams.get('error')
+        if (error) { navigate('/accedi?error=' + error, { replace: true }); return }
+        if (token && name && email) {
+          const payload = JSON.parse(atob(token.split('.')[1]))
+          setAuth(token, { id: payload.id, name: decodeURIComponent(name), email: decodeURIComponent(email) })
+          navigate('/', { replace: true })
+        }
+      } catch { navigate('/accedi', { replace: true }) }
+    }).then(h => { handle = h })
+    return () => { handle?.remove() }
+  }, [navigate, setAuth])
+
   return (
     <Routes>
       {/* Public app */}
@@ -107,7 +112,7 @@ useEffect(() => {
         </Route>
       </Route>
 
-      {/* Legacy admin (keep for compatibility) */}
+      {/* Legacy admin */}
       <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route element={<RequireAdmin />}>
         <Route element={<AdminLayout />}>
