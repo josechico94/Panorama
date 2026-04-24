@@ -9,7 +9,7 @@ import VenueLayout from '@/components/layout/VenueLayout'
 import RequireAdmin from '@/components/layout/RequireAdmin'
 import RequireVenue from '@/components/layout/RequireVenue'
 import SuperAdminLayout from '@/pages/superadmin/SuperAdminLayout'
-import ResetPassword from "./pages/ResetPassword";
+import ResetPassword from '@/pages/ResetPassword'
 
 import HomePage from '@/pages/HomePage'
 import ExplorePage from '@/pages/ExplorePage'
@@ -81,14 +81,12 @@ export default function App() {
         <Route path="/esperienze/:slug" element={<ExperienceDetailPage />} />
         <Route path="/offerte" element={<WeeklyOffersPage />} />
         <Route path="/profilo" element={<ProfilePage />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
       </Route>
 
       {/* Auth */}
       <Route path="/accedi" element={<AuthPage />} />
-
-      {/* OAuth callback */}
       <Route path="/auth-callback" element={<AuthCallbackPage />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Venue portal */}
       <Route path="/locale/login" element={<VenueLoginPage />} />
