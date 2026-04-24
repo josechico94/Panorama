@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://panoramabo.onrender.com/api/v1";
+const API_URL = "https://panoramabo.onrender.com/api/v1";
 
 export default function ResetPassword() {
   const [params] = useSearchParams();
@@ -50,13 +50,14 @@ export default function ResetPassword() {
         return;
       }
 
-      setMessage("Password aggiornata correttamente.");
+      setMessage("Password aggiornata correttamente ✅");
 
+      // opcional: redirige después de 2 segundos
       setTimeout(() => {
         navigate("/accedi");
-      }, 1500);
+      }, 2000);
 
-    } catch {
+    } catch (err) {
       setMessage("Errore di connessione.");
     } finally {
       setLoading(false);
