@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { Admin } from '../models/Admin';
 import { User } from '../models/User';
 import { VenueOwner } from '../models/VenueOwner';
-import { sendWelcomeEmail } from '../utils/email';
+import { sendWelcomeEmail, sendPasswordResetEmail } from '../utils/email';
 
 const router = Router();
 const sign = (payload: object, expiresIn = '7d') =>
@@ -191,9 +191,8 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
     }
 
     const jwtToken = sign({ id: user._id, role: 'user' });
-    const params = `token=${jwtToken}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`;
-    // ✅ Redirect al frontend web — AuthCallbackPage salva il token
-    res.redirect(`${FRONTEND_URL}/auth-callback?${params}`);
+    const redirectUrl = `${FRONTEND_URL}/auth-callback?token=${jwtToken}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`;
+    res.redirect(redirectUrl);
   } catch (e: any) {
     console.error('Google OAuth error:', e.message);
     res.redirect(`${FRONTEND_URL}/accedi?error=google_failed`);
