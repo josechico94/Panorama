@@ -124,7 +124,7 @@ router.post('/user/login', async (req: Request, res: Response) => {
     return;
   }
 
-  if ((user as any).provider === 'google') {
+  if (user.provider === 'google') {
     res.status(401).json({ error: 'Questo account usa Google. Accedi con Google.' });
     return;
   }
@@ -187,7 +187,7 @@ router.post('/user/forgot-password', async (req: Request, res: Response) => {
       return;
     }
 
-    if ((user as any).provider === 'google') {
+    if (user.provider === 'google') {
       res.status(400).json({
         error: 'Questo account usa Google. Accedi con Google.',
       });
@@ -196,14 +196,12 @@ router.post('/user/forgot-password', async (req: Request, res: Response) => {
 
     const token = crypto.randomBytes(32).toString('hex');
 
-    (user as any).resetPasswordToken = token;
-    (user as any).resetPasswordExpires = new Date(Date.now() + 3600000);
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = new Date(Date.now() + 3600000);
 
     await user.save();
 
-    const resetUrl = `${FRONTEND_URL}/reset-password?token=${token}`;
-
-    await sendPasswordResetEmail(user.email, resetUrl);
+    await sendPasswordResetEmail(user.email, token);
 
     res.json({ message: "Se l'email esiste riceverai un link" });
   } catch (e: any) {
@@ -229,7 +227,7 @@ router.post('/user/reset-password', async (req: Request, res: Response) => {
     const user = await User.findOne({
       resetPasswordToken: token,
       resetPasswordExpires: { $gt: new Date() },
-    } as any);
+    });
 
     if (!user) {
       res.status(400).json({ error: 'Token non valido o scaduto' });
@@ -237,8 +235,8 @@ router.post('/user/reset-password', async (req: Request, res: Response) => {
     }
 
     user.password = password;
-    (user as any).resetPasswordToken = undefined;
-    (user as any).resetPasswordExpires = undefined;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
 
     await user.save();
 
