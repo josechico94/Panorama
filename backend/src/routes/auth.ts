@@ -362,24 +362,19 @@ router.get('/user/google/callback', async (req: Request, res: Response) => {
 
     const jwtToken = sign({ id: user._id, role: 'user' });
 
-    const redirectBase = isApp
-      ? 'com.fafapp.bologna://auth-callback'
-      : `${FRONTEND_URL}/auth-callback`;
-
     const redirectUrl =
-      `${redirectBase}?token=${jwtToken}` +
+      `${FRONTEND_URL}/auth-callback?token=${jwtToken}` +
       `&name=${encodeURIComponent(user.name)}` +
-      `&email=${encodeURIComponent(user.email)}`;
+      `&email=${encodeURIComponent(user.email)}` +
+      (isApp ? '&from=app' : '');
 
     res.redirect(redirectUrl);
   } catch (e: any) {
     console.error('Google OAuth error:', e.message);
 
     const failRedirect = isApp
-      ? 'com.fafapp.bologna://auth-callback?error=google_failed'
+      ? `${FRONTEND_URL}/auth-callback?error=google_failed&from=app`
       : `${FRONTEND_URL}/accedi?error=google_failed`;
-
-    res.redirect(failRedirect);
   }
 });
 

@@ -23,13 +23,29 @@ export default function AuthCallbackPage() {
     const name = getParam('name')
     const email = getParam('email')
     const error = getParam('error')
+    const fromApp = getParam('from') === 'app'
 
     if (error) {
-      navigate('/accedi?error=' + error, { replace: true })
+      if (fromApp) {
+        window.location.href =
+          'com.fafapp.bologna://auth-callback?error=' + error
+      } else {
+        navigate('/accedi?error=' + error, { replace: true })
+      }
       return
     }
 
     if (token && name && email) {
+      if (fromApp) {
+        // Redirect via JS so Chrome Custom Tab fires the Android intent correctly
+        window.location.href =
+          'com.fafapp.bologna://auth-callback' +
+          '?token=' + encodeURIComponent(token) +
+          '&name=' + encodeURIComponent(name) +
+          '&email=' + encodeURIComponent(email)
+        return
+      }
+
       try {
         const payload = JSON.parse(atob(token.split('.')[1]))
         const realUserId = payload.id
