@@ -2,6 +2,7 @@ import cron from 'node-cron'
 import { Coupon } from '../models/Coupon'
 import { UserCoupon } from '../models/UserCoupon'
 import { sendPushToUser } from '../routes/push'
+import { runWeeklyReports } from '../services/weeklyReportJob'
 
 export function startCronJobs() {
 
@@ -79,6 +80,16 @@ export function startCronJobs() {
       }
     } catch (e: any) {
       console.error('[CRON] Error:', e.message)
+    }
+  }, { timezone: 'Europe/Rome' })
+
+  // ── Ogni lunedì alle 8:00 — report settimanale ai locali ──
+  cron.schedule('0 8 * * 1', async () => {
+    console.log('[CRON] Report settimanale ai locali...')
+    try {
+      await runWeeklyReports()
+    } catch (e: any) {
+      console.error('[CRON] Report error:', e.message)
     }
   }, { timezone: 'Europe/Rome' })
 

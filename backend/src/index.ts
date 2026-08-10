@@ -15,6 +15,7 @@ import superadminRouter from './routes/superadmin';
 import experiencesRouter  from './routes/experiences';
 import pushRouter from './routes/push';
 import categoriesRouter from './routes/categories';
+import eventsRouter     from './routes/events';
 import { startCronJobs } from './utils/cronJobs';
 
 dotenv.config();
@@ -50,7 +51,9 @@ app.use('/api/v1/push', pushRouter);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// Endpoint di sviluppo — disattivato in produzione
 app.post('/dev/setup-venue', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') { res.status(404).json({ error: 'Not found' }); return; }
   try {
     const { Place } = await import('./models/Place');
     const { VenueOwner } = await import('./models/VenueOwner');
@@ -77,6 +80,7 @@ app.use('/api/v1/reviews',    reviewsRouter);
 app.use('/api/v1/superadmin', superadminRouter);
 app.use('/api/v1/experiences', experiencesRouter);
 app.use('/api/v1/categories',  categoriesRouter);
+app.use('/api/v1/events',      eventsRouter);
 
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
