@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Bookmark, BookmarkCheck, MapPin } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -5,6 +6,7 @@ import type { Place } from '@/types'
 import { getCategoryConfig, PRICE_LABELS } from '@/types'
 import { useAppStore } from '@/store'
 import { getPlaceholder } from '@/lib/placeholders'
+import { observeImpression } from '@/lib/track'
 
 interface Props {
   place: Place
@@ -17,6 +19,13 @@ export default function PlaceCard({ place, index = 0, variant = 'default' }: Pro
   const saved = isSaved(place._id)
   const cat = getCategoryConfig(place.category)
 
+  // Impression: si dispara una sola volta, quando la card entra nel viewport
+  const impRef = useRef<HTMLDivElement>(null)
+  useEffect(
+    () => observeImpression(impRef.current, 'place_impression', { placeId: place._id, source: 'home' }),
+    [place._id],
+  )
+
   const handleSave = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -26,6 +35,7 @@ export default function PlaceCard({ place, index = 0, variant = 'default' }: Pro
   if (variant === 'hero') {
     return (
       <motion.div
+        ref={impRef}
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: index * 0.08, ease: [0.25,0.46,0.45,0.94] }}
@@ -81,6 +91,7 @@ export default function PlaceCard({ place, index = 0, variant = 'default' }: Pro
   // ── Default card ──
   return (
     <motion.div
+      ref={impRef}
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: index * 0.07, ease: [0.25,0.46,0.45,0.94] }}

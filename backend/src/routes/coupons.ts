@@ -1,9 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { Coupon } from '../models/Coupon';
 import { UserCoupon } from '../models/UserCoupon';
-import { requireUser } from '../middleware/auth';
+import { requireUser, requireVenueOwner } from '../middleware/auth';
 import type { AuthRequest } from '../middleware/auth';
 import { sendPushToUser } from './push';
+import { Event } from '../models/Event';
 
 const router = Router();
 
@@ -73,12 +74,27 @@ router.get('/validate/:uniqueCode', async (req: Request, res: Response) => {
 });
 
 // POST /api/v1/coupons/use/:uniqueCode
-router.post('/use/:uniqueCode', async (req: Request, res: Response) => {
+router.post('/use/:uniqueCode', requireVenueOwner, async (req: AuthRequest, res: Response) => {
   try {
     const uc = await UserCoupon.findOne({ uniqueCode: req.params.uniqueCode.toLowerCase() });
     if (!uc) { res.status(404).json({ error: 'Non trovato' }); return; }
+    // Un locale può bruciare solo i coupon emessi dal proprio locale
+    if (String(uc.placeId) !== String(req.placeId)) {
+      res.status(403).json({ error: 'Coupon di un altro locale' }); return;
+    }
     if (uc.status !== 'active') { res.status(400).json({ error: 'Non utilizzabile' }); return; }
-    await UserCoupon.findByIdAndUpdate(uc._id, { status: 'used', usedAt: new Date() });
+    // findOneAndUpdate atomico: due scansioni simultanee non possono usarlo due volte
+    const claimed = await UserCoupon.findOneAndUpdate(
+      { _id: uc._id, status: 'active' },
+      { status: 'used', usedAt: new Date() },
+      { new: true },
+    );
+    if (!claimed) { res.status(409).json({ error: 'Coupon già utilizzato' }); return; }
+
+    await Event.create({
+      type: 'coupon_redeem', userId: uc.userId, placeId: uc.placeId,
+      couponId: uc.couponId, source: 'venue',
+    }).catch(() => {});
 
     // Push notification: coupon used confirmation
     try {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
@@ -9,6 +10,7 @@ import { placesApi, couponsApi } from '@/lib/api'
 import { useAppStore } from '@/store'
 import { getCategoryConfig, PRICE_LABELS } from '@/types'
 import PlaceReviews from '@/components/places/PlaceReviews'
+import { track } from '@/lib/track'
 
 const DAYS_IT: Record<string, string> = {
   monday:'Lun', tuesday:'Mar', wednesday:'Mer',
@@ -42,6 +44,11 @@ export default function PlaceDetailPage() {
   const place = data?.data
   const saved = place ? isSaved(place._id) : false
   const cat = place ? getCategoryConfig(place.category) : null
+
+  // Visualizzazione della scheda — alimenta il report settimanale del locale
+  useEffect(() => {
+    if (place?._id) track('place_view', { placeId: place._id, source: 'detail' })
+  }, [place?._id])
 
   const { data: couponsData } = useQuery({
     queryKey: ['place-coupons', place?._id],

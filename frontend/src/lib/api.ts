@@ -84,7 +84,8 @@ export const couponsApi = {
   claim:    (id: string) => apiUser.post(`/coupons/${id}/claim`).then(r => r.data),
   myList:   () => apiUser.get('/coupons/my/list').then(r => r.data),
   validate: (code: string) => apiPublic.get(`/coupons/validate/${code}`).then(r => r.data),
-  markUsed: (code: string) => apiPublic.post(`/coupons/use/${code}`).then(r => r.data),
+  // Il canje ora richiede il JWT del locale: usiamo apiVenue, non apiPublic
+  markUsed: (code: string) => apiVenue.post(`/coupons/use/${code}`).then(r => r.data),
 }
 
 export const venueApi = {
